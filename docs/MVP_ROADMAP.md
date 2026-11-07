@@ -1,0 +1,81 @@
+# MVP implementation roadmap
+
+Status: M0 foundation only. M1–M6 are unimplemented. Each milestone must satisfy its gate before the next; keep scope viable for one developer. File names below are expected locations, not existing modules.
+
+## M0 — Foundation and repository setup
+
+- Objective: establish one consistent, honest implementation contract and preserve the repository.
+- Dependencies: inspect repository, Git, and existing configurations before edits.
+- Files/modules: root README, AGENTS, environment/ignore templates, docs, empty apps/data/scripts scaffold, Python package markers.
+- Tasks: document product, schemas, API, AI controls, study window, demo assumptions, roadmap, discrepancies, and unresolved decisions.
+- Acceptance: requested documents exist and cross-link; no application logic, migrations, dependency installation, deployment, commit, or push; existing IDE files remain intact.
+- Testing: validate links, requested paths/entities/API coverage, Git diff/whitespace, ignored secret/runtime paths, tracked demo path, and baseline file hashes. No application tests exist.
+- Definition of done: report tree, changed/new files, validation results, open questions, and exact M1 scope.
+
+## M1 — Local frontend/backend foundation and map
+
+- Objective: runnable local web/API shell with a selectable bounded map and visible data status.
+- Dependencies: M0; select runtime versions, dependency manager/locks, and local map style/license strategy. No API key prerequisite.
+- Files/modules: apps/web package/Vite/TypeScript/Tailwind configuration, src/pages and map feature; apps/api dependency manifest, app entry/config, routes/health; scripts development helpers; .env.example, README, minimal data/demo geometry and manifest.
+- Tasks: initialize one React application and one FastAPI application; add validated local CORS/config; implement proposed health route; load at most 30 labeled demo roads; map selection plus equivalent list; provide local empty-style/GeoJSON fallback when basemap unavailable. Lock only needed dependencies.
+- Acceptance: documented fresh setup launches both processes; health returns the proposed schema; segment selection works; no-key/no-tiles mode works; synthetic labels and source legend visible. No estimate/conflict functionality claimed.
+- Testing: backend health/config checks, frontend typecheck/build, map selection smoke check, absent-key and tile-failure paths; record actual commands.
+- Definition of done: local run and stop commands verified, versions locked, supported endpoints marked implemented with evidence, M1 acceptance checklist recorded.
+
+## M2 — Road assets and repair estimates
+
+- Objective: inspect records and reproduce assumption-based cost/duration estimates.
+- Dependencies: M1; review DATA_MODEL, fixture coverage, and per-field provenance; choose SQLite persistence adapter.
+- Files/modules: models/schemas for RoadSegment, InfrastructureAsset, ConditionAssessment, WorkProject, UtilityWork, RepairOption, CostEstimate, EvidenceSource, AuditEvent; services estimates/repositories; routes roads/conditions/projects/estimates/repair-options; web assets/estimates; tests; demo fixture manifest/import script.
+- Tasks: validate/load reviewed fixtures, add SQLite persistence and required migrations only now if justified, implement asset detail and latest assessment selection; tie-break equal assessment dates by stable ID; implement decimal cost math, duration assumptions, bounds, explicit scope and missing-input errors. Record source snapshot and method version.
+- Acceptance: known records and unknown fields render correctly; estimate totals can be reproduced manually; source/synthetic distinctions survive import; persisted records survive local restart; API/UI expose the same values.
+- Testing: validation and repository integration; cents rounding, negative rates, mismatched units, missing geometry/dimensions, invalid ranges, equal-date assessments, fixture import idempotence, and estimate details UI smoke test.
+- Definition of done: supported routes documented, formula and evidence tests pass, setup includes repeatable seeding, no unlabelled synthetic observations.
+
+## M3 — Geospatial and temporal conflict detection
+
+- Objective: flag concurrent work and near-term reopening risks while preserving unknown coverage.
+- Dependencies: M2; freeze CRS, proximity tolerance, interval, and horizon semantics in ARCHITECTURE.
+- Files/modules: schemas/models ConflictFinding; services conflicts/spatial adapter; routes/conflicts; web conflicts overlays/panel; tests and demo fixtures.
+- Tasks: validate/project geometry; evaluate project pairs deterministically; emit findings and indeterminate checks; persist evidence/method parameters; map both work footprints; separate utility coverage from findings.
+- Acceptance: overlapping synthetic road/utility case is detected; adjacent dates do not overlap; later utility case triggers reopening rule; missing utility geometry/schedule produces a warning; no screen says excavation is safe.
+- Testing: projected metre thresholds including exact boundary, crossing/grade ambiguity, date adjacency, 0/30/31-day horizons, missing inputs, invalid geometry, duplicate findings, stable input-order-independent results.
+- Definition of done: fixtures and manual reasoning agree; API and map reference identical findings; coverage limitations persist even with zero findings.
+
+## M4 — Budget-aware scenario comparison
+
+- Objective: compare three manually constructed alternatives with transparent scope and tradeoffs.
+- Dependencies: M3; explicit repair option/action assumptions and common snapshot; agree budget basis.
+- Files/modules: models/schemas Scenario and ScenarioEvaluation; services scenarios/evaluation; routes scenarios/evaluations; web comparison; tests; demo scenarios.
+- Tasks: save draft scenarios with actions and budget; calculate costs, bounds, elapsed time, lane-closure-days, lifespan and review flags; check central/upper affordability; store immutable snapshots/hashes; show exclusions and explicit repeat-restoration costs.
+- Acceptance: immediate/coordinated/staged results match DEMO_PLAN arithmetic; budget changes are visible; missing cost returns indeterminate; coordination includes a deferral review warning; no global optimality or safety claim.
+- Testing: totals and bounds, budget equality/zero, empty or duplicate actions, mismatched snapshots/cost scopes, unknown rates, shared mobilization, repeat runs, source mutation producing a new snapshot, immutable old evaluation.
+- Definition of done: complete comparison from saved input to UI is reproducible; constraints and assumptions are inspectable; all affordability labels qualified.
+
+## M5 — AI explanations and responsible-AI controls
+
+- Objective: explain validated results with safe deterministic fallback and optional evidence-grounded AI.
+- Dependencies: M4; AI_SYSTEM contracts and responsible-AI test cases. Any credential setup is a separate authorized task; do not obtain a key merely to implement fallback.
+- Files/modules: services explanations/provider interface/claim validator; routes explanations/reviews; AuditEvent persistence; web evidence/review panels; tests; AI docs and environment configuration.
+- Tasks: deterministic templates first; optional backend-only provider with timeout; structured claim references; reject unsupported content; expose mode/fallback reason; record review notes and audit metadata without approving work.
+- Acceptance: no-key workflow fully useful; injected instructions in evidence cannot alter behavior; numbers/dates are rendered from facts; invalid/missing citations or outage fall back; reviewer remains accountable.
+- Testing: grounding, unknown omission, unsupported numbers/claims, malicious source text, schema failures, timeout/rate limit/unavailable key, provider mock, redacted logging and review audit. Live paid calls are optional and never required by tests.
+- Definition of done: failure matrix passes and fallback is demonstrated; generated output cannot mutate facts; API/user interface distinguish facts, assumptions, and prose.
+
+## M6 — Integration testing, demo and presentation
+
+- Objective: reliable end-to-end demo with clear limits and a defensible presentation.
+- Dependencies: M1–M5 gates; frozen reviewed manifest and offline fallback.
+- Files/modules: API integration and web end-to-end tests, scripts/demo reset/verification, data/demo manifest, README and DEMO_PLAN, presentation notes in docs.
+- Tasks: verify fresh setup, full workflow and empty/unknown/provider-failure paths; measure local performance targets; inspect keyboard/non-color flows; rehearse the narrative; record limitations and actual commands.
+- Acceptance: complete map → asset → estimate → conflict → three-scenario comparison → evidence/review journey; no-key/no-network-data demonstration; all displayed demo numbers reconcile; no synthetic observation is presented as real.
+- Testing: integration and regression suite, build/typecheck, snapshot reproducibility, secret checks, accessibility smoke checks, performance measurements on documented hardware, demo rehearsal checklist.
+- Definition of done: verified demo can be repeated from documented instructions; outstanding failures and municipal-use limits are disclosed; no production readiness claim or deployment required.
+
+## Separate stretch backlog
+
+Only after M6: condition-based prioritization with explainable policy weights; NetworkX detours/disruption analysis with verified graph semantics; extra optimization constraints with an explicit OR-Tools justification if needed. None blocks hackathon acceptance.
+
+## Post-MVP backlog
+
+Progress forecasting, live municipal integrations, additional infrastructure classes, and commercial multi-tenant controls. Each requires separate source validation, domain review, security and licensing work, and new acceptance criteria.

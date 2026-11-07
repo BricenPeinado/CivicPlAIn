@@ -1,0 +1,48 @@
+# Credentials and local configuration; keep the reviewed name-only template.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+secrets.json
+
+# Local Python / JS environments and caches.
+.venv/
+venv/
+env/
+node_modules/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+.coverage
+.coverage.*
+coverage/
+htmlcov/
+
+# Build output and machine-local files. Existing tracked IDE files are preserved.
+dist/
+build/
+out/
+*.egg-info/
+.DS_Store
+*.log
+
+# Local runtime databases and SQLite sidecars; demo fixtures use JSON/GeoJSON.
+*.sqlite
+*.sqlite3
+*.db
+*.sqlite-*
+*.sqlite3-*
+*.db-*
+
+# Downloaded and generated data, never blanket-ignore reviewed data/demo fixtures.
+/data/raw/*
+!/data/raw/.gitkeep
+/data/processed/*
+!/data/processed/.gitkeep
+/data/tmp/
+/tmp/
