@@ -1,6 +1,6 @@
 # REST API contract
 
-**Implemented through M4:** the five M1 GET paths plus GET `/api/v1/road-segments/{id}/conditions`, GET `/api/v1/repair-options`, GET `/api/v1/road-segments/{id}/repair-options`, POST `/api/v1/estimates`, GET `/api/v1/estimates/{id}`. M3 additionally implements project list/detail, conflict analysis/list/detail and saved analysis retrieval below. M3.5 provided the scenario contracts; M4 implements scenario CRUD, immutable evaluation and comparison below. Reviews and explanation routes remain unimplemented. Base `/api/v1`, local server `http://127.0.0.1:8000`; no `/api/roads` or root `/health` aliases.
+**Implemented through M4:** the five M1 GET paths plus GET `/api/v1/road-segments/{id}/conditions`, GET `/api/v1/repair-options`, GET `/api/v1/road-segments/{id}/repair-options`, POST `/api/v1/estimates`, GET `/api/v1/estimates/{id}`. M3 additionally implements project list/detail, conflict analysis/list/detail and saved analysis retrieval below. M3.5 provided the scenario contracts; M4 implements scenario CRUD, immutable evaluation and comparison below. M5 explanation and human-review routes are implemented in the M5 section below. Base `/api/v1`, local server `http://127.0.0.1:8000`; no `/api/roads` or root `/health` aliases.
 
 ## Transport conventions
 
@@ -14,7 +14,7 @@ The local MVP has no authentication and must not be publicly exposed. There are 
 
 ## Endpoint contracts
 
-Roads, planning, projects and M3 conflict routes listed as implemented below work locally. Generic assets and review/explanation routes remain future contracts; M4 scenario routes are implemented as clarified below.
+Roads, planning, projects and M3 conflict routes listed as implemented below work locally. Generic asset routes remain future contracts; M4 scenario and M5 explanation/review routes are implemented as clarified below.
 
 | Method and path | Input | Output / success | Validation and specific errors | Computation |
 | --- | --- | --- | --- | --- |
@@ -40,8 +40,7 @@ Roads, planning, projects and M3 conflict routes listed as implemented below wor
 | POST `/scenarios/{id}/evaluate` | expected_revision! and M3 AnalysisParameters: proximity_m 0–100 default 5; corridor_m 0–50 default 5; reopening_horizon_days integer 0–365 default 30 | 200 immutable ScenarioEvaluation | 404 scenario; 409 invalid/stale source snapshot that cannot be reconstructed; incomplete data returns indeterminate fields, not fake zero totals | deterministic evaluation |
 | GET `/scenario-evaluations/{id}` | ID | 200 immutable ScenarioEvaluation | 404 missing ID | deterministic read |
 | POST `/scenario-comparisons` | evaluation_ids! 2–3 distinct IDs | 200 ScenarioComparison table with metrics, deltas, common basis and warnings | 404 references; 409 mismatched snapshots, horizon, price basis, scope or method versions; 422 duplicate/invalid count | deterministic comparison; no automatic optimum |
-| POST `/explanations` | evaluation_id!, mode optional enum deterministic/ai default deterministic | 200 ExplanationResult; explanation audit saved | 404 evaluation; 422 invalid mode; provider timeout, missing key or bad output return 200 explicit deterministic fallback; storage failure 503 | deterministic facts/templates, AI prose only when requested and configured |
-| POST `/scenario-evaluations/{id}/reviews` | reviewer_label! 1–100 chars, note! 1–2000 chars, acknowledged_limitations! nonempty code list | 201 AuditEvent with action=review_note | 404 evaluation; 422 lengths/unknown limitation codes | human note recorded deterministically; not approval |
+| POST `/scenario-evaluations/{id}/reviews` | reviewer_label! 1–100 chars, note! 1–2000 chars, acknowledged_limitations! nonempty code list | 201 review event with action=review_note | 404 evaluation; 422 lengths/unknown limitation codes | human note recorded deterministically; not approval |
 | GET `/evidence-sources/{id}` | ID | 200 EvidenceSource | 404 missing ID | deterministic read |
 
 Road conditions are read-only assessments in the MVP. Project and asset creation are fixture/import responsibilities, not open user mutations. Scenario draft edits retain their stable ID and increment an optimistic revision; evaluations and audit events are immutable. Schema/system fields are populated by the service, not trusted from the caller.
@@ -50,7 +49,7 @@ Road conditions are read-only assessments in the MVP. Project and asset creation
 
 **ConflictAnalysis** (M3): concrete fields are specified in DATA_MODEL. Includes findings, indeterminate_checks with spatial evidence, excluded_project_ids, utility_coverage=unknown, possible_pair_count, checked_pair_count, method_version, parameters, detection time, complete input_snapshot, input_hash, result_hash and stable ID. Only the explicit selected project set is checked. All roads are retained for corridor analysis; this does not imply all projects or utilities are known. A one-project scope returns zero pairs and a warning. Empty project_ids is 422. Missing project geometry/dates are accepted and remain unknown. Invalid topology is rejected, not repaired.
 
-The previous proposed `/conflicts/check` and ConflictCheckResult draft are superseded by `/conflicts/analyze` and ConflictAnalysis; no compatibility alias is implemented. There is no date-range project-list filter in M3. M3 flattens utility scope/category fields into WorkProject and has no UtilityWork child. Saved analysis history provides reproducibility; the general AuditEvent and review-note workflow remains M5 work.
+The previous proposed `/conflicts/check` and ConflictCheckResult draft are superseded by `/conflicts/analyze` and ConflictAnalysis; no compatibility alias is implemented. There is no date-range project-list filter in M3. M3 flattens utility scope/category fields into WorkProject and has no UtilityWork child. Saved analysis history provides reproducibility; M5 implements its scoped interaction audit and separate review-note workflow below. A general cross-module AuditEvent stream remains a future contract.
 
 Project/conflict lists use the existing limit 1–100/default 30, stable-ID order and opaque cursors. M3 cursors bind to snapshot plus endpoint filters and reject reuse with different filters. Findings across all saved analyses are returned by default; use analysis_id for one version. Different input snapshots can intentionally retain findings for the same pair, with distinct analysis IDs. Valid no-match filters return empty arrays; incomplete coverage warning remains in metadata. Empty unseeded databases return empty lists. Unknown filter references return 404. GET never triggers analysis.
 
@@ -66,7 +65,7 @@ This fictional pair yields one reopening_risk, a two-calendar-day gap, computed 
 
 **ScenarioComparison**: `evaluation_ids`, `common_basis` (snapshot, baseline_source_hash, horizon, cost_scope, currency, price basis and method versions), `rows` (evaluation ID, cost range or null, budget and status, upper-bound status, elapsed days, lane-closure-days, per-action lifespan ranges, known findings count, indeterminate checks count, review flags), `deltas` (pair IDs and central cost/closure-day differences, nullable when incomplete), `warnings`. No ranking is implied. Cost differences use the same cost scope and remain hypothetical when synthetic inputs occur.
 
-**ExplanationResult**: `id`, `evaluation_id`, `mode_used` deterministic/ai, `fallback_reason` nullable enum not_configured/provider_unavailable/timeout/invalid_output/unsupported_claim, `summary`, `claims` (claim_id, fact_refs, evidence_ids, rendered_text), `unknowns`, `limitations`, `human_review_required=true`, `input_hash`, `prompt_version` nullable, `model_label` nullable. Claims expose source references even in deterministic mode. AI_SYSTEM defines the stricter provider-only contract; its raw output is not the public response.
+**M5 Explanation**: the implemented public schema and separate provider selection contract are specified in the M5 section below and DATA_MODEL. The earlier ExplanationResult draft is superseded.
 
 ## M4 scenario transport (implemented; clarifications below supersede design wording)
 
@@ -108,7 +107,7 @@ GET `/estimates/{id}` returns the saved data without recalculation. Input snapsh
 
 ## Implemented M4 routes and reconciliation
 
-All paths below have the existing `/api/v1` prefix and `Envelope {data,meta}` response. Validation errors use the existing sanitized error envelope with field_errors; unknown references → 404, stale revision/incompatible comparison basis → 409, invalid inputs/unsupported adjustments → 422, storage failures → 503. No LLM/provider dependency. The earlier scenario table is a design summary; the concrete M4 transport here takes precedence. M5 explanation/review routes remain unimplemented.
+All paths below have the existing `/api/v1` prefix and `Envelope {data,meta}` response. Validation errors use the existing sanitized error envelope with field_errors; unknown references → 404, stale revision/incompatible comparison basis → 409, invalid inputs/unsupported adjustments → 422, storage failures → 503. No LLM/provider dependency. The earlier scenario table is a design summary; the concrete M4 transport here takes precedence. M5 explanation/review transport is implemented in the section below.
 
 | Method/path | Body/query | Result |
 | --- | --- | --- |
@@ -129,3 +128,39 @@ PATCH accepts a complete draft/action inside its typed envelope so cross-field v
 Valid incomplete drafts can omit actions and explicitly retain unknown methods, quantity, geometry or schedules with reasons. Empty drafts evaluate as indeterminate, never within-budget zero. Shared mobilization and arbitrary cost overrides return explicit 422 errors. Unsupported patch/restoration methods can remain null, not mapped to an existing method. Proposed actions cannot be submitted as WorkProject snapshots and never enter the real project/history tables.
 
 For a runnable complete request, use `data/demo/scenarios.json` entry `.draft` (exclude fixture `.id`). Those are synthetic plans using existing roads/projects/catalog, with declared assumptions, source geometry and explicit project replacement. Server-side IDs and timestamps differ for manually created copies. Inspect `cost_total_usd`, nullable `budget_headroom_usd`, base budget_status and upper_bound_within_budget separately. GET evaluations includes exact inputs, source aliases/contents, per-action estimates, versions, hypothetical/existing finding contexts and hashes; it is sufficient for offline replay through services.scenarios.replay.
+
+## Implemented M5 AI and review transport (supersedes proposed explanation contract)
+
+All responses use the existing Envelope `{data,meta}` and `/api/v1` base. The former proposed POST `/explanations` and its draft ExplanationResult were never implemented; the explicit M5 task selects the `/ai/*` routes below. There is no compatibility alias. Existing M1–M4 requests/responses/calculations are unchanged. Defaults are deterministic; the optional provider is requested with `mode=ai` and must also be enabled server-side.
+
+| Method/path | Strict request | Response |
+| --- | --- | --- |
+| POST `/ai/explain-estimate` | `{estimate_id,mode?:deterministic\|ai}` | 200 Explanation from immutable saved estimate |
+| POST `/ai/explain-conflict` | `{conflict_id,mode?:deterministic\|ai}` | 200 Explanation from saved finding and parent analysis |
+| POST `/ai/explain-scenario-comparison` | `{evaluation_ids:[2–3 distinct saved IDs],mode?:deterministic\|ai}` | 200 Explanation after existing M4 basis checks |
+| POST `/ai/ask` | `{context:{type,record_ids},question,mode?:deterministic\|ai}` | 200 bounded explanation or explicit insufficient_evidence |
+| GET `/ai/status` | none | Default mode, provider configured boolean/name, model if configured, timeout/output/call limits, free_text_generation=false, live_provider_verified=false |
+| GET `/ai/interactions/{id}` | audit reference | 200 minimal interaction metadata; 404 absent |
+| POST `/scenario-evaluations/{id}/reviews` | `{reviewer_label,note,acknowledged_limitations}` | 201 immutable human review event; authorizes_work=false |
+
+Context type is road, assessment, estimate, conflict, project, evaluation or comparison. Non-comparison contexts require exactly one ID. Comparison requires 2–3 distinct evaluation IDs; no stored comparison-ID lookup is offered. IDs have 1–150 nonblank characters; question 1–500 stripped nonblank characters; all extra input fields are rejected. The local intent matcher can decline future-effect, approval, secret, override or unrelated questions; it never uses client money/evidence as truth. `insufficient_evidence` has an empty key_findings list, explicit reason, attached evidence/unknowns and human-review requirements.
+
+Review aliases are 1–100 stripped nonblank characters; notes 1–2000. acknowledged_limitations is a nonempty list of 1–3 allowed codes: synthetic_inputs, unknown_utilities, human_review. This is an annotation, not a legally significant acknowledgement or municipal approval. Do not enter sensitive data. Notes are never sent to the provider.
+
+Public Explanation fields are defined in [DATA_MODEL](DATA_MODEL.md), and the separate provider-only schema in [AI_SYSTEM](AI_SYSTEM.md). All numerical/date/unit claims are server-rendered from typed evidence facts. Citations expose record IDs/content hashes/source revision hashes/method versions; evidence carries field-level references and truncation indicators. Summary, tradeoff and review language uses fixed templates. All fact-catalog entries are retained in the answer (up to projection limits), independent of model emphasis. Synthetic source labels, unknown utility coverage and human-review requirements cannot be suppressed by model selections.
+
+Unknown reference → 404; malformed body, extra fields, invalid mode/question/count or oversized mandatory evidence metadata → 422; source-integrity/replay/basis mismatch → 409; storage/audit failure → sanitized 503. No secrets, provider exception text or stack traces appear. The source record must validate before a useful fallback can be returned.
+
+Provider failure remains a 200 Explanation with provider_status=fallback, validation_status=fallback_validated, and fallback_reason such as not_configured, timeout, rate_limit, provider_unavailable, invalid_output, invalid_context, invalid_citation, missing_caveats, unsupported_claim, usage_limit or busy. Deterministic requests return provider_status=deterministic. Valid model selections return openai; they are selections of safe templates, not independently verified LLM prose. `GET /ai/status` verifies configuration only and makes no live call. Audit references exist only after successful persistence.
+
+Examples (replace saved IDs with API results):
+
+```json
+{"estimate_id":"<saved-estimate-id>","mode":"deterministic"}
+```
+
+```json
+{"context":{"type":"road","record_ids":["demo-r-001"]},"question":"Why is this road flagged?","mode":"deterministic"}
+```
+
+The established local-only unauthenticated deployment remains; no production authorization/tenant isolation is introduced. No endpoint exposes AI mutation tools or changes existing municipal/domain records.

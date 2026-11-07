@@ -1005,3 +1005,23 @@ h1 {
 .scenario-facts dt { color: #53675f; font-size: 12px; }
 .scenario-facts dd { margin: 4px 0; overflow-wrap: anywhere; }
 @media(max-width: 720px) { .scenario-planner { padding: 14px; } .scenario-form-grid,.scenario-metrics,.scenario-facts { grid-template-columns: 1fr; } .scenario-planner .list-heading { flex-wrap: wrap; gap: 12px; } }
+
+/* M5 advisor uses the existing workspace palette and keyboard controls. */
+.ai-advisor { margin: 1rem 0; }
+.ai-advisor > button { margin: .2rem .5rem .4rem 0; }
+.advisor-panel { border: 1px solid var(--border, #d5ddd8); border-radius: 10px; background: #f6faf7; padding: 1rem; color: #223d33; overflow-wrap: anywhere; }
+.advisor-panel h3, .advisor-panel h4 { margin: .8rem 0 .4rem; }
+.advisor-panel p, .advisor-panel li { font-size: .84rem; line-height: 1.55; }
+.advisor-panel ul { padding-left: 1.3rem; }
+.advisor-panel label { display: block; font-size: .84rem; margin: .6rem 0; }
+.advisor-panel textarea { display: block; width: 100%; min-height: 75px; border: 1px solid #b9cbc0; border-radius: 6px; padding: .65rem; background: white; font: inherit; }
+.advisor-panel details { margin: .65rem 0; padding: .6rem; background: white; border: 1px solid #dbe6df; border-radius: 6px; }
+.advisor-panel summary { cursor: pointer; font-size: .85rem; font-weight: 650; }
+.advisor-panel pre { max-height: 300px; overflow: auto; font-size: .7rem; white-space: pre-wrap; }
+.advisor-findings p { margin: .35rem 0 0; }
+.advisor-findings small { color: #52695d; }
+.advisor-findings a { display: inline-block; color: #245b45; font-size: .78rem; padding: .25rem; text-decoration: underline; }
+.advisor-source { border-top: 1px solid #dbe6df; padding-top: .5rem; scroll-margin-top: 1rem; }
+.advisor-source:target { outline: 2px solid #3a7355; }
+
+.advisor-findings { max-height: 22rem; overflow-y: auto; padding-right: .5rem; }

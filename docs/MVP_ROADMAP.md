@@ -1,6 +1,6 @@
 # MVP implementation roadmap
 
-Status: M0–M3 and M3.5 are complete locally; M4 is implemented locally; M5–M6 remain unimplemented. See [M4_IMPLEMENTATION](M4_IMPLEMENTATION.md). M3.5 verification is recorded in [M3_5_COMPATIBILITY](M3_5_COMPATIBILITY.md). M3 verification is recorded in [M3_IMPLEMENTATION](M3_IMPLEMENTATION.md). M2 verification is recorded in [M2_IMPLEMENTATION](M2_IMPLEMENTATION.md). M1 verification is recorded in [M1_IMPLEMENTATION](M1_IMPLEMENTATION.md). Each milestone must satisfy its gate before the next; keep scope viable for one developer. M1–M3 file locations now exist; M4 files now exist; M5–M6 file locations remain planned.
+Status: M0–M3 and M3.5 are complete locally; M4 is implemented locally; M5 is implemented locally; M6 remains unimplemented. See [M5_IMPLEMENTATION](M5_IMPLEMENTATION.md). See [M4_IMPLEMENTATION](M4_IMPLEMENTATION.md). M3.5 verification is recorded in [M3_5_COMPATIBILITY](M3_5_COMPATIBILITY.md). M3 verification is recorded in [M3_IMPLEMENTATION](M3_IMPLEMENTATION.md). M2 verification is recorded in [M2_IMPLEMENTATION](M2_IMPLEMENTATION.md). M1 verification is recorded in [M1_IMPLEMENTATION](M1_IMPLEMENTATION.md). Each milestone must satisfy its gate before the next; keep scope viable for one developer. M1–M3 file locations now exist; M4 files now exist; M5 file locations now exist; M6 remains planned.
 
 ## M0 — Foundation and repository setup
 
@@ -68,7 +68,7 @@ M3 result: seven persisted fictional work projects, multi-road links, explicit a
 
 M4 reconciliation: the authorized demo now uses the same resurfacing scope in three supplied schedule alternatives (before, after, coordinated overlap). The older immediate-plus-restoration/staged-patch narrative remains unpriced, with unavailable-input behavior tested rather than invented methods. Empty drafts are allowed; mutable drafts carry optimistic revisions; saved evaluations remain append-only. Calendar assumptions are recorded, not optimized. Nonempty shared-mobilization groups are explicitly rejected. M4 includes conservative Pareto comparison of fully available comparable objectives, with no weighted winner. See M4_IMPLEMENTATION for actual verification and limitations.
 
-## M5 — AI explanations and responsible-AI controls
+## M5 — AI explanations and responsible-AI controls (complete locally)
 
 - Objective: explain validated results with safe deterministic fallback and optional evidence-grounded AI.
 - Dependencies: M4; AI_SYSTEM contracts and responsible-AI test cases. Any credential setup is a separate authorized task; do not obtain a key merely to implement fallback.
@@ -77,6 +77,8 @@ M4 reconciliation: the authorized demo now uses the same resurfacing scope in th
 - Acceptance: no-key workflow fully useful; injected instructions in evidence cannot alter behavior; numbers/dates are rendered from facts; invalid/missing citations or outage fall back; reviewer remains accountable.
 - Testing: grounding, unknown omission, unsupported numbers/claims, malicious source text, schema failures, timeout/rate limit/unavailable key, provider mock, redacted logging and review audit. Live paid calls are optional and never required by tests.
 - Definition of done: failure matrix passes and fallback is demonstrated; generated output cannot mutate facts; API/user interface distinguish facts, assumptions, and prose.
+
+M5 result: seven bounded context types; frozen estimate/analysis/evaluation replay and content/source hashes; strict fact/template selections through the official server-side SDK; deterministic default/fallback; contextual REST advisor integrated into existing views; inspectable evidence, synthetic/unknown labels, How AI works and separate human-review notes; additive append-only evidence/interaction/review persistence. The explicit M5 request selects `/api/v1/ai/*` instead of the older proposed `/explanations` path, reconciled in API_SPEC. No arbitrary AI prose, tools, source mutations, paid calls, new demo prices or autonomous agents. Local acceptance and limitations are recorded in [M5_IMPLEMENTATION](M5_IMPLEMENTATION.md).
 
 ## M6 — Integration testing, demo and presentation
 

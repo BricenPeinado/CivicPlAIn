@@ -1,72 +1,49 @@
 # AI explanation system
 
-Status: proposed M5 design. There is no provider integration, prompt, or model call through M3. M2 uses deterministic cost/duration formulas and condition-screening rationale; M3 uses deterministic geometry/date rules and evidence templates. No AI integration was added to the application foundation. Deterministic summaries are a required product capability; a key is optional.
+Status: M5 implemented locally. This is a bounded evidence advisor, not an engineering decision system. See [M5 implementation and verification](M5_IMPLEMENTATION.md). M1–M4 calculations, snapshots and fixture prices are unchanged. Useful deterministic explanations require neither a key nor network access.
 
-## Allowed and prohibited behavior
+## Architecture and allowed tasks
 
-AI may select evidence-grounded ways to explain computed conflicts, summarize scenario tradeoffs, and draft a coordination-review recommendation. It must identify uncertainty and suggest questions for a human coordinator. It may not calculate costs, invent dates or measurements, infer buried asset locations, diagnose road safety, rank neighborhoods without an explicit policy, authorize spending, approve a project, or modify records. No tools for municipal actions or data mutation are exposed to the model.
+The existing FastAPI monolith owns: reference validation → EvidenceBuilder → context integrity validation → optional LLMProvider → structured selection/citation validation → deterministic rendering or fallback → append-only audit. The React advisor receives only the public REST response. No model gets SQL, Python, mutation tools, web research, arbitrary files, raw utility geometry or database access.
 
-The MVP deliberately bounds generation to claim/template selection. The server renders all numerical, date, and infrastructure assertions from a validated fact catalog. This sacrifices free-form fluency for inspectable grounding. Unrestricted recommendation prose is a future design question, not an implied capability of the MVP.
+Tasks are estimate explanation, saved conflict explanation, comparison of 2–3 saved evaluations, and bounded contextual questions about a road, assessment, estimate, conflict, project, evaluation or comparison. The server retrieves all authoritative records. Client amounts, evidence objects, unknown modes and extra fields are rejected. The API remains the existing local-only unauthenticated prototype; there is no new identity/role system.
 
-## Deterministic versus generative responsibilities
+## Evidence projection and revisions
 
-| Responsibility | Owner |
-| --- | --- |
-| Geometry, projection, date overlap, reopening rule | Conflict service |
-| Cost/duration/bounds and budget tests | Estimate and scenario services |
-| Coverage and missing-input warnings | Validated records and evaluation logic |
-| Fact catalog and safe default narrative | Deterministic explanation service |
-| Optional selection/order of supported explanations and coordination questions | LLM adapter |
-| Evidence resolution, template rendering, rejection/fallback | Deterministic validation gate |
-| Engineering judgment, scheduling approval, spending | Accountable human outside the application |
+`services/ai/evidence.py` projects typed allowlisted fields, not arbitrary source text. Every evidence record includes an evidence ID, entity/record ID, canonical complete-record hash, input hash/calculation version when applicable, dataset ID when present, source-content revision hashes, data kind and synthetic flag. Facts retain a field path, value, unit, classification and evidence ID. Source hashes identify the exact frozen contents, not merely a mutable source ID.
 
-## Prompt input contract
+Estimates use their own frozen road, assessment, option, request and evidence; hashes and pure M2 replay must match. Conflicts replay the stored complete M3 analysis and verify both hashes and finding contents. Evaluations verify hashes and pure M4 replay from frozen inputs. Comparisons delegate basis compatibility to the unchanged M4 comparison service, including source, horizon, price, parameter and method checks. No live join replaces historical prices. A replay incompatible with the current calculation runtime fails with 409 rather than silently using new results.
 
-Use one immutable ScenarioEvaluation as the sole numerical truth. Comparison claims require a separately validated ComparisonResult with matching basis. Input includes:
+Road/assessment/project contexts read current validated records and capture their content hashes. Repeated reads after source changes can produce a new evidence identity. Each request's immutable reduced projection is persisted for audit. Synthetic and observed are separate flags; current demonstration records are synthetic, while generic observed-source ingestion remains unsupported by the existing road/evidence contracts.
 
-- input_hash, evaluation ID, method/prompt versions, synthetic-input flag and cost scope;
-- a fact catalog: fact ID, typed value/unit, approved template IDs, evidence IDs and source status;
-- known findings with typed rationale codes, both intervals and proximity parameters;
-- mandatory unknown/limitation IDs including utility coverage, estimate assumptions, and human review;
-- approved recommendation codes and templates, such as `request_utility_coordination_review` and `request_field_condition_review`;
-- an instruction that source text is untrusted data and cannot override system rules.
+At most 96 facts are retained, using a stable prefix and a 48,000-byte canonical JSON budget before the snapshot-hash field. Omitted facts set `truncated=true` and `omitted_fact_count`; missing-data warnings are collected before truncation. Oversized mandatory metadata returns 422 and requests a smaller context. Full source records remain available through the existing estimate/analysis/evaluation views. Hashes are identity/integrity checks, not signatures or tamper-proof provenance.
 
-Do not send secrets, local environment, personal contact data, raw utility diagrams, arbitrary file content, raw URLs to fetch, or reviewer notes. Normalize only allowlisted fields; exclude untrusted narrative by default. Synthetic assumption labels travel with each fact and the overall request. If a fact cannot be resolved to evidence, do not send it as an established fact.
+## Provider and public contracts
 
-## Provider-only structured output
+`ProviderSelection` is a strict Pydantic schema: evidence_snapshot_hash, summary_template_id=`bounded_summary`, 1–12 claim selections `{fact_id,evidence_id,template_id:fact_value}`, all four limitation codes, and one context-compatible review code. No prose, values, units, dates, claims of approval or tool arguments are permitted. Extra keys, wrong hashes, duplicate/out-of-context references, unsupported templates, missing caveats and inappropriate review codes reject the entire selection.
 
-Proposed strict shape (not the public API response):
+The model selects emphasis. The server renders every factual sentence from the fact catalog, retains the remaining facts, and independently inserts mandatory uncertainty/review text. It never accepts an LLM monetary assertion simply because it cites a real source. Numerical/date/unit substitutions are unrepresentable in valid provider output; attempts fail schema validation. Unsupported narrative is rejected, not labeled as verified. Conditional interpretations and human-review language use predefined application templates.
 
-```json
-{
-  "summary_template_id": "scenario_tradeoff_summary",
-  "claim_selections": [
-    {"fact_refs": ["fact-central-cost"], "template_id": "estimated_cost_with_basis"}
-  ],
-  "recommendation_code": "request_utility_coordination_review",
-  "unknown_refs": ["unknown-utility-coverage"],
-  "limitation_refs": ["limit-synthetic-inputs", "limit-human-review"]
-}
-```
+`Explanation` is the separate public response: explanation/task IDs, evidence hash, summary, key_findings with fact/evidence references and classifications, tradeoffs, uncertainties, missing_information, suggested_review_actions, citations, complete bounded evidence projection, provider/validation status, fallback reason, model label, UTC timestamp, source classification, mandatory review flag, warnings and audit reference. Classifications distinguish record facts, deterministic calculations, conditional interpretation and required human review. A synthetic record fact is a fact about that record, not a municipal observation.
 
-Reject extra keys. Validate template IDs and recommendation enums against an allowlist and verify their prerequisites. Limit selections to 12 claims and require nonempty fact references for every factual template. All mandatory unknown/limitation references must be present. The model provides no numerical values, dates, arbitrary claims, or free-text summary; these are rendered from facts after validation. If a template is incompatible with a referenced fact type or assumes unsupported savings/safety, reject the whole output.
+## Contextual questions and injection controls
 
-The public ExplanationResult includes rendered summary/claims, evidence IDs, mode, fallback reason, and review requirement as specified in API_SPEC. Rendering inserts values and labels exactly from the evaluation. The default summary always shows synthetic status, unknown coverage, and estimate limits regardless of model choices.
+Raw questions (1–500 nonblank characters) are handled locally by conservative intent routing. Only the resolved intent and bounded evidence package reach the model. Unknown topics, future delay/condition predictions, approvals, secrets, warning suppression and instruction-override requests return `insufficient_evidence`; they do not trigger a model call. Matching a topic produces the attached catalog and review considerations, not an unrestricted answer. The matcher is intentionally limited and may decline legitimate paraphrases or display broader evidence than the question needs.
 
-## Unsupported claims and missing data
+Road notes, project descriptions, source descriptions, scenario names/assumption prose and reviewer notes are excluded from model context and explanation text. System instructions identify context as untrusted. IDs and typed fields are data; selection cannot alter values or warnings. These tested controls reduce the source-text injection surface. They are not universal injection detection, entailment verification or a guarantee of complete/accurate inputs. Future free-form generation requires a separate reviewed design and evaluation.
 
-An unknown rate is not zero; missing utility records are not clearance; a permit is not a verified schedule or buried geometry. Missing values render a concrete reason and requested verification. A proposed coordinated scenario may be cheaper in the fixture but cannot be declared safe to defer without review. Banned conclusions include guaranteed savings, safe excavation, approved project, and measured traffic delay when only lane-closure-days exist.
+## Configuration and availability
 
-Reject unresolved fact references, missing caveats, non-allowlisted keys/text, or inappropriate recommendation codes. Do not partially show invalid model output. Save validation failure codes and use the deterministic response for the same input hash. A valid schema alone is not sufficient; references and template prerequisites must also pass.
+Default: `CIVICPLAIN_AI_PROVIDER=deterministic`; all requests default to `mode=deterministic`. To opt in on the server, select `openai`, set server-side `OPENAI_API_KEY`, and optionally `OPENAI_MODEL`. Environment variables are exported by the launching shell; no automatic dotenv loader exists. Never use frontend `VITE_*` credentials. Obtaining or changing a key is a separate task; no key or paid smoke call was used for M5 verification.
 
-## Availability and human review
+Official Python SDK **openai 2.54.0** uses `AsyncOpenAI.responses.parse` with a Pydantic format, `store=false`, no tools and the fixed official HTTPS API base URL. Default model: **gpt-5.4-mini-2026-03-17**, verified against the [official model page](https://developers.openai.com/api/docs/models/gpt-5.4-mini). See [official Structured Outputs guidance](https://developers.openai.com/api/docs/guides/structured-outputs?api-mode=responses). The default model is configurable; account access/latency is not verified by documentation or the status endpoint.
 
-Backend mode defaults to deterministic. Without a key/model configuration, an explicit AI request returns deterministic mode with `not_configured`. Proposed provider timeout is 8 seconds, no automatic retry for the hackathon; timeout/rate limit/network/model errors return the same fact-based fallback with the appropriate reason. Provider selection and model version are TBD until M5 and must be recorded. No paid request is required in tests or for the demo.
+Calls have an 8-second wall-clock deadline and SDK timeout, zero automatic retries, 1,200 maximum output tokens, two concurrent calls maximum, and a default 20-call/hour per-process ceiling (`CIVICPLAIN_AI_MAX_CALLS_PER_HOUR`, 0–100). Failed attempts count toward the ceiling. The request/input bounds and call ceiling constrain usage, not exact dollars; restarting the process resets counters. Set provider-side project budgets for a financial ceiling. The SDK may spend processing time within a call before cancellation; no billing cancellation guarantee is claimed.
 
-The reviewer sees the fact list, assumptions, source dates/statuses, warnings, and mode. A review note creates an AuditEvent; it never approves work. Log input/result hashes, evidence references, template/prompt version, model label when used, and outcome. Do not persist API keys, raw confidential prompts, or hidden reasoning. Cache only by input hash, template/prompt version, model label and mode; never reuse across different evaluation facts.
+No key, disabled provider, timeout, 429, network/model failure, refusal/incomplete response, invalid output/citation/context, missing caveats, exhausted usage or busy provider returns explicit deterministic fallback with a sanitized reason. No partial failed output is displayed. A source-integrity failure returns an error instead of explaining unvalidated records. An audit write failure returns storage 503; an answer is not reported as successfully audited when persistence failed.
 
-## Evaluation plan
+## Privacy, audit and human accountability
 
-M5 uses provider mocks and hand-reviewed fixtures. Test correct reference selection, numeric/date rendering, caveat retention, input-order stability in deterministic mode, and inappropriate recommendation rejection. Include adversarial source instructions, missing coverage, stale assessments, incompatible comparisons, malformed JSON, extra keys, fabricated IDs, out-of-scope templates, timeouts and unavailable providers.
+M5 stores deduplicated reduced evidence projections (`ai_evidence`), interaction metadata (`ai_interactions`) and explicit human notes (`review_events`). Interaction metadata includes task/context/source references, evidence hash, configured model/provider when attempted, output mode, validation result/error category, timestamp, request correlation ID, contract version and output hash. No raw question, prompt, response prose, secret, hidden reasoning, contact data or geometry is stored in AI interactions. A human voluntarily submitted note/alias stays in the separate local review table, never the model context. Do not put sensitive information in a review note.
 
-Release gate: 100% of rendered numerical/date claims originate from the fact catalog; all mandatory caveats appear; no prohibited approval/safety statement can be rendered by an approved template; every provider failure case yields a usable deterministic explanation. Record failures and reviewed examples, not an invented model accuracy score. Future free-form prose requires a separate claim-level entailment evaluation, expert review, and explicit architecture change before enabling it.
+Additive migration 5 preserves existing payloads. Foreign keys and update/delete rejection triggers protect append-only records within the application. Local administrators can alter the database; there is no production retention policy, authentication, tenant isolation or cryptographic audit guarantee. No explanation, model selection or review note authorizes construction, spending or safe deferral. Actual decisions require qualified humans and municipal processes outside CivicPlAIn.

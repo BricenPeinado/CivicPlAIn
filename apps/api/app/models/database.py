@@ -42,6 +42,9 @@ def initialize(path: Path):
         for statement in M4_SCHEMA:
             conn.execute(statement)
         conn.execute("INSERT OR IGNORE INTO schema_migrations VALUES (4, 'm4-additive-v1')")
+        for statement in M5_SCHEMA:
+            conn.execute(statement)
+        conn.execute("INSERT OR IGNORE INTO schema_migrations VALUES (5, 'm5-additive-v1')")
 
 
 M2_SCHEMA = [
@@ -77,4 +80,16 @@ M4_SCHEMA = [
     "CREATE INDEX IF NOT EXISTS evaluations_by_scenario ON scenario_evaluations(scenario_id,revision)",
     "CREATE TRIGGER IF NOT EXISTS evaluations_no_update BEFORE UPDATE ON scenario_evaluations BEGIN SELECT RAISE(ABORT, 'evaluations are immutable'); END",
     "CREATE TRIGGER IF NOT EXISTS evaluations_no_delete BEFORE DELETE ON scenario_evaluations BEGIN SELECT RAISE(ABORT, 'evaluations are immutable'); END",
+]
+
+M5_SCHEMA = [
+    "CREATE TABLE IF NOT EXISTS review_events (id TEXT PRIMARY KEY, evaluation_id TEXT NOT NULL REFERENCES scenario_evaluations(id), payload TEXT NOT NULL)",
+    "CREATE TRIGGER IF NOT EXISTS review_events_no_update BEFORE UPDATE ON review_events BEGIN SELECT RAISE(ABORT, 'Review events are immutable'); END",
+    "CREATE TRIGGER IF NOT EXISTS review_events_no_delete BEFORE DELETE ON review_events BEGIN SELECT RAISE(ABORT, 'Review events are immutable'); END",
+    "CREATE TABLE IF NOT EXISTS ai_evidence (hash TEXT PRIMARY KEY, payload TEXT NOT NULL)",
+    "CREATE TABLE IF NOT EXISTS ai_interactions (id TEXT PRIMARY KEY, evidence_hash TEXT NOT NULL REFERENCES ai_evidence(hash), payload TEXT NOT NULL)",
+    "CREATE TRIGGER IF NOT EXISTS ai_evidence_no_update BEFORE UPDATE ON ai_evidence BEGIN SELECT RAISE(ABORT, 'AI evidence is immutable'); END",
+    "CREATE TRIGGER IF NOT EXISTS ai_evidence_no_delete BEFORE DELETE ON ai_evidence BEGIN SELECT RAISE(ABORT, 'AI evidence is immutable'); END",
+    "CREATE TRIGGER IF NOT EXISTS ai_interactions_no_update BEFORE UPDATE ON ai_interactions BEGIN SELECT RAISE(ABORT, 'AI audit is immutable'); END",
+    "CREATE TRIGGER IF NOT EXISTS ai_interactions_no_delete BEFORE DELETE ON ai_interactions BEGIN SELECT RAISE(ABORT, 'AI audit is immutable'); END",
 ]

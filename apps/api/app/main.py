@@ -20,6 +20,10 @@ from app.core.conflict_repository import ConflictRepository
 from app.routes.conflicts import router as conflicts_router
 from app.core.scenario_repository import ScenarioRepository
 from app.routes.scenarios import router as scenarios_router
+from app.routes.ai import router as ai_router, review_router
+from app.core.ai_repository import AIInteractionAuditRepository
+from app.services.ai.providers import AISettings, OpenAIProvider
+from app.services.ai.explanations import AIExplanationService
 
 
 def error(request, status, code, message, fields=None):
@@ -28,7 +32,7 @@ def error(request, status, code, message, fields=None):
         "request_id": getattr(request.state, "request_id", "unavailable")}})
 
 
-def create_app(settings: Settings | None = None):
+def create_app(settings: Settings | None = None, ai_settings=None, ai_provider=None):
     settings = settings or Settings()
 
     @asynccontextmanager
@@ -45,6 +49,8 @@ def create_app(settings: Settings | None = None):
     app.state.planning = PlanningRepository(settings.database_path)
     app.state.conflicts = ConflictRepository(settings.database_path)
     app.state.scenarios = ScenarioRepository(settings.database_path)
+    ai_settings = ai_settings or AISettings()
+    app.state.ai = AIExplanationService(ai_settings, ai_provider or OpenAIProvider(ai_settings), AIInteractionAuditRepository(settings.database_path))
     app.add_middleware(CORSMiddleware, allow_origins=list(settings.allowed_origins),
                        allow_methods=["GET", "POST", "PATCH", "DELETE"], allow_headers=["Accept", "Content-Type"], expose_headers=["X-Request-ID"])
 
@@ -87,6 +93,8 @@ def create_app(settings: Settings | None = None):
     app.include_router(planning_router)
     app.include_router(conflicts_router)
     app.include_router(scenarios_router)
+    app.include_router(ai_router)
+    app.include_router(review_router)
     return app
 
 
