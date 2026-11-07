@@ -1,11 +1,15 @@
-import { categories, type Envelope, type Evidence, type Road, type RoadsCollection } from '../types/api';
+import { categories, type Envelope, type Evidence, type Road, type RoadsCollection, type Assessment, type OptionComparison, type Estimate, type EstimateRequest } from '../types/api';
 const base = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1').replace(/\/$/, '');
 const TIMEOUT_MS = 10000;
-async function request<T>(path: string, signal?: AbortSignal): Promise<T> {
+async function request<T>(path: string, signal?: AbortSignal, body?: unknown): Promise<T> {
   const timeout = AbortSignal.timeout(TIMEOUT_MS);
   try {
-    const response = await fetch(`${base}${path}`, { signal: signal ? AbortSignal.any([signal, timeout]) : timeout });
-    if (!response.ok) throw new Error(`API returned HTTP ${response.status}.`);
+    const response = await fetch(`${base}${path}`, { signal: signal ? AbortSignal.any([signal, timeout]) : timeout, ...(body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {}) });
+    if (!response.ok) {
+      let message = `API returned HTTP ${response.status}.`;
+      try { const error = await response.json(); if (typeof error.error?.message === 'string') message += ` ${error.error.message}`; } catch { /* retain HTTP status */ }
+      throw new Error(message);
+    }
     return await response.json() as T;
   } catch (error) {
     if (signal?.aborted) throw error;
@@ -41,3 +45,8 @@ export async function getRoads(signal?: AbortSignal): Promise<RoadsCollection> {
 }
 export const getRoad = (id: string, signal?: AbortSignal) => request<Envelope<Road>>(`/road-segments/${encodeURIComponent(id)}`, signal);
 export const getEvidence = (id: string, signal?: AbortSignal) => request<Envelope<Evidence>>(`/evidence-sources/${encodeURIComponent(id)}`, signal);
+
+export const getAssessments = (id: string, signal?: AbortSignal) => request<Envelope<Assessment[]>>(`/road-segments/${encodeURIComponent(id)}/conditions`, signal);
+export const getRepairOptions = (id: string, signal?: AbortSignal) => request<Envelope<OptionComparison[]>>(`/road-segments/${encodeURIComponent(id)}/repair-options`, signal);
+export const createEstimate = (body: EstimateRequest, signal?: AbortSignal) => request<Envelope<Estimate>>('/estimates', signal, body);
+export const getEstimate = (id: string, signal?: AbortSignal) => request<Envelope<Estimate>>(`/estimates/${encodeURIComponent(id)}`, signal);

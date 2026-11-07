@@ -81,3 +81,7 @@ Optional AI selects approved evidence-backed explanation templates; the displaye
 - [ ] Keyboard/list flow and non-color warning indicators are checked.
 - [ ] Explanation/review logs contain evidence references and no secrets; no approval is claimed.
 - [ ] Rehearsal completes within the allotted presentation time (TBD from hackathon rules); actual timing and remaining limitations recorded.
+
+## M2 implementation boundary
+
+M2 now implements road/assessment inspection and repair estimates using the separately reviewed `data/demo/maintenance.json` catalog. The scenario arithmetic and future utility work in this document remain illustrative M3/M4/M6 targets; their prices, durations and quantities are not the current M2 catalog. Do not present those narrative scenarios as implemented screens or saved estimates. See M2_IMPLEMENTATION for the verified local workflow.

@@ -1,6 +1,6 @@
 # MVP implementation roadmap
 
-Status: M0 and M1 are complete; M2–M6 are unimplemented. M1 verification is recorded in [M1_IMPLEMENTATION](M1_IMPLEMENTATION.md). Each milestone must satisfy its gate before the next; keep scope viable for one developer. M1 file locations now exist; later milestone file locations remain planned.
+Status: M0 and M1 are complete; M2 is complete; M3–M6 are unimplemented. M2 verification is recorded in [M2_IMPLEMENTATION](M2_IMPLEMENTATION.md). M1 verification is recorded in [M1_IMPLEMENTATION](M1_IMPLEMENTATION.md). Each milestone must satisfy its gate before the next; keep scope viable for one developer. M1/M2 file locations now exist; M3–M6 file locations remain planned.
 
 ## M0 — Foundation and repository setup
 
@@ -21,17 +21,19 @@ Status: M0 and M1 are complete; M2–M6 are unimplemented. M1 verification is re
 - Acceptance: documented fresh setup launches both processes; health returns the proposed schema; segment selection works; no-key/no-tiles mode works; synthetic labels and source legend visible. No estimate/conflict functionality claimed.
 - Testing: backend health/config checks, frontend typecheck/build, map selection smoke check, absent-key and tile-failure paths; record actual commands.
 - Definition of done: local run and stop commands verified, versions locked, supported endpoints marked implemented with evidence, M1 acceptance checklist recorded. See M1_IMPLEMENTATION for actual checks and known build/test warnings.
-- Scope reconciliation: the explicit M1 implementation request requires SQLite persistence, idempotent seeding, basic condition categories/details and summary counts. Minimal road/evidence SQLite storage and a read-only synthetic condition_summary therefore move forward from M2. No full assessment/asset/project lifecycle or estimate functionality is implemented.
+- Scope reconciliation: the explicit M1 implementation request requires SQLite persistence, idempotent seeding, basic condition categories/details and summary counts. Minimal road/evidence SQLite storage and a read-only synthetic condition_summary therefore move forward from M2. At the M1 gate no full assessment/asset/project lifecycle or estimate functionality was implemented; M2 is recorded below.
 
-## M2 — Road assets and repair estimates
+## M2 — Road assets and repair estimates (complete)
 
 - Objective: inspect records and reproduce assumption-based cost/duration estimates.
-- Dependencies: M1; review DATA_MODEL, fixture coverage, and per-field provenance; extend the M1 sqlite3 persistence adapter for assessment/asset/project relationships.
-- Files/modules: models/schemas for RoadSegment, InfrastructureAsset, ConditionAssessment, WorkProject, UtilityWork, RepairOption, CostEstimate, EvidenceSource, AuditEvent; services estimates/repositories; routes roads/conditions/projects/estimates/repair-options; web assets/estimates; tests; demo fixture manifest/import script.
+- Dependencies: M1; review DATA_MODEL, fixture coverage, and per-field provenance; extend the M1 sqlite3 persistence adapter for related maintenance attributes, assessments and estimate snapshots. Projects/utility work are deferred to M3 under the explicit M2 task scope.
+- Files/modules: RoadSegment maintenance attributes, ConditionAssessment, RepairOption, CostEstimate and EvidenceSource; services/estimates and repositories; routes roads/conditions/estimates/repair-options; web assets/estimates; tests; demo fixture manifest/import script.
 - Tasks: validate/load reviewed fixtures, extend SQLite persistence and introduce migrations only if justified, implement asset detail and latest assessment selection; tie-break equal assessment dates by stable ID; implement decimal cost math, duration assumptions, bounds, explicit scope and missing-input errors. Record source snapshot and method version.
-- Acceptance: known records and unknown fields render correctly; estimate totals can be reproduced manually; source/synthetic distinctions survive import; persisted records survive local restart; API/UI expose the same values.
+- Acceptance: known records and unknown fields render correctly; estimate totals can be reproduced manually; source/synthetic distinctions survive import; immutable estimates and M1 records survive local restart; API/UI expose the same values.
 - Testing: validation and repository integration; cents rounding, negative rates, mismatched units, missing geometry/dimensions, invalid ranges, equal-date assessments, fixture import idempotence, and estimate details UI smoke test.
 - Definition of done: supported routes documented, formula and evidence tests pass, setup includes repeatable seeding, no unlabelled synthetic observations.
+
+M2 result: five linked maintenance fixtures, 26 assessment records, three treatments, read-only history, comparison previews, explicit dimension assumptions, Decimal line/contingency math, duration allowances, saved source snapshots, and UI breakdowns. No project lifecycle, conflicts, scenarios or AI were added. See M2_IMPLEMENTATION for actual checks.
 
 ## M3 — Geospatial and temporal conflict detection
 

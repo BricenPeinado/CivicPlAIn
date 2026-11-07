@@ -1,3 +1,4 @@
+import { RepairPlanner } from './features/estimates/RepairPlanner';
 import { useEffect, useState } from 'react';
 import { RoadMap, colors } from './features/map/RoadMap';
 import { getEvidence, getRoad, getRoads } from './services/api';
@@ -21,7 +22,7 @@ export default function App() {
   const [reload, setReload] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [detail, setDetail] = useState<Road | null>(null);
-  const [evidence, setEvidence] = useState<Evidence | null>(null);
+  const [evidence, setEvidence] = useState<Evidence[]>([]);
   const [detailError, setDetailError] = useState('');
   const [detailRetry, setDetailRetry] = useState(0);
   const [query, setQuery] = useState('');
@@ -36,15 +37,15 @@ export default function App() {
   }, [reload]);
   useEffect(() => {
     const controller = new AbortController();
-    setDetail(null); setEvidence(null); setDetailError('');
+    setDetail(null); setEvidence([]); setDetailError('');
     if (selected && roads) {
       getRoad(selected, controller.signal).then(async result => {
         if (result.data.id !== selected || result.meta.dataset_snapshot_id !== roads.meta.dataset_snapshot_id) {
           throw new Error('The road snapshot changed. Reload the workspace.');
         }
         if (!controller.signal.aborted) setDetail(result.data);
-        const source = await getEvidence(result.data.evidence_ids[0], controller.signal);
-        if (!controller.signal.aborted) setEvidence(source.data);
+        const sources = await Promise.all(result.data.evidence_ids.map(id => getEvidence(id, controller.signal)));
+        if (!controller.signal.aborted) setEvidence(sources.map(source => source.data));
       }).catch(e => { if (!controller.signal.aborted) setDetailError(e.message); });
     }
     return () => controller.abort();
@@ -63,7 +64,7 @@ export default function App() {
         <div className="nav-item unavailable"><Glyph kind="road"/>Scenario planner <small>SOON</small></div>
         <div className="nav-item unavailable"><span aria-hidden="true">⚙</span>Settings <small>SOON</small></div>
       </nav>
-      <div className="sidebar-bottom"><span className="outline-label">MILESTONE 01</span><h3>A foundation for better decisions.</h3><p>Explore road records and their sources. Analysis tools arrive in later milestones.</p><div className="sidebar-foot">LOCAL DEVELOPMENT <span>v0.1</span></div></div>
+      <div className="sidebar-bottom"><span className="outline-label">MILESTONE 02</span><h3>Inspect every planning assumption.</h3><p>Compare deterministic repair estimates and inspect their evidence.</p><div className="sidebar-foot">LOCAL DEVELOPMENT <span>v0.1</span></div></div>
     </aside>
     <div className="workspace" id="workspace">
       <header className="topbar"><div><span className="breadcrumb">Workspace</span><span className="slash">/</span><strong>Lower Manhattan</strong></div><div className="source-status"><span className={error ? 'status-dot error-dot' : 'status-dot'} />{error ? 'API unavailable' : roads ? 'Local snapshot loaded' : 'Connecting to local API'}</div></header>
@@ -84,14 +85,15 @@ export default function App() {
               {!selected ? <div className="detail-empty"><span className="empty-icon"><Glyph kind="road"/></span><h3>A closer look starts here</h3><p>Select a segment on the map or in the road list to inspect its condition and source.</p><span className="small-label">MAP + KEYBOARD ROAD LIST</span></div> : <div className="detail-content" aria-live="polite">
                 <span className="small-label">{selected}</span>
                 {detail ? <><h3>{detail.name || 'Unnamed segment'}</h3><div className="detail-badges"><Condition category={detail.condition_summary.category}/><span className="demo-badge">SYNTHETIC</span></div>
-                  <dl className="metadata"><div><dt>Condition score</dt><dd>{detail.condition_summary.rating ? `${detail.condition_summary.rating} / 10 (demo)` : 'Unknown'}</dd></div><div><dt>Last assessed</dt><dd>{detail.condition_summary.assessed_on || 'Unknown'}</dd></div><div><dt>Length / width</dt><dd>{detail.length_m || 'Unknown'} / {detail.width_m || 'Unknown'}</dd></div><div><dt>Utility coverage</dt><dd>Unknown</dd></div><div><dt>Snapshot</dt><dd>{detail.dataset_snapshot_id}</dd></div></dl>
-                  <div className="provenance"><p className="eyebrow">DATA PROVENANCE</p>{evidence ? <><h4>{evidence.title}</h4><p>{evidence.publisher} · {evidence.version}</p><p>{evidence.reliability_note}</p><details><summary>Source and record limitations</summary><p>Repository source: {evidence.uri}</p><p>CRS: {evidence.original_crs}</p><p>{evidence.coverage_note}</p><p>{evidence.license_note}</p><p className="checksum">SHA-256: {evidence.checksum_sha256}</p><ul>{detail.limitations.map(item => <li key={item}>{item}</li>)}</ul></details></> : !detailError && <p role="status">Loading source evidence…</p>}</div>
-                  <div className="future-analysis"><span>Repair estimates & analysis</span><small>COMING IN M2</small></div></> : !detailError && <p role="status">Loading segment details…</p>}
+                  <dl className="metadata"><div><dt>Condition score</dt><dd>{detail.condition_summary.rating ? `${detail.condition_summary.rating} / 10 (demo)` : 'Unknown'}</dd></div><div><dt>Last assessed</dt><dd>{detail.condition_summary.assessed_on || 'Unknown'}</dd></div><div><dt>Length / width</dt><dd>{detail.length_m ? `${detail.length_m} m` : 'Unknown'} / {detail.width_m ? `${detail.width_m} m` : 'Unknown'}</dd></div><div><dt>Repairable area</dt><dd>{detail.repairable_area_m2 ? `${detail.repairable_area_m2} m² (length × width)` : 'Unknown'}</dd></div><div><dt>Dimension provenance</dt><dd>{Object.values(detail.dimension_basis || {}).length ? [...new Set(Object.values(detail.dimension_basis || {}))].join(', ').replaceAll('_', ' ') : 'Unknown'}</dd></div><div><dt>Surface / classification</dt><dd>{detail.surface_material || 'unknown'} / {detail.functional_class || 'unknown'}</dd></div><div><dt>Utility coverage</dt><dd>Unknown</dd></div><div><dt>Snapshot</dt><dd>{detail.dataset_snapshot_id}</dd></div></dl>
+                  <div className="provenance"><p className="eyebrow">DATA PROVENANCE</p>{evidence.length ? evidence.map(source => <div key={source.id}><h4>{source.title}</h4><p>{source.publisher} · {source.version}</p><p>{source.reliability_note}</p><details><summary>Source and record limitations</summary><p>Repository source: {source.uri}</p><p>CRS: {source.original_crs}</p><p>{source.coverage_note}</p><p>{source.license_note}</p><p className="checksum">SHA-256: {source.checksum_sha256}</p><ul>{detail.limitations.map(item => <li key={item}>{item}</li>)}</ul></details></div>) : !detailError && <p role="status">Loading source evidence…</p>}</div>
+                  <p>{detail.notes}</p></> : !detailError && <p role="status">Loading segment details…</p>}
                 {detailError && <div role="alert"><p>Details or source evidence unavailable. {detailError}</p><button className="text-button" onClick={() => setDetailRetry(v => v + 1)}>Retry details</button></div>}
               </div>}
               <div className="coverage-note"><strong>Utility information is unknown.</strong><p>This map does not establish excavation safety or authorize work.</p></div>
             </aside>
           </div>
+          {detail && <RepairPlanner key={detail.id} road={detail}/>}
           <section className="road-list-card" aria-label="Keyboard accessible road list"><div className="list-heading"><div><p className="eyebrow">EXPLORE THE SNAPSHOT</p><h2>Road segments <span>{filtered.length}</span></h2></div><label className="search-box"><span aria-hidden="true">⌕</span><input aria-label="Find road segments" placeholder="Find a segment by name or ID" value={query} onChange={e => setQuery(e.target.value)}/></label></div>
             <div className="road-list">{filtered.map(f => <button key={f.properties.id} className={selected === f.properties.id ? 'road-row selected' : 'road-row'} aria-pressed={selected === f.properties.id} onClick={() => setSelected(f.properties.id)}><span className="road-row-icon"><Glyph kind="road"/></span><span className="road-row-name"><strong>{f.properties.name || f.properties.id}</strong><small>{f.properties.id} · Synthetic geometry</small></span><Condition category={f.properties.condition_summary.category}/><span className="row-arrow" aria-hidden="true">↗</span></button>)}</div>
             {filtered.length === 0 && <p className="search-empty">No segments match this search.</p>}
