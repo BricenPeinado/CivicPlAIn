@@ -1,6 +1,6 @@
 # Hackathon demo plan
 
-Status: proposed M6 presentation. All data and interactions below are future work. Numeric examples are **synthetic assumptions**, not NYC measurements, bids, planned projects, or verified savings.
+Status: proposed M6 presentation. M1 map/list/detail/provenance and basic road-condition fixtures are implemented. Estimates, project/utility overlays, scenarios, explanations and the full presentation below remain future work. The current M1 snapshot is demo-m1-v1; demo-v1 below remains the proposed full-workflow snapshot. Numeric examples are **synthetic assumptions**, not NYC measurements, bids, planned projects, or verified savings.
 
 ## Narrative and screens
 

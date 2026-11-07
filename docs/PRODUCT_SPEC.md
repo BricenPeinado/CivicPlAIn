@@ -1,6 +1,6 @@
 # CivicPlAIn product specification
 
-Status: proposed hackathon MVP; M0 contains no application behavior.
+Status: M1 implements local map/list selection, basic synthetic condition/provenance details and dataset summary counts. The full hackathon workflow below remains the product target; estimates, projects/conflicts, scenarios and explanations are not implemented.
 
 ## Users and problem
 

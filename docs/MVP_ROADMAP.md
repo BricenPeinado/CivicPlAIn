@@ -1,6 +1,6 @@
 # MVP implementation roadmap
 
-Status: M0 foundation only. M1–M6 are unimplemented. Each milestone must satisfy its gate before the next; keep scope viable for one developer. File names below are expected locations, not existing modules.
+Status: M0 and M1 are complete; M2–M6 are unimplemented. M1 verification is recorded in [M1_IMPLEMENTATION](M1_IMPLEMENTATION.md). Each milestone must satisfy its gate before the next; keep scope viable for one developer. M1 file locations now exist; later milestone file locations remain planned.
 
 ## M0 — Foundation and repository setup
 
@@ -12,7 +12,7 @@ Status: M0 foundation only. M1–M6 are unimplemented. Each milestone must satis
 - Testing: validate links, requested paths/entities/API coverage, Git diff/whitespace, ignored secret/runtime paths, tracked demo path, and baseline file hashes. No application tests exist.
 - Definition of done: report tree, changed/new files, validation results, open questions, and exact M1 scope.
 
-## M1 — Local frontend/backend foundation and map
+## M1 — Local frontend/backend foundation and map (complete)
 
 - Objective: runnable local web/API shell with a selectable bounded map and visible data status.
 - Dependencies: M0; select runtime versions, dependency manager/locks, and local map style/license strategy. No API key prerequisite.
@@ -20,14 +20,15 @@ Status: M0 foundation only. M1–M6 are unimplemented. Each milestone must satis
 - Tasks: initialize one React application and one FastAPI application; add validated local CORS/config; implement proposed health route; load at most 30 labeled demo roads; map selection plus equivalent list; provide local empty-style/GeoJSON fallback when basemap unavailable. Lock only needed dependencies.
 - Acceptance: documented fresh setup launches both processes; health returns the proposed schema; segment selection works; no-key/no-tiles mode works; synthetic labels and source legend visible. No estimate/conflict functionality claimed.
 - Testing: backend health/config checks, frontend typecheck/build, map selection smoke check, absent-key and tile-failure paths; record actual commands.
-- Definition of done: local run and stop commands verified, versions locked, supported endpoints marked implemented with evidence, M1 acceptance checklist recorded.
+- Definition of done: local run and stop commands verified, versions locked, supported endpoints marked implemented with evidence, M1 acceptance checklist recorded. See M1_IMPLEMENTATION for actual checks and known build/test warnings.
+- Scope reconciliation: the explicit M1 implementation request requires SQLite persistence, idempotent seeding, basic condition categories/details and summary counts. Minimal road/evidence SQLite storage and a read-only synthetic condition_summary therefore move forward from M2. No full assessment/asset/project lifecycle or estimate functionality is implemented.
 
 ## M2 — Road assets and repair estimates
 
 - Objective: inspect records and reproduce assumption-based cost/duration estimates.
-- Dependencies: M1; review DATA_MODEL, fixture coverage, and per-field provenance; choose SQLite persistence adapter.
+- Dependencies: M1; review DATA_MODEL, fixture coverage, and per-field provenance; extend the M1 sqlite3 persistence adapter for assessment/asset/project relationships.
 - Files/modules: models/schemas for RoadSegment, InfrastructureAsset, ConditionAssessment, WorkProject, UtilityWork, RepairOption, CostEstimate, EvidenceSource, AuditEvent; services estimates/repositories; routes roads/conditions/projects/estimates/repair-options; web assets/estimates; tests; demo fixture manifest/import script.
-- Tasks: validate/load reviewed fixtures, add SQLite persistence and required migrations only now if justified, implement asset detail and latest assessment selection; tie-break equal assessment dates by stable ID; implement decimal cost math, duration assumptions, bounds, explicit scope and missing-input errors. Record source snapshot and method version.
+- Tasks: validate/load reviewed fixtures, extend SQLite persistence and introduce migrations only if justified, implement asset detail and latest assessment selection; tie-break equal assessment dates by stable ID; implement decimal cost math, duration assumptions, bounds, explicit scope and missing-input errors. Record source snapshot and method version.
 - Acceptance: known records and unknown fields render correctly; estimate totals can be reproduced manually; source/synthetic distinctions survive import; persisted records survive local restart; API/UI expose the same values.
 - Testing: validation and repository integration; cents rounding, negative rates, mismatched units, missing geometry/dimensions, invalid ranges, equal-date assessments, fixture import idempotence, and estimate details UI smoke test.
 - Definition of done: supported routes documented, formula and evidence tests pass, setup includes repeatable seeding, no unlabelled synthetic observations.

@@ -1,6 +1,6 @@
 # Preliminary data model
 
-Status: proposed logical schemas, not database tables or migrations. API_SPEC uses these shapes. Storage/ORM details are TBD for M2.
+Status: M1 implements RecordMeta/RoadSegment and EvidenceSource for synthetic fixtures, plus the limited condition_summary projection below. Other entities remain proposed. API_SPEC uses these shapes. M1 stores validated JSON in SQLite using sqlite3; normalization of assessments/assets/projects belongs to M2.
 
 ## Shared conventions
 
@@ -225,3 +225,22 @@ Catalog accessibility and imported payload validation are different facts. Candi
 | detail! | typed, redacted JSON; review text, warning codes, model/prompt version, validation result as applicable |
 
 Append-only at the application boundary, not claimed tamper-proof. Never store API keys, authorization headers, hidden model reasoning, raw personal information, or unredacted prompts. A review note records acknowledgement and remaining questions, not engineering approval or spending consent.
+
+## Implemented M1 storage and condition projection
+
+SQLite tables: `dataset(id PRIMARY KEY, manifest_json)`, `evidence(id PRIMARY KEY, dataset_id REFERENCES dataset(id), payload)`, `roads(id PRIMARY KEY, dataset_id REFERENCES dataset(id), payload)`. Payloads are JSON validated through Pydantic on import and read, preserving nullable decimal strings, dates, geometry and per-field provenance. Only synthetic records are accepted by the M1 implementation; observed/derived entities above are future contracts, not working import types. M1 supports exactly one snapshot per database. Imports use stable IDs, checksum validation, foreign keys and a transaction. No mutation endpoint exists.
+
+The RoadSegment transport additionally includes a required, read-only **condition_summary** for this milestone:
+
+| Field | Implemented meaning |
+| --- | --- |
+| category | good, fair, poor, unknown; text accompanies all color styling |
+| rating | Decimal string 1–10 or null |
+| rating_scale | `synthetic-1-10-higher-better`, or null without an assessment |
+| assessed_on | Nullable ISO date; all M1 fixtures are undated, not current observations |
+| evidence_ids | Nonempty subset of the road evidence references |
+| data_kind / synthetic_input | `synthetic` / true |
+
+The fixture-only categorization rule is good ≥8, fair ≥5 and <8, poor <5; unknown has no rating, scale or date. This is an authored demo rule, not normalization of an official NYC scale. The manifest freezes it. Material populated fields have field_evidence; null material fields have unknown_reasons. Geometry is a nonzero valid EPSG:4326 LineString. All records preserve unknown utility coverage.
+
+The projection carries no independently mutable assessment list. Full ConditionAssessment records, latest-dated selection and stable-ID tie-breaking remain M2, at which point the summary should be derived from those records. No costs, dimensions, observed dates, utility routes or schedules are inferred for M1.

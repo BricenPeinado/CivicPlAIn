@@ -1,0 +1,77 @@
+{
+  "dataset_snapshot_id": "demo-m1-v1",
+  "study_area_id": "lower-manhattan-window-v1",
+  "bbox": [
+    -74.012,
+    40.71,
+    -74.0,
+    40.72
+  ],
+  "record_count": 24,
+  "road_ids": [
+    "demo-r-001",
+    "demo-r-002",
+    "demo-r-003",
+    "demo-r-004",
+    "demo-r-005",
+    "demo-r-006",
+    "demo-r-007",
+    "demo-r-008",
+    "demo-r-009",
+    "demo-r-010",
+    "demo-r-011",
+    "demo-r-012",
+    "demo-r-013",
+    "demo-r-014",
+    "demo-r-015",
+    "demo-r-016",
+    "demo-r-017",
+    "demo-r-018",
+    "demo-r-019",
+    "demo-r-020",
+    "demo-r-021",
+    "demo-r-022",
+    "demo-r-023",
+    "demo-r-024"
+  ],
+  "synthetic_input": true,
+  "selection_method": "schematic-lattice-v1: 12 bent horizontal and 12 vertical LineStrings; no municipal source",
+  "category_rule": "synthetic-1-10-higher-better: good >=8, fair >=5 and <8, poor <5; unknown if rating absent",
+  "expected_categories": {
+    "good": 6,
+    "fair": 6,
+    "poor": 6,
+    "unknown": 6
+  },
+  "field_assumptions": "All geometry, names and condition labels/ratings are synthetic. Dates and dimensions remain null.",
+  "rejected_records": 0,
+  "manual_exclusions": [],
+  "coverage_note": "Schematic placed within NYC; not a street survey or representative sample.",
+  "files": {
+    "roads.geojson": {
+      "checksum_sha256": "5ded8efbc495e027b95c3d8b888604d97697f0c5b72f0f906275962765e6b846",
+      "origin": "scripts/create_demo_fixture.py",
+      "data_kind": "synthetic"
+    }
+  },
+  "evidence_source": {
+    "id": "demo-assumptions-v1",
+    "title": "CivicPlAIn M1 schematic road and condition assumptions",
+    "publisher": "CivicPlAIn demo authors",
+    "source_kind": "demo_assumption",
+    "verification_status": "synthetic_demo",
+    "uri": "data/demo/roads.geojson",
+    "retrieved_at": null,
+    "observed_on": null,
+    "version": "demo-m1-v1",
+    "checksum_sha256": "5ded8efbc495e027b95c3d8b888604d97697f0c5b72f0f906275962765e6b846",
+    "original_crs": "EPSG:4326",
+    "coverage_note": "24 schematic segments inside the chosen Lower Manhattan window; no actual street coverage.",
+    "reliability_note": "Authored synthetic assumptions. No survey, assessment date, dimensions, or utility information.",
+    "license_note": "Original CivicPlAIn synthetic fixture; no third-party geographic data incorporated.",
+    "unknown_reasons": {
+      "retrieved_at": "not_applicable_authored_fixture",
+      "observed_on": "not_observed"
+    }
+  }
+}
