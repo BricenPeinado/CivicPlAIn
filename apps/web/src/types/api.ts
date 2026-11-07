@@ -67,3 +67,39 @@ export interface EstimateRequest {
   road_segment_id: string; repair_option_id: string; dataset_snapshot_id: string;
   planning_assumptions?: { length_m?: string; width_m?: string; unit: 'm'; note: string };
 }
+
+export const infrastructureCategories = ['water', 'sewer', 'gas', 'electric', 'telecommunications', 'road_resurfacing', 'road_reconstruction', 'other'] as const;
+export type InfrastructureCategory = typeof infrastructureCategories[number];
+export interface WorkProject {
+  id: string; title: string; description: string; kind: 'road_repair' | 'utility' | 'other';
+  infrastructure_category: InfrastructureCategory; work_type: string; responsible_organization: string | null;
+  schedule_status: string; schedule_basis: string; start_date: string | null; end_date: string | null;
+  actual_start_date: string | null; actual_end_date: string | null;
+  geometry: import('geojson').Polygon | LineString | null; location_status: 'source_reported' | 'approximate' | 'unknown';
+  road_segment_ids: string[]; excavation_required: boolean | null; lanes_closed: number | null;
+  estimated_cost_usd: string | null; currency: 'USD'; dataset_snapshot_id: string;
+  evidence_ids: string[]; field_evidence: Record<string, string[]>; unknown_reasons: Record<string, string>;
+  limitations: string[]; data_kind: 'synthetic' | 'observed'; synthetic_input: boolean; created_at: string; updated_at: string;
+}
+export interface SpatialEvidence {
+  classifications: string[]; distance_m: number | null; polygon_overlap: boolean; geometry_intersects: boolean;
+  shared_road_ids: string[]; shared_corridor_ids: string[]; basis: string;
+}
+export interface ConflictFinding {
+  id: string; analysis_id: string; project_ids: string[]; affected_road_ids: string[];
+  finding_type: 'concurrent_work' | 'reopening_risk' | 'multiple_closures' | 'sequencing_review';
+  priority: 'coordination_review'; spatial_evidence: SpatialEvidence;
+  temporal_evidence: { intervals: Record<string, (string | null)[]>; interval_basis: Record<string, string>;
+    overlap_start: string | null; overlap_end: string | null; gap_days: number | null; preceding_project_id: string | null; basis: string };
+  explanation: string; required_review: string[]; data_quality_warnings: string[]; evidence_ids: string[];
+  method_version: string; input_hash: string; detected_at: string; synthetic_input: boolean;
+}
+export interface ConflictAnalysis {
+  id: string; dataset_snapshot_id: string; findings: ConflictFinding[];
+  indeterminate_checks: { project_ids: string[]; missing_fields: string[]; reason: string; spatial_evidence: SpatialEvidence }[];
+  excluded_project_ids: string[]; possible_pair_count: number; checked_pair_count: number;
+  utility_coverage: 'unknown'; warnings: string[];
+  parameters: { proximity_m: number; corridor_m: number; reopening_horizon_days: number };
+  method_version: string; detected_at: string; input_hash: string; result_hash: string;
+  input_snapshot: { projects: WorkProject[]; roads: Road[]; sources: Evidence[]; exchange_crs: string; calculation_crs: string; libraries: Record<string, string> };
+}

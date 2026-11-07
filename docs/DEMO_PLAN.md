@@ -1,6 +1,6 @@
 # Hackathon demo plan
 
-Status: proposed M6 presentation. M1 map/list/detail/provenance and basic road-condition fixtures are implemented. Estimates, project/utility overlays, scenarios, explanations and the full presentation below remain future work. The current M1 snapshot is demo-m1-v1; demo-v1 below remains the proposed full-workflow snapshot. Numeric examples are **synthetic assumptions**, not NYC measurements, bids, planned projects, or verified savings.
+Status: M1–M3 map, asset/estimate inspection and fictional project/conflict review are implemented. The three-scenario comparison, generative explanation/review-note controls and full M6 presentation below remain future work. Use the implemented M3 walkthrough at the end of this document; the earlier M4/M6 narrative is illustrative. The current M1 snapshot is demo-m1-v1; demo-v1 below remains the proposed full-workflow snapshot. Numeric examples are **synthetic assumptions**, not NYC measurements, bids, planned projects, or verified savings.
 
 ## Narrative and screens
 
@@ -85,3 +85,21 @@ Optional AI selects approved evidence-backed explanation templates; the displaye
 ## M2 implementation boundary
 
 M2 now implements road/assessment inspection and repair estimates using the separately reviewed `data/demo/maintenance.json` catalog. The scenario arithmetic and future utility work in this document remain illustrative M3/M4/M6 targets; their prices, durations and quantities are not the current M2 catalog. Do not present those narrative scenarios as implemented screens or saved estimates. See M2_IMPLEMENTATION for the verified local workflow.
+
+## Implemented M3 walkthrough
+
+Prerequisites: updated pinned Python requirements (including pyproj), explicit `PYTHONPATH=apps/api .venv/bin/python -m app.seed`, and restarted local API/web servers per README. The seed reports 24 synthetic roads, M2 counts (5,26,3), and seven M3 projects. Existing local records are preserved; no reset/delete command is needed.
+
+All M3 project records, organizations, polygons, closure declarations and dates are authored **fictional demonstration inputs**, not municipal observations or utility locations. Actual utility coverage and depth remain unknown. Fixtures and expected examples live in `data/demo/projects.json` and `projects-manifest.json`; `scripts/create_m3_fixture.py` regenerates identical bytes.
+
+1. Open the map and choose **Project coordination**. The client loads all seven projects and checks that explicit set using the default 5 m footprint proximity, 5 m road-centerline corridor tolerance and 30-day sequencing window. Expect **8 findings**, **10 incomplete pair checks**, and **16 indexed candidates of 21 possible pairs**. These are rule counts, not engineering/safety counts.
+2. Select **Fictional R-001 resurfacing** (`demo-road-project`), scheduled `[2027-04-01,2027-04-08)`. Its authored approximate rectangle lies on schematic R-001. Four findings involve that project. Its cost is unknown; the existing M2 repair option estimate is a separate hypothetical planning calculation.
+3. Select **Potential pavement rework** involving `demo-utility-project`, the fictional water excavation scheduled `[2027-04-10,2027-04-15)`. Both supplied polygons overlap and declare R-001; the utility starts **2 calendar days** after the road-work end. The engine says potential rework and requests excavation/restoration-scope and schedule review. It does not predict pavement destruction or calculate loss/savings.
+4. Inspect the selected conflict's spatial evidence, half-open schedules, gap, sources and unverified assumptions. The map outlines both original work zones and related roads. Approximate polygon overlap remains a computed geometry fact with a potential-evidence classification. No buried route/depth is inferred.
+5. Select a concurrent finding involving `demo-concurrent-project`, fictional sewer work affecting R-001 and R-002 on `[2027-04-05,2027-04-11)`. Its overlap with resurfacing is `[2027-04-05,2027-04-08)`. Both declare lane closures, so a separate multiple_closures coordination finding is retained. No measured traffic delay is supplied.
+6. Toggle **Show project work zones** and individual category checkboxes; confirm only geometry display changes. Select roads with the existing map/list to filter findings by declared/screened related assets. Thick outlines and selected text supplement color. Use **Show all conflicts** to clear the filter.
+7. Select **Fictional distant telecom inspection** (`demo-unrelated-project`). It has zero positive findings and a qualified utility-coverage warning; its pairing with the unknown-location gas project remains indeterminate. This is not clearance.
+8. Select the gas project with **location unknown** and the electric project with **schedule unknown**. Missing geometry stays off the map and in the list; incomplete checks and reasons remain visible. Expand the analysis source/method disclosure to inspect source contents, parameters and hashes.
+9. Select R-001 and **Compare Repair Options** to demonstrate M2 still works: resurfacing base **$53,400**, low **$44,760**, high **$66,360**, five preliminary days. These are the M2 catalog assumptions, not the earlier M4 narrative's $120,000 resurfacing scenario. Do not switch price bases or present scenarios/AI/review-note submission as implemented.
+
+M3 tests/manual reasoning cover exact meter thresholds (projection roundoff epsilon only), 0/30/31-day sequential boundaries, adjacent intervals, shared roads/corridors, polygon overlap, nearby separation, invalid geometry, completed/cancelled records, missing information, replay and duplicate prevention. M3_IMPLEMENTATION records actual test/build/browser results. The unchecked M6 full-workflow checklist above remains future work.

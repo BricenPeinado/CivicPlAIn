@@ -1,6 +1,6 @@
 # CivicPlAIn product specification
 
-Status: M2 implements local map/list selection, synthetic maintenance attributes and assessment history, three repair categories, deterministic cost/preliminary-duration estimates, immutable snapshots and comparison/breakdown panels. Projects/conflicts, scenarios and generative explanations remain unimplemented.
+Status: M2 implements local map/list selection, synthetic maintenance attributes and assessment history, three repair categories, deterministic cost/preliminary-duration estimates, immutable snapshots and comparison/breakdown panels. M3 additionally implements persisted fictional work projects, deterministic spatial/temporal conflict screening, source snapshots and map/review panels. Scenarios and generative explanations remain unimplemented.
 
 ## Users and problem
 

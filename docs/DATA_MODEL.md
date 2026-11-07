@@ -1,6 +1,6 @@
 # Preliminary data model
 
-Status: M2 implements synthetic RoadSegment maintenance attributes, related asset records, normalized ConditionAssessment history, a synthetic RepairOption catalog and immutable CostEstimate snapshots. Other entities remain proposed. The concrete M2 shapes below supersede their former planning drafts. Existing M1 JSON remains unchanged in storage; enriched reads preserve its API shape.
+Status: M2 implements synthetic RoadSegment maintenance attributes, related asset records, normalized ConditionAssessment history, a synthetic RepairOption catalog and immutable CostEstimate snapshots. M3 adds implemented WorkProject, ConflictFinding and immutable ConflictAnalysis records below. Scenarios, generic infrastructure assets and AuditEvent workflows remain proposed. The concrete M2 shapes below supersede their former planning drafts. Existing M1 JSON remains unchanged in storage; enriched reads preserve its API shape.
 
 ## Shared conventions
 
@@ -67,35 +67,23 @@ Preserve the established `synthetic-1-10-higher-better` scale: 1 ≤ rating ≤1
 
 The API returns the complete bounded per-road history and `meta.latest_usable_id`; road collection, GeoJSON and detail share the same derived condition summary. In an M1-only database, the original undated summary remains visible until the explicit M2 seed adds historical records.
 
-## WorkProject
+## WorkProject (implemented M3)
 
-| Field | Type / validation |
-| --- | --- |
-| title! | nonempty string |
-| kind! | enum road_repair, utility, other |
-| road_segment_ids! | list of RoadSegment IDs; may be empty for unmatched permits |
-| geometry? | GeoJSON LineString or Polygon, actual or explicitly assumed work footprint |
-| start_date?, end_date? | dates; when both known, start < end |
-| schedule_status! | enum planned, tentative, completed, cancelled, unknown |
-| schedule_basis! | enum confirmed_source, permit_window, assumed_demo, unknown |
-| lanes_closed? | nonnegative integer; if segment lane count known, cannot exceed it without documented multi-segment scope |
-| review_status! | enum unreviewed, reviewed_with_notes; neither means approved |
+Required fields: `id`, `title`, `description`, `kind` (road_repair/utility/other), `infrastructure_category` (water/sewer/gas/electric/telecommunications/road_resurfacing/road_reconstruction/other), `work_type` (resurfacing/reconstruction/excavation/inspection/maintenance/other), `schedule_status` (planned/tentative/active/completed/cancelled/unknown), `schedule_basis` (confirmed_source/permit_window/assumed_demo/unknown), `location_status` (source_reported/approximate/unknown), `road_segment_ids` (distinct, ≤30, empty allowed), and the provenance fields below. Category and kind must agree. Titles/descriptions cannot be blank. Responsible organization is nullable; no individual contacts are stored.
 
-Relationships: one optional UtilityWork subtype; scenarios reference source projects but propose their own action dates. Unknown geometry/dates allow storage but produce indeterminate checks. Permit validity is not a confirmed actual construction schedule. Cancelled projects are excluded with an explicit reason; completed historical work is considered only for relevant reopening comparisons.
+`geometry` is a nullable valid nonzero LineString or positive-area Polygon in EPSG:4326, longitude/latitude, wholly within the Lower Manhattan study window. Polygon rings must explicitly close and be topologically valid. No silent repair, clipping, guessed position or numeric location-confidence probability. Null geometry requires location_status=unknown; approximate geometry must be labeled approximate. Source-reported geometry does not establish physical utility position/depth. Multi-road projects use one work-zone geometry plus multiple affected road references, not duplicated project rows. MultiPolygon and general geographic ingestion are deferred.
 
-## UtilityWork
+Nullable `start_date`/`end_date` are planned civil dates; `actual_start_date`/`actual_end_date` are actual civil dates when supported. Every complete pair must have start < end under `[start,end)`. Actual end requires actual start and completed status. Completed status may have unknown actual dates, which yields indeterminate temporal checks. Unknown schedule basis cannot carry planned dates. A permit_window is a source window, not an assertion that construction will occur then. Cancelled records are stored but explicitly excluded from screening; completed records are only considered as preceding sequential work using actual dates.
 
-| Field | Type / validation |
-| --- | --- |
-| work_project_id! | unique WorkProject ID with kind=utility |
-| utility_type! | enum water, sewer, gas, electric, telecom, unknown |
-| infrastructure_asset_ids! | list of InfrastructureAsset IDs, empty if unmapped |
-| permit_reference? | string; source-specific, no fabricated official identifier |
-| excavation_required? | bool; null means not established |
-| location_confidence! | enum source_reported, assumed_demo, unknown; not numeric probability |
-| scope_note? | string explaining what is and is not known |
+Nullable `excavation_required` is an explicit boolean; null means unestablished. Nullable nonnegative integer `lanes_closed` is a source declaration, not inferred from category. Nullable `estimated_cost_usd` is a finite nonnegative Decimal with at most two decimal places; `currency=USD`. No cost is inferred or used to compute savings/loss. Actual estimates remain the separate M2 CostEstimate contract.
 
-Schedule/geometry live on WorkProject to prevent contradictory copies. A permit may imply potential utility work only with supporting classification evidence. No sensitive underground route data is required for MVP.
+Provenance: `dataset_snapshot_id`, nonempty `evidence_ids`, `field_evidence`, `unknown_reasons`, `limitations`, `data_kind` (synthetic/observed), `synthetic_input`, offset-aware `created_at`/`updated_at` (updated ≥ created). Synthetic status and flag must agree; synthetic IDs require `demo-`. Material category/type/status/basis/location/roads, populated geometry/dates/organization/excavation/closures/cost require source IDs drawn from evidence_ids. Null material fields require a nonempty unknown reason. The current seed imports synthetic records only with full EvidenceSource contents; accepting an observed classification structurally is not an implemented observed-data adapter or a claim that any observed project exists.
+
+Persistence: `work_projects(id,dataset_id REFERENCES dataset,payload)` and normalized `project_roads(project_id REFERENCES work_projects,road_id REFERENCES roads,PRIMARY KEY(project_id,road_id))`; a road-first index supports linkage. No open create/update/delete endpoint exists. Stable seed IDs preserve local payloads and links on repeat import. References must resolve in the same snapshot.
+
+## UtilityWork boundary
+
+M3 keeps utility category, work type, organization, excavation requirement and location uncertainty directly on WorkProject. This supersedes the former planned optional UtilityWork child and avoids duplicate schedule/geometry models. No UtilityWork table or `utility_work` API child exists. The broader generic utility-asset lifecycle, permit linkage, depth and observed ingestion remain future contracts. Missing utility records/location never establishes safe excavation.
 
 ## RepairOption (implemented M2 catalog)
 
@@ -117,23 +105,25 @@ Each scenario has `line_items` (label, decimal quantity, unit m2/allowance, deci
 
 `input_snapshot` contains the exact enriched road, chosen assessment, complete repair option, request, evidence records and method version; user assumptions are retained inline. SHA-256 hashes use sorted-key compact ASCII JSON; input hash covers snapshot, result hash covers the Calculation fields. IDs and creation times are excluded from semantic result hashing. Replay calls the pure calculation engine with these saved model inputs. Subsequent record/catalog changes cannot rewrite history. No estimate update/delete route exists; SQLite triggers reject both operations.
 
-## ConflictFinding
+## ConflictFinding (implemented M3)
 
-| Field | Type / validation |
-| --- | --- |
-| project_ids! | exactly two distinct WorkProject IDs, canonically sorted |
-| finding_type! | enum concurrent_work, reopening_risk |
-| spatial_distance_m! | decimal ≥0, from projected geometry |
-| proximity_m! | decimal ≥0, rule input |
-| overlap_start?, overlap_end? | dates; required with start < end for concurrent_work |
-| gap_days? | integer ≥0; required for reopening_risk and ≤ reopening_horizon_days |
-| reopening_horizon_days! | integer ≥0 |
-| overlap_geometry? | GeoJSON for explanatory visualization; null when proximity has no geometric intersection |
-| severity! | enum coordination_review, urgent_review; policy assumption, not predicted safety |
-| rationale_code! | deterministic rule identifier |
-| method_version!, input_hash! | strings |
+`id`, `analysis_id`, exactly two canonical distinct `project_ids`, `affected_road_ids`, `finding_type`, `priority=coordination_review`, `spatial_evidence`, `temporal_evidence`, deterministic `explanation`, `required_review`, `data_quality_warnings`, `evidence_ids`, `method_version=conflict-screen-v1`, `input_hash`, offset-aware `detected_at`, `data_kind=derived`, and transitive `synthetic_input`.
 
-data_kind=derived. `urgent_review` requires a separate sourced policy/safety flag; default is coordination_review. Findings are positive rule matches only. Indeterminate pair checks and coverage warnings live in the check/evaluation response, not as fake positive findings. References do not assert a physical underground collision.
+Types: `concurrent_work`, `reopening_risk` (potential pavement rework), `multiple_closures`, `sequencing_review`. Priority is a transparent review policy, not validated severity/safety. `affected_road_ids` is the union of both projects' declared roads and their shared screened corridor IDs; it is not a surveyed conflict footprint. Evidence references include project and affected-road sources.
+
+`spatial_evidence`: `classifications` (confirmed_geometric_overlap/shared_affected_road/proximity_based_potential_overlap/insufficient_spatial_information), nullable nonnegative computed `distance_m`, `polygon_overlap`, `geometry_intersects`, `shared_road_ids`, `shared_corridor_ids`, and `basis`. Positive polygon area is computed separately from the potential classification for approximate footprints. Missing distance is unknown, never zero. Geometry confirmation means supplied-shape overlap only. Point/line contact, shared road and centerline corridor are screening signals without depth/grade confirmation. No derived overlap geometry is persisted; map highlights the original work zones.
+
+`temporal_evidence`: project-keyed `intervals` and `interval_basis` (planned/actual), nullable `overlap_start`/`overlap_end`, nullable nonnegative `gap_days`, nullable `preceding_project_id`, and `basis`. Concurrent findings retain the positive half-open intersection; sequential findings retain the preceding project and 0–horizon gap. Original planned and actual dates remain in the source snapshot. Human review covers location/depth/grade, work scope, restoration, schedule and access. No financial-loss or safety conclusion is generated.
+
+## ConflictAnalysis (implemented M3)
+
+`id`, `dataset_snapshot_id`, `findings`, separate `indeterminate_checks` (project_ids, missing_fields, reason, spatial_evidence), `excluded_project_ids` (cancelled), `possible_pair_count`, `checked_pair_count` (indexed candidates actually examined), `utility_coverage=unknown`, `warnings`, `parameters`, `method_version`, `detected_at`, `input_snapshot`, `input_hash`, `result_hash`. One selected non-cancelled project is valid, with zero pairs and an explicit warning. Missing location checks may coexist with known shared-road findings; unknown schedules cannot create positive temporal findings. Unknown coverage does not depend on count.
+
+Parameters: finite meter-valued `proximity_m` 0–100 (default 5), `corridor_m` 0–50 (default 5), integer `reopening_horizon_days` 0–365 (default 30). Parameter keys encode units; extra or inconsistent unit fields are rejected. Bounds cap this study-area screening prototype and are not engineering standards.
+
+Snapshot freezes sorted complete projects, all roads used for corridor/reference screening, complete source contents, parameters, exchange/calculation CRS and method/library versions. Canonical M2 hash encoding applies. Analysis IDs hash inputs; finding IDs hash the input hash, sorted pair and type; semantic result hash excludes detection time. Same inputs reuse the first saved time and result; changes create distinct immutable history. Replay uses saved inputs and recorded library versions.
+
+Storage: `conflict_analyses(id,dataset_id,payload)` and `conflict_findings(id,analysis_id,payload)`, with foreign keys, analysis index and UPDATE/DELETE rejection triggers. Migration version 3 is additive. JSON is Pydantic validated on reads. No general AuditEvent/review-note lifecycle is claimed. See ARCHITECTURE for exact spatial/temporal rules and false-positive limits.
 
 ## Scenario
 
@@ -233,4 +223,4 @@ The projection carries no independently mutable assessment list. M2 now derives 
 
 `assessments(id PRIMARY KEY, road_id REFERENCES roads, assessed_on, payload)` retains history with a road/date/ID index. `repair_options(id PRIMARY KEY, dataset_id REFERENCES dataset, payload)` holds the validated catalog. `fixture_imports` freezes M2 manifest identity without changing the M1 dataset manifest. `schema_migrations` records additive version 2. `estimates(id, road_id, dataset_id, payload, low_cents, base_cents, high_cents)` enforces nonnegative ordered totals and immutable records. All JSON is validated on import/read. Referenced road and source IDs must resolve in the same dataset during seed. Startup creates schema only; the explicit CLI adds fixtures idempotently without overwriting existing records.
 
-The proposed WorkProject/UtilityWork, generic assets, scenarios, conflicts and audit-event workflows above remain unimplemented. M2 was deliberately limited to the requested maintenance/estimate slice; those entities enter when their milestone needs them.
+M3 now implements WorkProject and conflict snapshots as specified above. Generic assets, scenarios and audit-event/review-note workflows remain unimplemented. M2 estimates and original stored road payloads are preserved.

@@ -1,0 +1,693 @@
+{
+  "fixture_id": "demo-m3-v1",
+  "dataset_snapshot_id": "demo-m1-v1",
+  "evidence_id": "demo-project-assumptions-v1",
+  "synthetic_input": true,
+  "projects": [
+    {
+      "id": "demo-road-project",
+      "title": "Fictional R-001 resurfacing",
+      "description": "Entirely invented coordination example. No municipal project, utility route or actual schedule is asserted.",
+      "kind": "road_repair",
+      "infrastructure_category": "road_resurfacing",
+      "work_type": "resurfacing",
+      "responsible_organization": "Fictional CivicPlAIn demo organization",
+      "schedule_status": "planned",
+      "schedule_basis": "assumed_demo",
+      "start_date": "2027-04-01",
+      "end_date": "2027-04-08",
+      "actual_start_date": null,
+      "actual_end_date": null,
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0106,
+              40.71148
+            ],
+            [
+              -74.0094,
+              40.71148
+            ],
+            [
+              -74.0094,
+              40.71172
+            ],
+            [
+              -74.0106,
+              40.71172
+            ],
+            [
+              -74.0106,
+              40.71148
+            ]
+          ]
+        ]
+      },
+      "location_status": "approximate",
+      "road_segment_ids": [
+        "demo-r-001"
+      ],
+      "excavation_required": false,
+      "lanes_closed": 1,
+      "estimated_cost_usd": null,
+      "currency": "USD",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "evidence_ids": [
+        "demo-project-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "created_at": "2026-11-07T00:00:00Z",
+      "updated_at": "2026-11-07T00:00:00Z",
+      "limitations": [
+        "Fictional schedules and approximate authored work zones; no observed utility location, depth or positional accuracy."
+      ],
+      "field_evidence": {
+        "infrastructure_category": [
+          "demo-project-assumptions-v1"
+        ],
+        "work_type": [
+          "demo-project-assumptions-v1"
+        ],
+        "schedule_status": [
+          "demo-project-assumptions-v1"
+        ],
+        "schedule_basis": [
+          "demo-project-assumptions-v1"
+        ],
+        "location_status": [
+          "demo-project-assumptions-v1"
+        ],
+        "road_segment_ids": [
+          "demo-project-assumptions-v1"
+        ],
+        "geometry": [
+          "demo-project-assumptions-v1"
+        ],
+        "start_date": [
+          "demo-project-assumptions-v1"
+        ],
+        "end_date": [
+          "demo-project-assumptions-v1"
+        ],
+        "responsible_organization": [
+          "demo-project-assumptions-v1"
+        ],
+        "excavation_required": [
+          "demo-project-assumptions-v1"
+        ],
+        "lanes_closed": [
+          "demo-project-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {
+        "actual_start_date": "not_supplied_in_fictional_fixture",
+        "actual_end_date": "not_supplied_in_fictional_fixture",
+        "estimated_cost_usd": "not_supplied_in_fictional_fixture"
+      }
+    },
+    {
+      "id": "demo-utility-project",
+      "title": "Fictional water excavation after resurfacing",
+      "description": "Entirely invented coordination example. No municipal project, utility route or actual schedule is asserted.",
+      "kind": "utility",
+      "infrastructure_category": "water",
+      "work_type": "excavation",
+      "responsible_organization": "Fictional CivicPlAIn demo organization",
+      "schedule_status": "planned",
+      "schedule_basis": "assumed_demo",
+      "start_date": "2027-04-10",
+      "end_date": "2027-04-15",
+      "actual_start_date": null,
+      "actual_end_date": null,
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0102,
+              40.7115
+            ],
+            [
+              -74.0096,
+              40.7115
+            ],
+            [
+              -74.0096,
+              40.7117
+            ],
+            [
+              -74.0102,
+              40.7117
+            ],
+            [
+              -74.0102,
+              40.7115
+            ]
+          ]
+        ]
+      },
+      "location_status": "approximate",
+      "road_segment_ids": [
+        "demo-r-001"
+      ],
+      "excavation_required": true,
+      "lanes_closed": 1,
+      "estimated_cost_usd": null,
+      "currency": "USD",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "evidence_ids": [
+        "demo-project-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "created_at": "2026-11-07T00:00:00Z",
+      "updated_at": "2026-11-07T00:00:00Z",
+      "limitations": [
+        "Fictional schedules and approximate authored work zones; no observed utility location, depth or positional accuracy."
+      ],
+      "field_evidence": {
+        "infrastructure_category": [
+          "demo-project-assumptions-v1"
+        ],
+        "work_type": [
+          "demo-project-assumptions-v1"
+        ],
+        "schedule_status": [
+          "demo-project-assumptions-v1"
+        ],
+        "schedule_basis": [
+          "demo-project-assumptions-v1"
+        ],
+        "location_status": [
+          "demo-project-assumptions-v1"
+        ],
+        "road_segment_ids": [
+          "demo-project-assumptions-v1"
+        ],
+        "geometry": [
+          "demo-project-assumptions-v1"
+        ],
+        "start_date": [
+          "demo-project-assumptions-v1"
+        ],
+        "end_date": [
+          "demo-project-assumptions-v1"
+        ],
+        "responsible_organization": [
+          "demo-project-assumptions-v1"
+        ],
+        "excavation_required": [
+          "demo-project-assumptions-v1"
+        ],
+        "lanes_closed": [
+          "demo-project-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {
+        "actual_start_date": "not_supplied_in_fictional_fixture",
+        "actual_end_date": "not_supplied_in_fictional_fixture",
+        "estimated_cost_usd": "not_supplied_in_fictional_fixture"
+      }
+    },
+    {
+      "id": "demo-concurrent-project",
+      "title": "Fictional sewer work during resurfacing",
+      "description": "Entirely invented coordination example. No municipal project, utility route or actual schedule is asserted.",
+      "kind": "utility",
+      "infrastructure_category": "sewer",
+      "work_type": "excavation",
+      "responsible_organization": "Fictional CivicPlAIn demo organization",
+      "schedule_status": "planned",
+      "schedule_basis": "assumed_demo",
+      "start_date": "2027-04-05",
+      "end_date": "2027-04-11",
+      "actual_start_date": null,
+      "actual_end_date": null,
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0102,
+              40.7115
+            ],
+            [
+              -74.0096,
+              40.7115
+            ],
+            [
+              -74.0096,
+              40.7117
+            ],
+            [
+              -74.0102,
+              40.7117
+            ],
+            [
+              -74.0102,
+              40.7115
+            ]
+          ]
+        ]
+      },
+      "location_status": "approximate",
+      "road_segment_ids": [
+        "demo-r-001",
+        "demo-r-002"
+      ],
+      "excavation_required": true,
+      "lanes_closed": 1,
+      "estimated_cost_usd": null,
+      "currency": "USD",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "evidence_ids": [
+        "demo-project-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "created_at": "2026-11-07T00:00:00Z",
+      "updated_at": "2026-11-07T00:00:00Z",
+      "limitations": [
+        "Fictional schedules and approximate authored work zones; no observed utility location, depth or positional accuracy."
+      ],
+      "field_evidence": {
+        "infrastructure_category": [
+          "demo-project-assumptions-v1"
+        ],
+        "work_type": [
+          "demo-project-assumptions-v1"
+        ],
+        "schedule_status": [
+          "demo-project-assumptions-v1"
+        ],
+        "schedule_basis": [
+          "demo-project-assumptions-v1"
+        ],
+        "location_status": [
+          "demo-project-assumptions-v1"
+        ],
+        "road_segment_ids": [
+          "demo-project-assumptions-v1"
+        ],
+        "geometry": [
+          "demo-project-assumptions-v1"
+        ],
+        "start_date": [
+          "demo-project-assumptions-v1"
+        ],
+        "end_date": [
+          "demo-project-assumptions-v1"
+        ],
+        "responsible_organization": [
+          "demo-project-assumptions-v1"
+        ],
+        "excavation_required": [
+          "demo-project-assumptions-v1"
+        ],
+        "lanes_closed": [
+          "demo-project-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {
+        "actual_start_date": "not_supplied_in_fictional_fixture",
+        "actual_end_date": "not_supplied_in_fictional_fixture",
+        "estimated_cost_usd": "not_supplied_in_fictional_fixture"
+      }
+    },
+    {
+      "id": "demo-unrelated-project",
+      "title": "Fictional distant telecom inspection",
+      "description": "Entirely invented coordination example. No municipal project, utility route or actual schedule is asserted.",
+      "kind": "utility",
+      "infrastructure_category": "telecommunications",
+      "work_type": "inspection",
+      "responsible_organization": "Fictional CivicPlAIn demo organization",
+      "schedule_status": "planned",
+      "schedule_basis": "assumed_demo",
+      "start_date": "2027-04-02",
+      "end_date": "2027-04-06",
+      "actual_start_date": null,
+      "actual_end_date": null,
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.003,
+              40.7158
+            ],
+            [
+              -74.0026,
+              40.7158
+            ],
+            [
+              -74.0026,
+              40.716
+            ],
+            [
+              -74.003,
+              40.716
+            ],
+            [
+              -74.003,
+              40.7158
+            ]
+          ]
+        ]
+      },
+      "location_status": "approximate",
+      "road_segment_ids": [
+        "demo-r-009"
+      ],
+      "excavation_required": false,
+      "lanes_closed": 1,
+      "estimated_cost_usd": null,
+      "currency": "USD",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "evidence_ids": [
+        "demo-project-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "created_at": "2026-11-07T00:00:00Z",
+      "updated_at": "2026-11-07T00:00:00Z",
+      "limitations": [
+        "Fictional schedules and approximate authored work zones; no observed utility location, depth or positional accuracy."
+      ],
+      "field_evidence": {
+        "infrastructure_category": [
+          "demo-project-assumptions-v1"
+        ],
+        "work_type": [
+          "demo-project-assumptions-v1"
+        ],
+        "schedule_status": [
+          "demo-project-assumptions-v1"
+        ],
+        "schedule_basis": [
+          "demo-project-assumptions-v1"
+        ],
+        "location_status": [
+          "demo-project-assumptions-v1"
+        ],
+        "road_segment_ids": [
+          "demo-project-assumptions-v1"
+        ],
+        "geometry": [
+          "demo-project-assumptions-v1"
+        ],
+        "start_date": [
+          "demo-project-assumptions-v1"
+        ],
+        "end_date": [
+          "demo-project-assumptions-v1"
+        ],
+        "responsible_organization": [
+          "demo-project-assumptions-v1"
+        ],
+        "excavation_required": [
+          "demo-project-assumptions-v1"
+        ],
+        "lanes_closed": [
+          "demo-project-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {
+        "actual_start_date": "not_supplied_in_fictional_fixture",
+        "actual_end_date": "not_supplied_in_fictional_fixture",
+        "estimated_cost_usd": "not_supplied_in_fictional_fixture"
+      }
+    },
+    {
+      "id": "demo-unknown-location",
+      "title": "Fictional gas project \u2014 location unknown",
+      "description": "Entirely invented coordination example. No municipal project, utility route or actual schedule is asserted.",
+      "kind": "utility",
+      "infrastructure_category": "gas",
+      "work_type": "excavation",
+      "responsible_organization": "Fictional CivicPlAIn demo organization",
+      "schedule_status": "planned",
+      "schedule_basis": "assumed_demo",
+      "start_date": "2027-04-03",
+      "end_date": "2027-04-10",
+      "actual_start_date": null,
+      "actual_end_date": null,
+      "geometry": null,
+      "location_status": "unknown",
+      "road_segment_ids": [],
+      "excavation_required": null,
+      "lanes_closed": null,
+      "estimated_cost_usd": null,
+      "currency": "USD",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "evidence_ids": [
+        "demo-project-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "created_at": "2026-11-07T00:00:00Z",
+      "updated_at": "2026-11-07T00:00:00Z",
+      "limitations": [
+        "Fictional schedules and approximate authored work zones; no observed utility location, depth or positional accuracy."
+      ],
+      "field_evidence": {
+        "infrastructure_category": [
+          "demo-project-assumptions-v1"
+        ],
+        "work_type": [
+          "demo-project-assumptions-v1"
+        ],
+        "schedule_status": [
+          "demo-project-assumptions-v1"
+        ],
+        "schedule_basis": [
+          "demo-project-assumptions-v1"
+        ],
+        "location_status": [
+          "demo-project-assumptions-v1"
+        ],
+        "road_segment_ids": [
+          "demo-project-assumptions-v1"
+        ],
+        "start_date": [
+          "demo-project-assumptions-v1"
+        ],
+        "end_date": [
+          "demo-project-assumptions-v1"
+        ],
+        "responsible_organization": [
+          "demo-project-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {
+        "geometry": "not_supplied_in_fictional_fixture",
+        "actual_start_date": "not_supplied_in_fictional_fixture",
+        "actual_end_date": "not_supplied_in_fictional_fixture",
+        "excavation_required": "not_supplied_in_fictional_fixture",
+        "lanes_closed": "not_supplied_in_fictional_fixture",
+        "estimated_cost_usd": "not_supplied_in_fictional_fixture"
+      }
+    },
+    {
+      "id": "demo-unknown-schedule",
+      "title": "Fictional electric work \u2014 schedule unknown",
+      "description": "Entirely invented coordination example. No municipal project, utility route or actual schedule is asserted.",
+      "kind": "utility",
+      "infrastructure_category": "electric",
+      "work_type": "maintenance",
+      "responsible_organization": "Fictional CivicPlAIn demo organization",
+      "schedule_status": "unknown",
+      "schedule_basis": "unknown",
+      "start_date": null,
+      "end_date": null,
+      "actual_start_date": null,
+      "actual_end_date": null,
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0102,
+              40.7115
+            ],
+            [
+              -74.0096,
+              40.7115
+            ],
+            [
+              -74.0096,
+              40.7117
+            ],
+            [
+              -74.0102,
+              40.7117
+            ],
+            [
+              -74.0102,
+              40.7115
+            ]
+          ]
+        ]
+      },
+      "location_status": "approximate",
+      "road_segment_ids": [
+        "demo-r-001"
+      ],
+      "excavation_required": null,
+      "lanes_closed": 1,
+      "estimated_cost_usd": null,
+      "currency": "USD",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "evidence_ids": [
+        "demo-project-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "created_at": "2026-11-07T00:00:00Z",
+      "updated_at": "2026-11-07T00:00:00Z",
+      "limitations": [
+        "Fictional schedules and approximate authored work zones; no observed utility location, depth or positional accuracy."
+      ],
+      "field_evidence": {
+        "infrastructure_category": [
+          "demo-project-assumptions-v1"
+        ],
+        "work_type": [
+          "demo-project-assumptions-v1"
+        ],
+        "schedule_status": [
+          "demo-project-assumptions-v1"
+        ],
+        "schedule_basis": [
+          "demo-project-assumptions-v1"
+        ],
+        "location_status": [
+          "demo-project-assumptions-v1"
+        ],
+        "road_segment_ids": [
+          "demo-project-assumptions-v1"
+        ],
+        "geometry": [
+          "demo-project-assumptions-v1"
+        ],
+        "responsible_organization": [
+          "demo-project-assumptions-v1"
+        ],
+        "lanes_closed": [
+          "demo-project-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {
+        "start_date": "not_supplied_in_fictional_fixture",
+        "end_date": "not_supplied_in_fictional_fixture",
+        "actual_start_date": "not_supplied_in_fictional_fixture",
+        "actual_end_date": "not_supplied_in_fictional_fixture",
+        "excavation_required": "not_supplied_in_fictional_fixture",
+        "estimated_cost_usd": "not_supplied_in_fictional_fixture"
+      }
+    },
+    {
+      "id": "demo-nearby-project",
+      "title": "Fictional nearby water inspection",
+      "description": "Entirely invented coordination example. No municipal project, utility route or actual schedule is asserted.",
+      "kind": "utility",
+      "infrastructure_category": "water",
+      "work_type": "inspection",
+      "responsible_organization": "Fictional CivicPlAIn demo organization",
+      "schedule_status": "planned",
+      "schedule_basis": "assumed_demo",
+      "start_date": "2027-04-03",
+      "end_date": "2027-04-06",
+      "actual_start_date": null,
+      "actual_end_date": null,
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0102,
+              40.711735
+            ],
+            [
+              -74.0096,
+              40.711735
+            ],
+            [
+              -74.0096,
+              40.711755
+            ],
+            [
+              -74.0102,
+              40.711755
+            ],
+            [
+              -74.0102,
+              40.711735
+            ]
+          ]
+        ]
+      },
+      "location_status": "approximate",
+      "road_segment_ids": [],
+      "excavation_required": false,
+      "lanes_closed": null,
+      "estimated_cost_usd": null,
+      "currency": "USD",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "evidence_ids": [
+        "demo-project-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "created_at": "2026-11-07T00:00:00Z",
+      "updated_at": "2026-11-07T00:00:00Z",
+      "limitations": [
+        "Fictional schedules and approximate authored work zones; no observed utility location, depth or positional accuracy."
+      ],
+      "field_evidence": {
+        "infrastructure_category": [
+          "demo-project-assumptions-v1"
+        ],
+        "work_type": [
+          "demo-project-assumptions-v1"
+        ],
+        "schedule_status": [
+          "demo-project-assumptions-v1"
+        ],
+        "schedule_basis": [
+          "demo-project-assumptions-v1"
+        ],
+        "location_status": [
+          "demo-project-assumptions-v1"
+        ],
+        "road_segment_ids": [
+          "demo-project-assumptions-v1"
+        ],
+        "geometry": [
+          "demo-project-assumptions-v1"
+        ],
+        "start_date": [
+          "demo-project-assumptions-v1"
+        ],
+        "end_date": [
+          "demo-project-assumptions-v1"
+        ],
+        "responsible_organization": [
+          "demo-project-assumptions-v1"
+        ],
+        "excavation_required": [
+          "demo-project-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {
+        "actual_start_date": "not_supplied_in_fictional_fixture",
+        "actual_end_date": "not_supplied_in_fictional_fixture",
+        "lanes_closed": "not_supplied_in_fictional_fixture",
+        "estimated_cost_usd": "not_supplied_in_fictional_fixture"
+      }
+    }
+  ]
+}

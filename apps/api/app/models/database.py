@@ -36,6 +36,9 @@ def initialize(path: Path):
         for statement in M2_SCHEMA:
             conn.execute(statement)
         conn.execute("INSERT OR IGNORE INTO schema_migrations VALUES (2, 'm2-additive-v1')")
+        for statement in M3_SCHEMA:
+            conn.execute(statement)
+        conn.execute("INSERT OR IGNORE INTO schema_migrations VALUES (3, 'm3-additive-v1')")
 
 
 M2_SCHEMA = [
@@ -48,4 +51,17 @@ M2_SCHEMA = [
     "CREATE TABLE IF NOT EXISTS estimates (id TEXT PRIMARY KEY, road_id TEXT NOT NULL REFERENCES roads(id), dataset_id TEXT NOT NULL REFERENCES dataset(id), payload TEXT NOT NULL, low_cents INTEGER NOT NULL CHECK(low_cents>=0), base_cents INTEGER NOT NULL CHECK(base_cents>=low_cents), high_cents INTEGER NOT NULL CHECK(high_cents>=base_cents))",
     "CREATE TRIGGER IF NOT EXISTS estimates_no_update BEFORE UPDATE ON estimates BEGIN SELECT RAISE(ABORT, 'estimates are immutable'); END",
     "CREATE TRIGGER IF NOT EXISTS estimates_no_delete BEFORE DELETE ON estimates BEGIN SELECT RAISE(ABORT, 'estimates are immutable'); END",
+]
+
+M3_SCHEMA = [
+    "CREATE TABLE IF NOT EXISTS work_projects (id TEXT PRIMARY KEY, dataset_id TEXT NOT NULL REFERENCES dataset(id), payload TEXT NOT NULL)",
+    "CREATE TABLE IF NOT EXISTS project_roads (project_id TEXT NOT NULL REFERENCES work_projects(id), road_id TEXT NOT NULL REFERENCES roads(id), PRIMARY KEY(project_id, road_id))",
+    "CREATE INDEX IF NOT EXISTS project_roads_by_road ON project_roads(road_id, project_id)",
+    "CREATE TABLE IF NOT EXISTS conflict_analyses (id TEXT PRIMARY KEY, dataset_id TEXT NOT NULL REFERENCES dataset(id), payload TEXT NOT NULL)",
+    "CREATE TABLE IF NOT EXISTS conflict_findings (id TEXT PRIMARY KEY, analysis_id TEXT NOT NULL REFERENCES conflict_analyses(id), payload TEXT NOT NULL)",
+    "CREATE INDEX IF NOT EXISTS findings_by_analysis ON conflict_findings(analysis_id, id)",
+    "CREATE TRIGGER IF NOT EXISTS analyses_no_update BEFORE UPDATE ON conflict_analyses BEGIN SELECT RAISE(ABORT, 'analyses are immutable'); END",
+    "CREATE TRIGGER IF NOT EXISTS analyses_no_delete BEFORE DELETE ON conflict_analyses BEGIN SELECT RAISE(ABORT, 'analyses are immutable'); END",
+    "CREATE TRIGGER IF NOT EXISTS findings_no_update BEFORE UPDATE ON conflict_findings BEGIN SELECT RAISE(ABORT, 'findings are immutable'); END",
+    "CREATE TRIGGER IF NOT EXISTS findings_no_delete BEFORE DELETE ON conflict_findings BEGIN SELECT RAISE(ABORT, 'findings are immutable'); END",
 ]

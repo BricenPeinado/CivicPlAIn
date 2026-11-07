@@ -2,7 +2,7 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
-import { getEvidence, getRoad, getRoads } from './services/api';
+import { getEvidence, getRoad, getRoads, getProjects } from './services/api';
 import type { RoadsCollection } from './types/api';
 // Reuse the reviewed API fixture in tests only; production has no bundled road data.
 import { readFileSync } from 'node:fs';
@@ -18,6 +18,7 @@ const collection: RoadsCollection = { ...JSON.parse(fixture), meta: {
 } };
 beforeEach(() => {
   vi.mocked(getRoads).mockResolvedValue(collection);
+  vi.mocked(getProjects).mockResolvedValue({ data: [], meta: collection.meta });
   vi.mocked(getRoad).mockImplementation(async id => {
     const feature = collection.features.find(f => f.id === id)!;
     return { data: { ...feature.properties, geometry: feature.geometry }, meta: collection.meta };
@@ -86,4 +87,36 @@ describe('workspace', () => {
     expect(screen.getByRole('region', { name: 'Keyboard accessible road list' })).toBeInTheDocument();
     await waitFor(() => expect(getRoad).toHaveBeenCalled());
   });
+});
+
+it('loads the M3 analysis and filters findings using project selection', async () => {
+  const { projects, analysis } = await import('./features/conflicts/testData');
+  const { analyzeConflicts } = await import('./services/api');
+  vi.mocked(getProjects).mockResolvedValue({ data: projects, meta: collection.meta });
+  vi.mocked(analyzeConflicts).mockResolvedValue({ data: analysis, meta: collection.meta });
+  const user = userEvent.setup(); render(<App/>);
+  const review = await screen.findByRole('region', { name: 'Project coordination and conflict review' });
+  const finding = await within(review).findByRole('button', { name: /Potential pavement rework/ });
+  await user.click(finding);
+  expect(await within(review).findByRole('article', { name: 'Selected conflict evidence' })).toHaveTextContent('Sequential gap: 2');
+  await user.click(within(review).getByRole('button', { name: /Fictional distant telecom inspection/ }));
+  expect(within(review).getByText(/No conflicts detected in the checked records/)).toBeInTheDocument();
+  await user.click(within(review).getByRole('button', { name: 'Show all conflicts' }));
+  expect(within(review).getByRole('button', { name: /Potential pavement rework/ })).toBeInTheDocument();
+  expect(analyzeConflicts).toHaveBeenCalledWith('demo-m1-v1', projects.map(p => p.id), expect.any(AbortSignal));
+});
+
+it('keeps roads usable when project data fail and retries M3 independently', async () => {
+  vi.mocked(getProjects).mockRejectedValueOnce(new Error('Project storage unavailable'));
+  const user = userEvent.setup(); render(<App/>);
+  expect(await screen.findByRole('alert')).toHaveTextContent('Project storage unavailable');
+  expect(screen.getByRole('region', { name: 'Keyboard accessible road list' })).toBeInTheDocument();
+  await user.click(screen.getByRole('button', { name: 'Retry project analysis' }));
+  await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument());
+  expect(screen.getByText('No project records loaded. Utility coverage remains unknown.')).toBeInTheDocument();
+});
+it('rejects mismatched project snapshots before analysis', async () => {
+  vi.mocked(getProjects).mockResolvedValue({ data: [], meta: { ...collection.meta, dataset_snapshot_id: 'different' } });
+  render(<App/>);
+  expect(await screen.findByRole('alert')).toHaveTextContent('Project snapshot differs from roads');
 });

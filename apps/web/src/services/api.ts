@@ -1,4 +1,4 @@
-import { categories, type Envelope, type Evidence, type Road, type RoadsCollection, type Assessment, type OptionComparison, type Estimate, type EstimateRequest } from '../types/api';
+import { categories, type Envelope, type Evidence, type Road, type RoadsCollection, type Assessment, type OptionComparison, type Estimate, type EstimateRequest, type WorkProject, type ConflictAnalysis, type ConflictFinding, type Meta } from '../types/api';
 const base = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1').replace(/\/$/, '');
 const TIMEOUT_MS = 10000;
 async function request<T>(path: string, signal?: AbortSignal, body?: unknown): Promise<T> {
@@ -50,3 +50,27 @@ export const getAssessments = (id: string, signal?: AbortSignal) => request<Enve
 export const getRepairOptions = (id: string, signal?: AbortSignal) => request<Envelope<OptionComparison[]>>(`/road-segments/${encodeURIComponent(id)}/repair-options`, signal);
 export const createEstimate = (body: EstimateRequest, signal?: AbortSignal) => request<Envelope<Estimate>>('/estimates', signal, body);
 export const getEstimate = (id: string, signal?: AbortSignal) => request<Envelope<Estimate>>(`/estimates/${encodeURIComponent(id)}`, signal);
+
+export async function getProjects(signal?: AbortSignal): Promise<Envelope<WorkProject[]>> {
+  const records: WorkProject[] = [];
+  const seen = new Set<string>();
+  let cursor: string | null = null;
+  let first: { meta: Meta } | undefined;
+  do {
+    const page: Envelope<WorkProject[]> = await request(`/projects?limit=100${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`, signal);
+    if (!Array.isArray(page.data) || !page.meta || page.data.some(p => !p.id || !Array.isArray(p.road_segment_ids) || (p.geometry !== null && !['Polygon', 'LineString'].includes(p.geometry?.type)))) throw new Error('Unsupported project response.');
+    if (first && page.meta.dataset_snapshot_id !== first.meta.dataset_snapshot_id) throw new Error('Project snapshot changed. Reload the workspace.');
+    first = first || page;
+    records.push(...page.data);
+    cursor = page.meta.next_cursor;
+    if (cursor && seen.has(cursor)) throw new Error('Invalid project pagination.');
+    if (cursor) seen.add(cursor);
+    if (records.length > 50) throw new Error('Project dataset exceeds the 50-project analysis limit.');
+  } while (cursor);
+  if (new Set(records.map(p => p.id)).size !== records.length) throw new Error('Duplicate project IDs.');
+  return { data: records, meta: first!.meta };
+}
+export const analyzeConflicts = (dataset_snapshot_id: string, project_ids: string[], signal?: AbortSignal) =>
+  request<Envelope<ConflictAnalysis>>('/conflicts/analyze', signal, { dataset_snapshot_id, project_ids });
+export const getConflict = (id: string, signal?: AbortSignal) => request<Envelope<ConflictFinding>>(`/conflicts/${encodeURIComponent(id)}`, signal);
+export const getConflictAnalysis = (id: string, signal?: AbortSignal) => request<Envelope<ConflictAnalysis>>(`/conflict-analyses/${encodeURIComponent(id)}`, signal);
