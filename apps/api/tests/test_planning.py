@@ -231,7 +231,7 @@ def test_migration_preserves_exact_m1_payloads_and_idempotent_seed(tmp_path):
         assert manifest == conn.execute('SELECT * FROM dataset').fetchall()
         assert conn.execute('SELECT COUNT(*) FROM assessments').fetchone()[0] == 26
         assert conn.execute('PRAGMA foreign_key_check').fetchall() == []
-        assert conn.execute('SELECT * FROM schema_migrations').fetchall() == [(2, 'm2-additive-v1'), (3, 'm3-additive-v1')]
+        assert conn.execute('SELECT * FROM schema_migrations').fetchall() == [(2, 'm2-additive-v1'), (3, 'm3-additive-v1'), (4, 'm4-additive-v1')]
 
 
 def test_m2_bad_checksum_and_unresolved_references_atomic(db, tmp_path):

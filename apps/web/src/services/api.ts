@@ -1,13 +1,13 @@
 import { categories, type Envelope, type Evidence, type Road, type RoadsCollection, type Assessment, type OptionComparison, type Estimate, type EstimateRequest, type WorkProject, type ConflictAnalysis, type ConflictFinding, type Meta } from '../types/api';
 const base = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1').replace(/\/$/, '');
 const TIMEOUT_MS = 10000;
-async function request<T>(path: string, signal?: AbortSignal, body?: unknown): Promise<T> {
+async function request<T>(path: string, signal?: AbortSignal, body?: unknown, method = body ? 'POST' : 'GET'): Promise<T> {
   const timeout = AbortSignal.timeout(TIMEOUT_MS);
   try {
-    const response = await fetch(`${base}${path}`, { signal: signal ? AbortSignal.any([signal, timeout]) : timeout, ...(body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {}) });
+    const response = await fetch(`${base}${path}`, { signal: signal ? AbortSignal.any([signal, timeout]) : timeout, ...(body ? { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {}) });
     if (!response.ok) {
       let message = `API returned HTTP ${response.status}.`;
-      try { const error = await response.json(); if (typeof error.error?.message === 'string') message += ` ${error.error.message}`; } catch { /* retain HTTP status */ }
+      try { const error = await response.json(); if (typeof error.error?.message === 'string') message += ` ${error.error.message}`; if (Array.isArray(error.error?.field_errors)) message += error.error.field_errors.map((f: { path: string; reason: string }) => ` ${f.path}: ${f.reason}`).join(';'); } catch { /* retain HTTP status */ }
       throw new Error(message);
     }
     return await response.json() as T;
@@ -74,3 +74,24 @@ export const analyzeConflicts = (dataset_snapshot_id: string, project_ids: strin
   request<Envelope<ConflictAnalysis>>('/conflicts/analyze', signal, { dataset_snapshot_id, project_ids });
 export const getConflict = (id: string, signal?: AbortSignal) => request<Envelope<ConflictFinding>>(`/conflicts/${encodeURIComponent(id)}`, signal);
 export const getConflictAnalysis = (id: string, signal?: AbortSignal) => request<Envelope<ConflictAnalysis>>(`/conflict-analyses/${encodeURIComponent(id)}`, signal);
+
+import type { Scenario, ScenarioDraft, ScenarioEvaluation, ScenarioComparison } from '../types/scenarios';
+export async function getScenarios(signal?: AbortSignal): Promise<Envelope<Scenario[]>> {
+  const records: Scenario[] = []; let after = ''; let first: Envelope<Scenario[]> | undefined;
+  const seen = new Set<string>();
+  do {
+    const page = await request<Envelope<Scenario[]>>(`/scenarios?limit=100${after ? `&after=${encodeURIComponent(after)}` : ''}`, signal);
+    first = first || page; records.push(...page.data); after = page.meta.next_cursor || '';
+    if (after && seen.has(after)) throw new Error('Invalid scenario pagination.');
+    seen.add(after);
+  } while (after);
+  return { data: records, meta: first!.meta };
+}
+export const getScenario = (id: string, signal?: AbortSignal) => request<Envelope<Scenario>>(`/scenarios/${encodeURIComponent(id)}`, signal);
+export const createScenario = (body: ScenarioDraft, signal?: AbortSignal) => request<Envelope<Scenario>>('/scenarios', signal, body);
+export const updateScenario = (id: string, expected_revision: number, draft: ScenarioDraft, signal?: AbortSignal) => request<Envelope<Scenario>>(`/scenarios/${encodeURIComponent(id)}`, signal, { expected_revision, draft }, 'PATCH');
+export const evaluateScenario = (id: string, expected_revision: number, signal?: AbortSignal) => request<Envelope<ScenarioEvaluation>>(`/scenarios/${encodeURIComponent(id)}/evaluate`, signal, { expected_revision });
+export const getScenarioEvaluations = (id: string, signal?: AbortSignal) => request<Envelope<ScenarioEvaluation[]>>(`/scenarios/${encodeURIComponent(id)}/evaluations`, signal);
+export const getScenarioEvaluation = (id: string, signal?: AbortSignal) => request<Envelope<ScenarioEvaluation>>(`/scenario-evaluations/${encodeURIComponent(id)}`, signal);
+export const compareScenarios = (evaluation_ids: string[], signal?: AbortSignal) => request<Envelope<ScenarioComparison>>('/scenario-comparisons', signal, { evaluation_ids });
+export const getRepairCatalog = (signal?: AbortSignal) => request<Envelope<import('../types/api').RepairOption[]>>('/repair-options', signal);

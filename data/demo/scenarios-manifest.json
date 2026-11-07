@@ -1,0 +1,18 @@
+{
+  "id": "demo-scenarios-v1",
+  "dataset_snapshot_id": "demo-m1-v1",
+  "data_kind": "synthetic",
+  "synthetic_input": true,
+  "file": "scenarios.json",
+  "checksum_sha256": "a03492c9c139520637836ba3b72395fae590ee46a344a31b3308af8674bd768f",
+  "scenario_ids": [
+    "demo-scenario-a",
+    "demo-scenario-b",
+    "demo-scenario-c"
+  ],
+  "limitations": [
+    "Hypothetical planning inputs, not municipal plans or measured quantities.",
+    "No quantified shared mobilization, avoided restoration or savings. Utility costs excluded.",
+    "B deferral and C coordinated overlap require human review. Existing catalog prices and sensitivity reused."
+  ]
+}

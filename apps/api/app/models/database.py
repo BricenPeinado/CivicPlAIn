@@ -39,6 +39,9 @@ def initialize(path: Path):
         for statement in M3_SCHEMA:
             conn.execute(statement)
         conn.execute("INSERT OR IGNORE INTO schema_migrations VALUES (3, 'm3-additive-v1')")
+        for statement in M4_SCHEMA:
+            conn.execute(statement)
+        conn.execute("INSERT OR IGNORE INTO schema_migrations VALUES (4, 'm4-additive-v1')")
 
 
 M2_SCHEMA = [
@@ -64,4 +67,14 @@ M3_SCHEMA = [
     "CREATE TRIGGER IF NOT EXISTS analyses_no_delete BEFORE DELETE ON conflict_analyses BEGIN SELECT RAISE(ABORT, 'analyses are immutable'); END",
     "CREATE TRIGGER IF NOT EXISTS findings_no_update BEFORE UPDATE ON conflict_findings BEGIN SELECT RAISE(ABORT, 'findings are immutable'); END",
     "CREATE TRIGGER IF NOT EXISTS findings_no_delete BEFORE DELETE ON conflict_findings BEGIN SELECT RAISE(ABORT, 'findings are immutable'); END",
+]
+
+M4_SCHEMA = [
+    "CREATE TABLE IF NOT EXISTS scenarios (id TEXT PRIMARY KEY, dataset_id TEXT NOT NULL REFERENCES dataset(id), revision INTEGER NOT NULL CHECK(revision>0), payload TEXT NOT NULL)",
+    "CREATE TABLE IF NOT EXISTS scenario_actions (scenario_id TEXT NOT NULL REFERENCES scenarios(id), id TEXT NOT NULL, road_id TEXT NOT NULL REFERENCES roads(id), option_id TEXT REFERENCES repair_options(id), payload TEXT NOT NULL, PRIMARY KEY(scenario_id,id))",
+    "CREATE TABLE IF NOT EXISTS scenario_projects (scenario_id TEXT NOT NULL REFERENCES scenarios(id), project_id TEXT NOT NULL REFERENCES work_projects(id), PRIMARY KEY(scenario_id, project_id))",
+    "CREATE TABLE IF NOT EXISTS scenario_evaluations (id TEXT PRIMARY KEY, scenario_id TEXT NOT NULL REFERENCES scenarios(id), revision INTEGER NOT NULL, payload TEXT NOT NULL)",
+    "CREATE INDEX IF NOT EXISTS evaluations_by_scenario ON scenario_evaluations(scenario_id,revision)",
+    "CREATE TRIGGER IF NOT EXISTS evaluations_no_update BEFORE UPDATE ON scenario_evaluations BEGIN SELECT RAISE(ABORT, 'evaluations are immutable'); END",
+    "CREATE TRIGGER IF NOT EXISTS evaluations_no_delete BEFORE DELETE ON scenario_evaluations BEGIN SELECT RAISE(ABORT, 'evaluations are immutable'); END",
 ]

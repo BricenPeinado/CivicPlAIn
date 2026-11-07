@@ -61,18 +61,7 @@ def calculate(road: Road, assessment: Assessment | None, option: RepairOption,
         quantity = dimensions['length_m'] * dimensions['width_m']
         if quantity <= 0:
             raise MissingInputs('repairable area must be positive')
-        scenarios = {}
-        for name in ('low', 'base', 'high'):
-            rate = getattr(option.unit_rates_usd, name)
-            items = [LineItem(label='Bundled roadwork: materials + labor + equipment', quantity=quantity,
-                unit='m2', unit_rate_usd=str(rate), amount_usd=money(quantity * rate), evidence_ids=option.evidence_ids)]
-            for label, value in [('Mobilization', option.mobilization_usd), ('Traffic management allowance', option.traffic_management_usd)]:
-                items.append(LineItem(label=label, quantity=Decimal(1), unit='allowance', unit_rate_usd=str(value),
-                    amount_usd=money(value), evidence_ids=option.evidence_ids))
-            subtotal = sum((Decimal(item.amount_usd) for item in items), Decimal(0))
-            contingency = Decimal(money(subtotal * option.contingency_fraction))
-            scenarios[name] = CostScenario(line_items=items, subtotal_usd=money(subtotal),
-                contingency_fraction=option.contingency_fraction, contingency_usd=money(contingency), total_usd=money(subtotal + contingency))
+        scenarios = cost_scenarios(quantity, option)
         return Calculation(road_segment_id=road.id, repair_option_id=option.id, repair_category=option.treatment,
             quantity=quantity, dimension_provenance=provenance, scenarios=scenarios, duration=duration(quantity, option),
             suitability=suitability(road, assessment, option),
@@ -85,3 +74,24 @@ def calculate(road: Road, assessment: Assessment | None, option: RepairOption,
                 *option.exclusions, *option.limitations],
             evidence_ids=sorted(set(road.evidence_ids + option.evidence_ids + (assessment.evidence_ids if assessment else []) +
                 (['user-planning-assumption'] if assumptions else []))))
+
+
+def cost_scenarios(quantity: Decimal, option: RepairOption):
+    """Single M2/M4 cost assembly; uncertainty changes bundled rates only."""
+    if not quantity.is_finite() or quantity <= 0 or quantity > 10000000:
+        raise ValueError("quantity must be positive, finite and at most 10,000,000 m2")
+    with localcontext() as ctx:
+        ctx.prec = 40
+        scenarios = {}
+        for name in ('low', 'base', 'high'):
+            rate = getattr(option.unit_rates_usd, name)
+            items = [LineItem(label='Bundled roadwork: materials + labor + equipment', quantity=quantity,
+                unit='m2', unit_rate_usd=str(rate), amount_usd=money(quantity * rate), evidence_ids=option.evidence_ids)]
+            for label, value in [('Mobilization', option.mobilization_usd), ('Traffic management allowance', option.traffic_management_usd)]:
+                items.append(LineItem(label=label, quantity=Decimal(1), unit='allowance', unit_rate_usd=str(value),
+                    amount_usd=money(value), evidence_ids=option.evidence_ids))
+            subtotal = sum((Decimal(item.amount_usd) for item in items), Decimal(0))
+            contingency = Decimal(money(subtotal * option.contingency_fraction))
+            scenarios[name] = CostScenario(line_items=items, subtotal_usd=money(subtotal),
+                contingency_fraction=option.contingency_fraction, contingency_usd=money(contingency), total_usd=money(subtotal + contingency))
+        return scenarios

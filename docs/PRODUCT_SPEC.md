@@ -1,6 +1,6 @@
 # CivicPlAIn product specification
 
-Status: M2 implements local map/list selection, synthetic maintenance attributes and assessment history, three repair categories, deterministic cost/preliminary-duration estimates, immutable snapshots and comparison/breakdown panels. M3 additionally implements persisted fictional work projects, deterministic spatial/temporal conflict screening, source snapshots and map/review panels. Scenarios and generative explanations remain unimplemented.
+Status: M2 implements local map/list selection, synthetic maintenance attributes and assessment history, three repair categories, deterministic cost/preliminary-duration estimates, immutable snapshots and comparison/breakdown panels. M3 additionally implements persisted fictional work projects, deterministic spatial/temporal conflict screening, source snapshots and map/review panels. M4 adds hypothetical scenario editing, immutable evaluation and budget/tradeoff comparison. Generative explanations and review-note submission remain unimplemented.
 
 ## Users and problem
 
@@ -16,7 +16,7 @@ Use the Lower Manhattan window and bounded segment selection defined in [DATA_SO
 2. Select a segment; inspect assets, latest usable condition assessment, and planned work. Unknown condition is visible.
 3. Choose a repair option and inspect dimensions, unit rates, duration, lifespan, uncertainty bounds, and exclusions.
 4. Review overlapping work and near-term reopening risks with spatial and date evidence. Distinguish known findings from incomplete utility coverage.
-5. Compare manually defined immediate, coordinated, and staged scenarios under an explicit roadwork budget.
+5. Compare manually defined before-utility, after-utility, and explicitly coordinated scenarios under an explicit roadwork budget.
 6. Inspect assumptions and a deterministic explanation, optionally request an AI explanation, and record human review. No project approval or spending action exists.
 
 ## User stories and screens
