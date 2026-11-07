@@ -1,90 +1,64 @@
 # Hackathon demo plan
 
-Status: M1–M3 map, asset/estimate inspection and fictional project/conflict review are implemented. The three-scenario comparison, generative explanation/review-note controls and full M6 presentation below remain future work. Use the implemented M3 walkthrough at the end of this document; the earlier M4/M6 narrative is illustrative. The current M1 snapshot is demo-m1-v1; demo-v1 below remains the proposed full-workflow snapshot. Numeric examples are **synthetic assumptions**, not NYC measurements, bids, planned projects, or verified savings.
+Status: M1–M3 map, estimates and fictional project/conflict review are implemented. M3.5 reconciles the proposed M4 narrative with those working contracts; no scenarios/evaluations, scenario UI, generative explanations or review-note submission are implemented. Current dataset snapshot is `demo-m1-v1`, with separate immutable M2/M3 import manifests. There is no imported `demo-v1` full-workflow dataset. Every current geometry, dimension, condition, schedule and price is synthetic, not a municipal observation.
 
-## Narrative and screens
+## Implemented demonstration and authoritative arithmetic
 
-A municipal planner opens the bounded Lower Manhattan map and selects **Demo segment R-001**. Its assumed condition rating is 3 on a synthetic 1–10 higher-is-better scale; no real pavement observation or safety judgment is asserted. The repair panel shows why the cost estimate depends on an assumed 100 m length and 8 m width. A utility-work overlay makes the coordination risk visible before the planner commits to a scenario.
+Use the M3 walkthrough below for the current application. Select schematic R-001; its three assessment records include the latest synthetic 3/10 rating dated 2026-10-01, not an inspection. Its 100 m × 8 m dimensions are authored rectangular planning scope, not measurements from the map. Utility coverage remains unknown.
 
-Use one map page with asset/condition, repair estimate, conflict evidence, scenario comparison, and explanation/review panels. Show fixture/version and coverage badges from the opening frame. An equivalent road list supports keyboard use and tile-failure fallback.
+Current supported methods are `demo-preventive`, `demo-resurface`, and `demo-reconstruct`. The source of truth is `data/demo/maintenance.json`, its immutable manifest and `repair-estimate-v1`. Rates have not been changed to match a narrative.
 
-The planner first inspects a deliberately overlapping schedule, then compares immediate repair, coordinated resurfacing, and a temporary patch followed by resurfacing. The final view explains the hypothetical advantage of coordination and the unresolved safety/utility questions. The presenter records a review note; there is no approval button.
+| R-001 option (800 m²) | Low / base / high USD | Preliminary duration | Demo suitability |
+| --- | --- | --- | --- |
+| Preventive maintenance | 7,008 / 8,160 / 9,888 | 1 active + 1 setup + 0 curing = 2 days | not_indicated |
+| Resurfacing or rehabilitation | 44,760 / 53,400 / 66,360 | 2 active + 2 setup + 1 curing = 5 days | not_indicated |
+| Full-depth reconstruction | 144,500 / 172,500 / 214,500 | 4 active + 3 setup + 3 curing = 10 days | candidate_requires_review |
 
-## Required frozen data
+Every alternative requires qualified engineering review. For resurfacing, base roadwork is 800 × $45 = $36,000; mobilization $6,000 and traffic allowance $2,500 give $44,500 subtotal; 20% contingency is $8,900, yielding $53,400. Low bundled rate $36 gives $44,760 total; high bundled rate $58.50 gives $66,360. Fixed allowances are unchanged. Each line and contingency round to cents using ROUND_HALF_UP. Do not multiply the complete total by 0.8 or 1.3. Productivity is 600 m²/active_workday, hence ceil(800/600)=2 active workdays. Five preliminary days do not establish a completion date or five calendar/work-calendar days.
 
-- 20–30 labeled segments if feasible, maximum 30, within `lower-manhattan-window-v1`; exact selection and any shortfall in the manifest.
-- Road/asset records and synthetic condition assessments, including a missing assessment case.
-- `demo-r-001`, `demo-road-project`, `demo-utility-project`, utility subtype record, and at least one utility record with missing geometry or dates for the unknown-data path.
-- `demo-resurface`, `demo-restoration`, and `demo-patch` options with explicit rate, mobilization, contingency, duration, lifespan bounds, and scope evidence.
-- Three Scenario records, positive conflict expectations, an indeterminate case, and expected estimates/evaluations derived from the assumptions below.
-- EvidenceSource records including `demo-assumptions-v1`; a `demo-v1` manifest with checksums, study bbox, provenance and synthetic flags. These identifiers are illustrative reserved fixture IDs, not existing records.
+Current options carry no lifespan values. Show unknown lifespan, never the old narrative's 10-year resurfacing or half-year patch assumptions. The previously illustrative $120,000 resurfacing, $48,000 repeat restoration and $19,200 patch, their scenario totals and claimed $48,000 difference are retired; none is an accepted M4 fixture, source or expected output.
 
-All below use local civil dates in 2027, half-open intervals, and calendar days. Common planning horizon is `[2027-04-01, 2027-05-01)`. The assumed utility project is `[2027-04-10, 2027-04-15)`, with a footprint within the proposed 5 m tolerance of the road repair. There is no real utility location, project, owner, permit or confirmed schedule behind this example.
+## Proposed M4 narrative and source gate (not implemented)
 
-## Key interactions and conflict evidence
+Compare manually proposed immediate, coordinated and staged actions using DATA_MODEL's `scenario-v1`/`scenario-action-v1`. All use the same frozen source contents, price basis, horizon and `roadwork_only` scope. Utility construction, monetized delay, design fees and other catalog exclusions remain outside this scope. No utility subtype record is needed: M3 utility fields are part of WorkProject.
 
-1. Select R-001 and open assumptions/provenance; show unknown real utility coverage.
-2. Request a resurfacing estimate and expand the itemized calculation.
-3. Inspect a separate illustrative road schedule `[2027-04-12, 2027-04-19)` against the utility interval. The deterministic concurrent finding is `[2027-04-12, 2027-04-15)`.
-4. Switch to immediate repair `[2027-04-01, 2027-04-08)`. Utility start is 2 days after repair end, inside the assumed 30-day reopening horizon. Explain that this is a potential reopening risk, not proof the pavement will be cut.
-5. Compare the three alternatives below, then change the budget to show a boundary. Explain both central and upper-bound affordability.
-6. Open explanation facts, toggle optional AI if available, show evidence and mandatory caveats, then record a non-approving human review note.
+For future acceptance examples, an explicitly hypothetical budget of **$60,000** would distinguish the known resurfacing base ($53,400, within) from its upper bound ($66,360, over). This is a test assumption, not a stored municipal budget. It does not make resurfacing suitable for R-001's poor-condition case or establish safe deferral. Record the budget assumption in a future reviewed scenario fixture; no such fixture is imported now.
 
-## Reproducible synthetic arithmetic
-
-Cost scope is **roadwork only**; utility construction costs are excluded equally from all alternatives. No monetized traffic delay, injuries, inflation, financing, or underground project cost is modeled. Mobilization and contingency are explicit roadwork assumptions, not market rates.
-
-| Action | Assumed quantity and cost | Calendar duration / one closed lane |
+| Proposed alternative | Available M2 component | Complete cost / scheduling status |
 | --- | --- | --- |
-| Full resurfacing | 100 m × 8 m = 800 m²; 800 × $100/m² + $20,000 mobilization = $100,000; 20% contingency → **$120,000** | 7 days |
-| Repeat restoration after utility work | 200 m² × $100/m² + $20,000 mobilization = $40,000; 20% contingency → **$48,000** | 3 days |
-| Temporary patch | 60 m² × $100/m² + $10,000 mobilization = $16,000; 20% contingency → **$19,200** | 2 days |
+| Immediate resurfacing plus explicit repeat restoration | resurfacing low/base/high 44,760 / 53,400 / 66,360 USD | total and affordability indeterminate: restoration scope/method/price missing |
+| Coordinated resurfacing after supplied utility interval | same resurfacing low/base/high | price available; any proposed dates/closures require explicit independent assumptions; deferral review mandatory |
+| Temporary patch followed by coordinated resurfacing | same resurfacing low/base/high | total and affordability indeterminate: patch scope/method/price missing |
 
-Each action has synthetic lower/upper sensitivity multipliers **0.8 / 1.3** of its central total. They are not calibrated confidence intervals. Assumed full resurfacing lifespan is central 10 years with range 8–12; patch lifespan is central 0.5 years with range 0.25–1. Restoration lifespan is unknown. These do not establish engineering suitability. Present per-action lifespan, never sum years across actions.
+These are planned comparison rows, not calculated scenarios. Do not add restoration merely because M3 reports reopening risk. An explicit justification and quantity/source are required. Partial/trench area must be supplied or derived from sourced dimensions; never infer it from a line intersection. A cheaper partial component is not a complete scenario price. No savings/delta is available when either complete total is unknown.
 
-All alternatives share a **$150,000 roadwork budget** and the same snapshot/horizon/cost scope:
+Patch/restoration methods are optional future M4 catalog extensions, not aliases for existing options. Each needs reviewed scope/material/bundled rate, USD price basis, inclusions/exclusions, mobilization/traffic allowances, contingency, productivity/unit, setup/curing, sensitivity derivation, applicability and conflict-work-type mapping. Synthetic sources must explicitly identify invented assumptions with immutable checksums and versions. Lifespan stays unknown unless a separately sourced, labeled range is introduced; no verified-performance claim. M3.5 adds no method, rate, quantity or lifespan fixture. M4 can first implement honest unavailable/indeterminate rows; a fully priced three-alternative narrative needs these sources.
 
-| Scenario | Roadwork actions | Central cost (lower–upper) | Budget central / upper | Elapsed / lane-closure-days |
-| --- | --- | --- | --- | --- |
-| Immediate repair, assumed repeat restoration | Resurface Apr 1–8; restoration Apr 15–18 | **$168,000** ($134,400–$218,400) | over / over | 17 / 10 |
-| Coordinate after utility | Resurface Apr 15–22 | **$120,000** ($96,000–$156,000) | within / over | 7 / 7 |
-| Temporary patch, then coordinate | Patch Apr 1–3; resurface Apr 15–22 | **$139,200** ($111,360–$180,960) | within / over | 21 / 9 |
+## Schedule and conflict rehearsal contract
 
-Elapsed days include gaps within each scenario's first/last action, not days from planning-horizon start. Lane-closure-days sum action duration × closed lanes; utility closure days are excluded consistently, and the proxy is not measured traffic delay. Temporary patch may itself be disturbed by utility work; the scenario assumes no separately priced patch restoration, and this limitation must be visible.
+The existing fictional road project is `[2027-04-01,2027-04-08)` and utility work `[2027-04-10,2027-04-15)`, with a two-calendar-day gap. Those are authored M3 fixture dates independent of the five-day M2 estimate. A future coordinated action might explicitly propose `[2027-04-15,2027-04-22)` inside `[2027-04-01,2027-05-01)`; that is a new scheduling assumption, not a conversion or automatic recommendation. Date adjacency has no overlap. Calendars, setup/curing closure treatment and closed lanes must be stated. Missing dates/closures yield null schedule metrics and incomplete checks, not zero disruption.
 
-The $48,000 central difference between immediate and coordinated scenarios exists only because the immediate scenario explicitly assumes a 200 m² repeat-restoration action. A rule match alone cannot establish that cost or guaranteed savings. Both later-repair alternatives require an unresolved field/safety review of the deferral. The temporary patch is illustrative, not an engineer-approved mitigation.
+Future evaluation uses the internal hypothetical adapter in ARCHITECTURE. Explicitly replace the selected original road project when modeling its alternative; related_project_ids alone does not remove it. Preserve original snapshots and replacement reasons. The utility fixture remains an external project. Proposals and their findings never become persistent municipal work projects or enter M3's saved existing-project finding history. Findings involving proposed actions must say hypothetical; all current external projects remain fictional too. The adapter reuses the unchanged M3 engine and retains its limitations.
 
-## Explanation and responsible-AI moment
+Default mobilization is separate per action. A proposed shared group needs explicit allowance, allocations, sources and replaced lines; overlapping dates do not imply a discount or fewer setup days. No calendar optimization, automatic project mutation, traffic-delay model or safe-deferral conclusion is part of this plan.
 
-The evidence panel shows the date gap, proximity rule, rate/quantity assumptions, excluded costs, source IDs, and unknown utility coverage. Deterministic text can say: “Under these synthetic roadwork assumptions, the coordinated scenario has a lower central cost. Its upper estimate exceeds the budget. Confirm utility scope and review the safety of delaying resurfacing.”
+## Future explanation and failure rehearsal (M5/M6)
 
-Optional AI selects approved evidence-backed explanation templates; the displayed numbers/dates still come from deterministic facts. The presenter states that AI does not calculate costs, identify buried infrastructure from nothing, or approve a city decision. No-key mode must deliver the same useful factual explanation.
+Show sources, action quantities, missing methods, supplied schedules, price basis, exclusions, hypothetical context and unknown utilities before any explanatory prose. A future deterministic summary may report the known resurfacing component and indeterminate total; it cannot claim the coordinated scenario saves money while restoration/patch costs are missing. Optional AI only selects supported evidence-backed templates; the server renders facts. No-key mode must remain useful. Review notes never approve work.
 
-## Failure fallback and rehearsal
+Use the local background-only map and keyboard list; no remote tiles are required. API failure remains a visible retry state, not a switch to fabricated live records. Missing utility information remains an incomplete check; missing rates remain unavailable costs; provider outage later uses the deterministic fallback.
 
-- Data/network unavailable: use reviewed frozen local fixtures, show offline and synthetic labels; no fabricated live update.
-- Basemap unavailable: render local GeoJSON on a plain MapLibre style and use the segment list. Do not depend on online tiles for the core story.
-- Provider absent/timeout/invalid output: show deterministic summary with mode and fallback reason.
-- Missing utility information: show an indeterminate check and the need to contact the utility coordinator, retaining any known findings.
-- Missing cost: show unknown total/indeterminate budget status, not a zero-cost option.
+## M6 full-workflow checklist (not yet verified)
 
-## Demo verification checklist (M6, currently unchecked)
-
-- [ ] Fresh documented setup and fixture import work; versions and checksums recorded.
-- [ ] Study bbox, segment count, geometry labels and source statuses match manifest.
-- [ ] Estimate subtotal/contingency/bounds reconcile to the arithmetic above.
-- [ ] Concurrent and reopening examples show correct date boundaries and evidence.
-- [ ] Three scenarios use identical cost scope, snapshot and planning horizon.
-- [ ] Central and upper-budget statuses, elapsed days and closure-day proxy reconcile.
-- [ ] Deferral safety warning and unknown utility coverage stay visible in all relevant panels.
-- [ ] No-key, missing-input and tile-failure flows work; provider failure is demonstrated with a mock if needed.
-- [ ] Keyboard/list flow and non-color warning indicators are checked.
-- [ ] Explanation/review logs contain evidence references and no secrets; no approval is claimed.
-- [ ] Rehearsal completes within the allotted presentation time (TBD from hackathon rules); actual timing and remaining limitations recorded.
-
-## M2 implementation boundary
-
-M2 now implements road/assessment inspection and repair estimates using the separately reviewed `data/demo/maintenance.json` catalog. The scenario arithmetic and future utility work in this document remain illustrative M3/M4/M6 targets; their prices, durations and quantities are not the current M2 catalog. Do not present those narrative scenarios as implemented screens or saved estimates. See M2_IMPLEMENTATION for the verified local workflow.
+- [ ] Fresh setup, checksums, exact source versions and hypothetical fixture assumptions recorded.
+- [ ] Map/assessment/estimate/conflict journey matches implemented fixtures and arithmetic above.
+- [ ] Three scenarios preserve common source contents, horizon, cost scope and price/method basis.
+- [ ] Unpriced scopes return indeterminate totals and qualified budget status, with no invented savings.
+- [ ] Supplied calendar/closure intervals, optional calendars and mobilization assumptions remain inspectable.
+- [ ] Adapter retains originals, explicit replacements, pair evidence, hypothetical labels and unknown coverage.
+- [ ] Deferral review, no-key/provider failure, incomplete-data and keyboard/non-color paths are demonstrated.
+- [ ] Optional explanations/review events are implemented and verified before presenting them as working.
+- [ ] Rehearsal timing and remaining municipal-use limits are recorded; presentation time remains TBD.
 
 ## Implemented M3 walkthrough
 
@@ -100,6 +74,6 @@ All M3 project records, organizations, polygons, closure declarations and dates 
 6. Toggle **Show project work zones** and individual category checkboxes; confirm only geometry display changes. Select roads with the existing map/list to filter findings by declared/screened related assets. Thick outlines and selected text supplement color. Use **Show all conflicts** to clear the filter.
 7. Select **Fictional distant telecom inspection** (`demo-unrelated-project`). It has zero positive findings and a qualified utility-coverage warning; its pairing with the unknown-location gas project remains indeterminate. This is not clearance.
 8. Select the gas project with **location unknown** and the electric project with **schedule unknown**. Missing geometry stays off the map and in the list; incomplete checks and reasons remain visible. Expand the analysis source/method disclosure to inspect source contents, parameters and hashes.
-9. Select R-001 and **Compare Repair Options** to demonstrate M2 still works: resurfacing base **$53,400**, low **$44,760**, high **$66,360**, five preliminary days. These are the M2 catalog assumptions, not the earlier M4 narrative's $120,000 resurfacing scenario. Do not switch price bases or present scenarios/AI/review-note submission as implemented.
+9. Select R-001 and **Compare Repair Options** to demonstrate M2 still works: resurfacing base **$53,400**, low **$44,760**, high **$66,360**, five preliminary days. These authoritative M2 values also anchor the proposed M4 comparison; patch/restoration totals remain unavailable. Do not switch price bases or present scenarios/AI/review-note submission as implemented.
 
 M3 tests/manual reasoning cover exact meter thresholds (projection roundoff epsilon only), 0/30/31-day sequential boundaries, adjacent intervals, shared roads/corridors, polygon overlap, nearby separation, invalid geometry, completed/cancelled records, missing information, replay and duplicate prevention. M3_IMPLEMENTATION records actual test/build/browser results. The unchecked M6 full-workflow checklist above remains future work.

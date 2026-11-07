@@ -2,7 +2,7 @@
 
 BUHACKS 2026 — local municipal infrastructure decision-support prototype.
 
-Milestones 1, 2 and 3 are implemented: React/TypeScript/Vite, Tailwind CSS, a selectable MapLibre map, FastAPI, and SQLite-backed synthetic roads. The map, road list, detail panel, provenance, and summary counts all use the same API dataset. M2 adds read-only assessment history, three repair alternatives, deterministic Decimal cost/duration calculations, immutable saved estimates, and comparison/detail panels. M3 adds persisted fictional work projects, projected spatial/temporal screening, immutable conflict snapshots and map/review panels. Forecasting, optimization, scenarios and AI remain unimplemented. See [M3 implementation and verification](docs/M3_IMPLEMENTATION.md). See [M2 implementation and verification](docs/M2_IMPLEMENTATION.md) and the historical [M1 report](docs/M1_IMPLEMENTATION.md).
+Milestones 1, 2 and 3 are implemented: React/TypeScript/Vite, Tailwind CSS, a selectable MapLibre map, FastAPI, and SQLite-backed synthetic roads. The map, road list, detail panel, provenance, and summary counts all use the same API dataset. M2 adds read-only assessment history, three repair alternatives, deterministic Decimal cost/duration calculations, immutable saved estimates, and comparison/detail panels. M3 adds persisted fictional work projects, projected spatial/temporal screening, immutable conflict snapshots and map/review panels. M3.5 fixes frontend dependency portability and documents versioned proposed-action, scheduling and hypothetical-screening contracts. Forecasting, optimization, scenarios and AI remain unimplemented. See [M3.5 compatibility verification](docs/M3_5_COMPATIBILITY.md). See [M3 implementation and verification](docs/M3_IMPLEMENTATION.md). See [M2 implementation and verification](docs/M2_IMPLEMENTATION.md) and the historical [M1 report](docs/M1_IMPLEMENTATION.md).
 
 **DEMO DATA:** the 24 road segments are an authored schematic inside the chosen Lower Manhattan study window, not actual streets or municipal condition observations. There are six good, six fair, six poor, and six unknown demo conditions. M2 explicitly adds synthetic planning dimensions and dated synthetic assessments to four roads, plus an incomplete fifth asset. These dimensions are authored rectangular scopes, not measurements from geometry. Other dimensions, lane counts and utility information remain unknown. This application cannot establish excavation safety or authorize work.
 
@@ -19,7 +19,7 @@ npm ci --prefix apps/web
 PYTHONPATH=apps/api .venv/bin/python -m app.seed
 ```
 
-Python's complete resolved dependency set is pinned in `apps/api/requirements.txt`; direct dependency ranges are recorded in `requirements.in`. JavaScript dependencies use exact versions and `package-lock.json`. No global installs, external database, map-provider key, or OpenAI key are required.
+Python's complete resolved dependency set is pinned in `apps/api/requirements.txt`; direct dependency ranges are recorded in `requirements.in`. JavaScript dependencies use exact versions and `package-lock.json`, including project-local `@types/node` 22.20.5 with explicit Node typing for the test/configuration imports. No parent-directory type installation is required. No global installs, external database, map-provider key, or OpenAI key are required.
 
 ## Start and stop
 
@@ -141,6 +141,7 @@ M2 extends the existing repository with related maintenance attributes, normaliz
 - [Responsible AI](docs/RESPONSIBLE_AI.md)
 - [Data sources and study area](docs/DATA_SOURCES.md)
 - [Demo plan](docs/DEMO_PLAN.md)
+- [M3.5 compatibility verification](docs/M3_5_COMPATIBILITY.md)
 - [Historical foundation inspection](docs/FOUNDATION_INSPECTION.md)
 - [M1 implementation and verification](docs/M1_IMPLEMENTATION.md)
 - [M2 implementation and verification](docs/M2_IMPLEMENTATION.md)
@@ -177,3 +178,9 @@ The default fictional dataset yields **8 findings and 10 incomplete pair checks*
 Analysis uses valid GeoJSON in EPSG:4326, longitude/latitude, transformed by pinned pyproj to EPSG:32618 meters. STRtree narrows distance/corridor candidates; shared road references and unknown footprints are handled explicitly. Defaults: 5 m footprint proximity, 5 m centerline corridor tolerance, and a 30-calendar-day sequencing review window. These are screening assumptions, not positional accuracy. Civil-date intervals are half-open `[start, end)` in America/New_York; adjacent intervals do not overlap. Invalid topology and reversed intervals are rejected without geometry repair. Work zones must lie inside the bounded study window. See [method and limitations](docs/ARCHITECTURE.md).
 
 Fixtures: `data/demo/projects.json` and `projects-manifest.json`; reproduce with `python3 scripts/create_m3_fixture.py`. Additive schema version 3 stores projects, project-road links, analyses and findings; estimate immutability and original road payloads are retained. Identical input snapshots reuse the original analysis/findings and detection timestamp. Changed source contents or parameters produce a distinct snapshot. General project editing/import, observed municipal adapters and full review audit-event workflows remain future work. M4 is the next milestone and has not started.
+
+## M3.5 compatibility and M4 preparation
+
+The existing three-method M2 catalog remains authoritative: R-001 resurfacing is low/base/high $44,760/$53,400/$66,360 and five preliminary days. Patch/restoration methods and lifespans are unavailable; the former demo's alternative prices are retired. No rates, fixture payloads, database records or calculation versions were changed.
+
+DATA_MODEL now defines proposed `scenario-action-v1` scope/quantity/provenance, supplied calendar assumptions, closure intervals and explicit mobilization groups. ARCHITECTURE defines a future hypothetical adapter that reuses the M3 engine with immutable proposal snapshots and explicit project overrides, without saving proposals as work projects. API_SPEC marks all scenario transport as proposed. These are documentation contracts; there are no new runtime scenario schemas, routes, migrations, evaluation services or screens. M4 remains the next separately authorized milestone. See M3_5_COMPATIBILITY for isolated-install regression evidence and source requirements for the complete future demo.

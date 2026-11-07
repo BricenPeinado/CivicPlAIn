@@ -38,7 +38,7 @@ These may be panels on one page; separate routed pages are not required.
 - FR2: Compute repair costs and preliminary active/setup/curing durations (calendar scheduling remains future work) from validated quantities and explicit assumptions; include maintenance lifespan assumptions when available.
 - FR3: Detect spatial proximity plus temporal overlap and near-term reopening risk using the versioned rules in ARCHITECTURE. Potential utility work is explicitly qualified.
 - FR4: Evaluate at least three manually defined scenarios using the same snapshot, roadwork cost scope, and planning horizon. Never call enumeration a global optimum.
-- FR5: Compare central and upper cost bounds with a nonnegative budget. Incomplete cost or safety inputs produce an indeterminate result rather than an affordable/safe badge.
+- FR5: Compare central and upper cost bounds with a nonnegative budget. Incomplete cost produces indeterminate affordability. Safety and deferral remain a separate mandatory review requirement regardless of price; an affordable result is never a safe-work badge.
 - FR6: Present deterministic evidence summaries without AI; optional AI prose cites only validated facts and preserves unknowns.
 - FR7: Retain input provenance, synthetic/observed/derived distinctions, immutable evaluation snapshots, method versions, and review events.
 - FR8: Preserve coverage warnings even when zero conflicts are found; capture reviewer notes without authorizing work.
