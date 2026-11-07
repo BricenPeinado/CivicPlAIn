@@ -1,6 +1,6 @@
 # Responsible AI and municipal-use limits
 
-Status: requirements for all implementation milestones, not a claim of completed controls or validated safety.
+Status: requirements apply to all milestones. M6 local test evidence is recorded in [FINAL_QA_REPORT](FINAL_QA_REPORT.md); completion is not validated engineering safety.
 
 ## Human accountability
 
@@ -69,7 +69,7 @@ Project location_status explicitly distinguishes source_reported, approximate an
 
 The UI labels the seven fictional demo projects, their category/status, approximate or unknown location, incomplete schedules, source data, relevant dates/roads, method/tolerances and required review. A dashed project outline, thick selected outline, textual category labels, warning symbols and selected text accompany color. Keyboard project/road lists remain usable without a map. Hiding layers does not remove findings or incomplete checks. Positive findings can coexist with missing-data warnings. Qualified zero-result wording and unknown utility coverage remain visible for unrelated projects and empty data.
 
-Saved analyses freeze complete inputs, source contents, parameters and library versions; input/result hashes and stable finding IDs support reproducibility. Same input returns the first saved result/time; changed inputs produce distinct history. Append-only SQLite triggers are application controls, not tamper-proof audit infrastructure. General review-note/AuditEvent workflows, observed ingestion, coverage verification and M5 provider controls remain unimplemented.
+Saved analyses freeze complete inputs, source contents, parameters and library versions; input/result hashes and stable finding IDs support reproducibility. Same input returns the first saved result/time; changed inputs produce distinct history. Append-only SQLite triggers are application controls, not tamper-proof audit infrastructure. At the historical M3 boundary these were deferred. M5 now implements scoped provider/interaction/review controls below; general audit streams, observed ingestion and coverage verification remain unsupported.
 
 The only demonstrated project/utility records are fictional. No private utility maps, permits, precise observed underground locations, personal contacts or external municipal data were imported. Broad shared-road/corridor screens require review of actual work scope, traffic/access and accessibility implications. A potential rework finding cannot establish that delaying a needed repair is safe. M3 itself did not add scenario planning or generative AI; M4 controls are recorded below.
 
@@ -91,7 +91,7 @@ Budget labels apply only to the declared roadwork actions and catalog exclusions
 
 Comparison may identify dominance only for its named numeric objectives under matching scope, assumptions, budgets and complete inputs/checks. It cannot select a universally best or safest plan, validate physical harm, approve projects or spending, or alter calendars. A coordinated label does not suppress concurrent-work or closure findings. The demo's after-utility option still carries a sequencing-review finding. Numerical feasibility and safety review remain independent.
 
-M4 adds no model calls, provider keys, prompts or AI explanation endpoint. Deterministic computed tradeoff sentences only restate saved metrics. The optional model/claim-validation/audit-review work remains unimplemented M5 scope.
+M4 adds no model calls, provider keys, prompts or AI explanation endpoint. Deterministic computed tradeoff sentences only restate saved metrics. The optional model/claim-validation/audit-review work is implemented in M5 below.
 
 ## Implemented M5 safeguards and limits
 
@@ -106,3 +106,12 @@ The local intent matcher deliberately declines delay predictions and unsupported
 Deterministic mode is the default and stays useful offline. Optional server-side OpenAI calls use timeouts, zero retries, bounded context/output, two concurrent calls and a per-process hourly ceiling. Billing/account access and live latency remain unverified; no paid call is required to test safeguards. Provider project budgets are necessary for a financial ceiling. Configuration status does not mean provider connectivity was tested.
 
 Reduced evidence projections and metadata are append-only local records; raw questions/prompts/prose and sensitive geometry are not logged. Human-submitted notes/aliases remain separate from model output and never authorize work. Avoid sensitive information in notes. There is no production retention/access-control system or tamper-proof storage. Keep the unauthenticated API on loopback; production authentication, tenancy, backups, retention and professional review remain separate release gates.
+
+
+## M6 responsible-AI acceptance boundary
+
+The integrated demonstration preserves synthetic labels, not-indicated resurfacing suitability, unknown utility coverage, planning uncertainty and independent engineering review. A/B/C retain identical calculated costs; coordination neither erases screening evidence nor receives an invented saving. B retains sequencing review; deferral is never certified safe. Source links now expand actual evidence and focus its record, while comparison tables retain text labels and keyboard access.
+
+All four requested injection surfaces are covered: road notes, project descriptions/utility narrative, scenario narrative and user questions. Strict provider selection rejects extra monetary/date/prose fields, unknown citations, stale hashes and missing caveats; source-integrity errors fail closed, and provider failure falls back. Successful explanations only append reduced evidence/interaction audits. M6 checks source-table equality before/after advice and verifies immutable replay, idempotent seed and SQLite integrity/FKs. Explicit human notes remain independent annotations without authorization.
+
+These tests verify structural restrictions and specified examples. They cannot prove completeness/accuracy of municipal sources, exhaustive semantic entailment, universal injection detection, unbiased allocation, engineering feasibility or legal/operational permission. Live provider entitlement, latency and billing remain unverified. No OS-wide network disconnection or broad accessibility/security certification was performed. See KNOWN_LIMITATIONS and FINAL_QA_REPORT for the exact release boundary.

@@ -10,7 +10,7 @@ export function useConflicts(roads: RoadsCollection | null) {
   const [retry, setRetry] = useState(0);
   useEffect(() => {
     const controller = new AbortController();
-    setProjects([]); setAnalysis(null); setError('');
+    setProjects([]); setAnalysis(null); setError(''); setLoading(false);
     if (!roads?.features.length || !roads.meta.dataset_snapshot_id) return;
     setLoading(true);
     const load = async () => {

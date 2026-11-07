@@ -1,6 +1,6 @@
 # AI explanation system
 
-Status: M5 implemented locally. This is a bounded evidence advisor, not an engineering decision system. See [M5 implementation and verification](M5_IMPLEMENTATION.md). M1–M4 calculations, snapshots and fixture prices are unchanged. Useful deterministic explanations require neither a key nor network access.
+Status: M5 implemented; M6 integration and responsible-AI regression verified locally. This is a bounded evidence advisor, not an engineering decision system. See [M5 implementation and verification](M5_IMPLEMENTATION.md). M1–M4 calculations, snapshots and fixture prices are unchanged. Useful deterministic explanations require neither a key nor network access.
 
 ## Architecture and allowed tasks
 
@@ -47,3 +47,10 @@ No key, disabled provider, timeout, 429, network/model failure, refusal/incomple
 M5 stores deduplicated reduced evidence projections (`ai_evidence`), interaction metadata (`ai_interactions`) and explicit human notes (`review_events`). Interaction metadata includes task/context/source references, evidence hash, configured model/provider when attempted, output mode, validation result/error category, timestamp, request correlation ID, contract version and output hash. No raw question, prompt, response prose, secret, hidden reasoning, contact data or geometry is stored in AI interactions. A human voluntarily submitted note/alias stays in the separate local review table, never the model context. Do not put sensitive information in a review note.
 
 Additive migration 5 preserves existing payloads. Foreign keys and update/delete rejection triggers protect append-only records within the application. Local administrators can alter the database; there is no production retention policy, authentication, tenant isolation or cryptographic audit guarantee. No explanation, model selection or review note authorizes construction, spending or safe deferral. Actual decisions require qualified humans and municipal processes outside CivicPlAIn.
+
+
+## M6 validation and demo evidence
+
+The full regression suite retains all M5 selection, citation, unsupported money/date/unit/prose, provider failure, timeout, rate-limit, audit and no-mutation cases. M6 additionally tests malicious scenario names/descriptions through save → evaluation → evidence projection → mocked provider and malicious user questions. Raw narrative never reaches provider input or rendered verified claims; unsupported questions return insufficient evidence without another call. Existing road-note/project-description injection tests remain passing.
+
+Actual browser checks used API-backed estimate, conflict and comparison explanations, source disclosure/focus, optional-AI not-configured fallback, and unavailable-local-API timeout/retry recovery. No paid/live OpenAI request was made. Deterministic mode and no-key fallback require only local services; no OS-wide network settings were changed during testing. The 1 MiB transport cap complements the smaller 48,000-byte/96-fact AI projection limit. See FINAL_QA_REPORT for measured local API timings and limits; these tests do not establish perfect hallucination prevention or truthful source inputs.

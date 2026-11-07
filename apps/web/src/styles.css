@@ -1025,3 +1025,34 @@ h1 {
 .advisor-source:target { outline: 2px solid #3a7355; }
 
 .advisor-findings { max-height: 22rem; overflow-y: auto; padding-right: .5rem; }
+
+/* M6: readable evidence, explicit focus, and a compact reversible demo guide. */
+button,input,select,textarea { font: inherit; }
+select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible { outline: 3px solid #8b641f; outline-offset: 4px; }
+.skip-link { position: fixed; top: -100px; left: 16px; z-index: 100; background: white; color: #253c38; padding: 12px; border: 2px solid #253c38; }
+.skip-link:focus { top: 12px; }
+.nav-item { text-decoration: none; }
+.heading-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.demo-guide { padding: 22px; margin-bottom: 24px; background: #edf2e7; border: 1px solid #bbcbb4; border-radius: 8px; }
+.demo-guide p { font-size: 13px; line-height: 1.6; margin-top: 8px; }
+.demo-guide ol { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 20px; list-style: none; padding: 0; margin: 20px 0 0; }
+.demo-guide button { font-size: 13px; text-align: left; min-height: 44px; }
+.explorer-grid { align-items: start; scroll-margin-top: 20px; }
+.detail-card .metadata { font-size: 12px; }
+.detail-card .metadata dt,.provenance p { color: #51624b; }
+.detail-card .metadata dd { overflow-wrap: anywhere; min-width: 0; }
+.detail-card .small-label,.provenance h4,.provenance p,.coverage-note { font-size: 12px; }
+.road-row-name strong { font-size: 12px; }
+.road-row .condition { font-size: 12px; }
+.small-label,.eyebrow { color: #58684f; }
+.detail-badges { flex-wrap: wrap; }
+.repair-planner,.repair-workspace,.scenario-planner,.scenario-result,.advisor-panel { min-width: 0; overflow-wrap: anywhere; }
+.table-scroll table caption { text-align: left; padding: 12px; color: #44574d; font-size: 12px; }
+.table-scroll:focus-visible { outline-offset: 2px; }
+.scenario-actions { flex-wrap: wrap; }
+.comparison-scope { padding: 14px; background: #fff8e8; font-size: 13px; }
+.advisor-mode input { margin-right: 8px; }
+@media(max-width:760px) { .demo-guide ol { grid-template-columns: 1fr; gap: 12px; } .detail-card .metadata { grid-template-columns: 1fr; } }
+@media(max-width:520px) { .heading-actions { flex-direction: column; align-items: flex-end; gap: 8px; } .page-heading .demo-badge { margin-top: 0; } .demo-guide { padding: 16px; } }
+.subtle,.quiet-tag,.breadcrumb,.page-heading p:last-child,.metric-label,.summary-grid small,.legend strong,.metadata dt,.state-card p { color: #53634f; }
+button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible { outline-color: #8b641f; }

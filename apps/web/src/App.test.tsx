@@ -120,3 +120,42 @@ it('rejects mismatched project snapshots before analysis', async () => {
   render(<App/>);
   expect(await screen.findByRole('alert')).toHaveTextContent('Project snapshot differs from roads');
 });
+
+it('guides the loaded demo records without creating substitute data', async () => {
+  const { projects, analysis } = await import('./features/conflicts/testData');
+  const { analyzeConflicts } = await import('./services/api');
+  vi.mocked(getProjects).mockResolvedValue({ data: projects, meta: collection.meta });
+  vi.mocked(analyzeConflicts).mockResolvedValue({ data: analysis, meta: collection.meta });
+  const user = userEvent.setup(); render(<App/>);
+  await user.click(screen.getByRole('button', { name: 'Explore Demo' }));
+  const guide = await screen.findByRole('region', { name: 'Synthetic demo guide' });
+  await user.click(within(guide).getByRole('button', { name: /Inspect demo road/ }));
+  expect(await screen.findByRole('heading', { name: 'Demo segment R-001' })).toBeInTheDocument();
+  await waitFor(() => expect(within(guide).getByRole('button', { name: /Review potential/ })).toBeEnabled());
+  await user.click(within(guide).getByRole('button', { name: /Review potential/ }));
+  expect(await screen.findByRole('article', { name: 'Selected conflict evidence' })).toHaveTextContent('Sequential gap: 2');
+});
+it('keeps unavailable demo data explicit and compact navigation named', async () => {
+  vi.mocked(getRoads).mockResolvedValue({ ...collection, features: collection.features.slice(1) });
+  const user = userEvent.setup(); render(<App/>);
+  await user.click(screen.getByRole('button', { name: 'Explore Demo' }));
+  const guide = await screen.findByRole('region', { name: 'Synthetic demo guide' });
+  expect(within(guide).getByRole('button', { name: /Inspect demo road/ })).toBeDisabled();
+  expect(guide).toHaveTextContent('Primary demo road is absent');
+  expect(screen.getByRole('button', { name: 'Infrastructure map' })).toHaveAttribute('title');
+  expect(screen.getByRole('button', { name: 'Scenario planner' })).toHaveAttribute('aria-expanded', 'false');
+});
+it('reopening scenario navigation preserves the unsaved editor', async () => {
+  const { getScenarios, getRepairCatalog } = await import('./services/api');
+  vi.mocked(getScenarios).mockResolvedValue({data:[],meta:collection.meta});
+  vi.mocked(getRepairCatalog).mockResolvedValue({data:[],meta:collection.meta});
+  const user=userEvent.setup(); render(<App/>);
+  await screen.findByRole('region',{name:'Keyboard accessible road list'});
+  const navigation=screen.getByRole('button',{name:'Scenario planner'});
+  await user.click(navigation);
+  await waitFor(()=>expect(screen.getByRole('button',{name:'Create scenario'})).toBeEnabled());
+  await user.click(screen.getByRole('button',{name:'Create scenario'}));
+  await user.type(screen.getByRole('textbox',{name:'Name'}),'Unfinished review plan');
+  await user.click(navigation);
+  expect(screen.getByRole('textbox',{name:'Name'})).toHaveValue('Unfinished review plan');
+});
