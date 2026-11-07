@@ -1,6 +1,6 @@
 # MVP implementation roadmap
 
-Status: M0–M3 are complete locally; M4–M6 are unimplemented. M3 verification is recorded in [M3_IMPLEMENTATION](M3_IMPLEMENTATION.md). M2 verification is recorded in [M2_IMPLEMENTATION](M2_IMPLEMENTATION.md). M1 verification is recorded in [M1_IMPLEMENTATION](M1_IMPLEMENTATION.md). Each milestone must satisfy its gate before the next; keep scope viable for one developer. M1–M3 file locations now exist; M4–M6 file locations remain planned.
+Status: M0–M3 and M3.5 are complete locally; M4–M6 are unimplemented. M3.5 verification is recorded in [M3_5_COMPATIBILITY](M3_5_COMPATIBILITY.md). M3 verification is recorded in [M3_IMPLEMENTATION](M3_IMPLEMENTATION.md). M2 verification is recorded in [M2_IMPLEMENTATION](M2_IMPLEMENTATION.md). M1 verification is recorded in [M1_IMPLEMENTATION](M1_IMPLEMENTATION.md). Each milestone must satisfy its gate before the next; keep scope viable for one developer. M1–M3 file locations now exist; M4–M6 file locations remain planned.
 
 ## M0 — Foundation and repository setup
 
@@ -47,13 +47,22 @@ M2 result: five linked maintenance fixtures, 26 assessment records, three treatm
 
 M3 result: seven persisted fictional work projects, multi-road links, explicit approximate/unknown location and schedule provenance; EPSG:32618 spatial screening with STRtree; concurrent work, multiple closures, potential rework and sequencing findings; separate indeterminate checks; immutable source/parameter snapshots and stable IDs; six REST routes; project map layers, category controls, selection/filtering and evidence panels. Default demo: 8 findings, 10 indeterminate checks, 16 candidates of 21 possible pairs. Contract reconciliation: `/conflicts/analyze` replaces the unimplemented `/conflicts/check`; utility classification/scope fields are part of WorkProject, avoiding an unnecessary subtype table. Full generic assets and AuditEvent/review-note workflows remain deferred. See M3_IMPLEMENTATION for actual verification and limits.
 
+## M3.5 — Compatibility and architecture preparation (complete)
+
+- Objective: remove ambient Node type dependency and reconcile M4 design with the working M2/M3 contracts.
+- Implementation: pinned project-local @types/node and explicit Node type inclusion; no TypeScript/runtime dependency upgrades. The transitive undici-types addition belongs to that type package.
+- Contracts: DATA_MODEL defines scenario-v1/scenario-action-v1, quantity/provenance, supplied schedules/calendars/closures and explicit mobilization groups; ARCHITECTURE defines a pure hypothetical adapter that delegates to the unchanged M3 engine without writing projects.
+- Reconciliation: current M2 rates, rate-only sensitivity and five preliminary days are authoritative. The old demo's $120,000 resurfacing, patch/restoration prices, whole-total multipliers and unsourced lifespan values are retired. Patch/restoration methods and lifespans remain unavailable, with future source requirements documented.
+- Acceptance: clean isolated npm ci, frontend tests/typecheck/build, backend regressions, database integrity and saved-input replay pass; existing data preserved; no scenario runtime models/tables/routes/evaluator/UI or calendar optimizer added. Actual commands and results are in M3_5_COMPATIBILITY.
+- Remaining M4 work: implement the frozen proposed contracts, shared quantity/cost helper and hypothetical adapter, snapshot persistence and comparison UI under separate authorization. Either retain honest indeterminate patch/restoration rows or add reviewed versioned catalog methods; never invent prices to complete a narrative.
+
 ## M4 — Budget-aware scenario comparison
 
 - Objective: compare three manually constructed alternatives with transparent scope and tradeoffs.
-- Dependencies: M3; explicit repair option/action assumptions and common snapshot; agree budget basis.
+- Dependencies: M3.5 contracts and regression gate; explicit repair/action assumptions and common source contents, roadwork-only budget basis and planning horizon.
 - Files/modules: models/schemas Scenario and ScenarioEvaluation; services scenarios/evaluation; routes scenarios/evaluations; web comparison; tests; demo scenarios.
-- Tasks: save draft scenarios with actions and budget; calculate costs, bounds, elapsed time, lane-closure-days, lifespan and review flags; check central/upper affordability; store immutable snapshots/hashes; show exclusions and explicit repeat-restoration costs.
-- Acceptance: immediate/coordinated/staged results match DEMO_PLAN arithmetic; budget changes are visible; missing cost returns indeterminate; coordination includes a deferral review warning; no global optimality or safety claim.
+- Tasks: save draft scenarios with actions and budget; calculate costs, bounds, supplied-calendar elapsed time, explicit lane-closure-days, sourced-or-unknown lifespan and review flags; check central/upper affordability; store immutable snapshots/hashes; show exclusions and explicit repeat-restoration costs.
+- Acceptance: immediate/coordinated/staged results match the authoritative M2 components in DEMO_PLAN, retaining indeterminate totals for unpriced patch/restoration scopes; budget changes are visible; missing cost returns indeterminate; coordination includes a deferral review warning; no global optimality or safety claim.
 - Testing: totals and bounds, budget equality/zero, empty or duplicate actions, mismatched snapshots/cost scopes, unknown rates, shared mobilization, repeat runs, source mutation producing a new snapshot, immutable old evaluation.
 - Definition of done: complete comparison from saved input to UI is reproducible; constraints and assumptions are inspectable; all affordability labels qualified.
 

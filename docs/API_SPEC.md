@@ -1,6 +1,6 @@
 # REST API contract
 
-**Implemented through M3:** the five M1 GET paths plus GET `/api/v1/road-segments/{id}/conditions`, GET `/api/v1/repair-options`, GET `/api/v1/road-segments/{id}/repair-options`, POST `/api/v1/estimates`, GET `/api/v1/estimates/{id}`. M3 additionally implements project list/detail, conflict analysis/list/detail and saved analysis retrieval below. Scenarios, comparisons, reviews and explanation routes remain proposed. Base `/api/v1`, local server `http://127.0.0.1:8000`; no `/api/roads` or root `/health` aliases.
+**Implemented through M3:** the five M1 GET paths plus GET `/api/v1/road-segments/{id}/conditions`, GET `/api/v1/repair-options`, GET `/api/v1/road-segments/{id}/repair-options`, POST `/api/v1/estimates`, GET `/api/v1/estimates/{id}`. M3 additionally implements project list/detail, conflict analysis/list/detail and saved analysis retrieval below. M3.5 updates the proposed scenario transport only; scenarios, comparisons, reviews and explanation routes remain unimplemented. Base `/api/v1`, local server `http://127.0.0.1:8000`; no `/api/roads` or root `/health` aliases.
 
 ## Transport conventions
 
@@ -34,10 +34,10 @@ Roads, planning, projects and M3 conflict routes listed as implemented below wor
 | GET `/conflicts` | project_id, road_segment_id, analysis_id, limit/cursor optional | 200 saved ConflictFinding list in stable ID order | 404 missing filter references; 422 cursor/filter mismatch | implemented deterministic read |
 | GET `/conflict-analyses/{id}` | analysis ID | 200 immutable ConflictAnalysis with complete input/source snapshot and parameters | 404 missing ID | implemented deterministic read |
 | GET `/conflicts/{id}` | ID | 200 saved ConflictFinding, including analysis_id | 404 missing ID | implemented deterministic read |
-| POST `/scenarios` | name!, dataset_snapshot_id!, budget_usd!, planning_start!, planning_end!, cost_scope!, actions! per ScenarioAction; review_note optional | 201 saved Scenario with system-populated RecordMeta | 422 invalid dates, duplicates, no actions, invalid budget/units; 404 references; 409 snapshot mismatch | deterministic validation/save |
+| POST `/scenarios` | scenario-v1 request below: contract_version!, name!, dataset_snapshot_id!, budget_usd!, currency!, planning_start!, planning_end!, cost_scope!, actions!; assumptions, external_project_ids, project_overrides, mobilization_groups, cost_scope_note, review_note | 201 saved Scenario with system-populated RecordMeta | 422 invalid dates, duplicates, no actions, invalid budget/units; 404 references; 409 snapshot mismatch | deterministic validation/save |
 | GET `/scenarios` | dataset_snapshot_id optional, limit/cursor | 200 Scenario list | 422 invalid filters | deterministic read |
 | GET `/scenarios/{id}` | ID | 200 Scenario | 404 missing ID | deterministic read |
-| POST `/scenarios/{id}/evaluations` | proximity_m optional ≥0 default 5; reopening_horizon_days optional integer 0–365 default 30 | 201 immutable ScenarioEvaluation | 404 scenario; 409 invalid/stale source snapshot that cannot be reconstructed; incomplete data returns indeterminate fields, not fake zero totals | deterministic evaluation |
+| POST `/scenarios/{id}/evaluations` | M3 AnalysisParameters: proximity_m 0–100 default 5; corridor_m 0–50 default 5; reopening_horizon_days integer 0–365 default 30 | 201 immutable ScenarioEvaluation | 404 scenario; 409 invalid/stale source snapshot that cannot be reconstructed; incomplete data returns indeterminate fields, not fake zero totals | deterministic evaluation |
 | GET `/scenario-evaluations/{id}` | ID | 200 immutable ScenarioEvaluation | 404 missing ID | deterministic read |
 | POST `/scenario-comparisons` | evaluation_ids! 2–5 distinct IDs | 200 ComparisonResult table with metrics, deltas, common basis and warnings | 404 references; 409 mismatched snapshots, horizon, price basis, scope or method versions; 422 duplicate/invalid count | deterministic comparison; no automatic optimum |
 | POST `/explanations` | evaluation_id!, mode optional enum deterministic/ai default deterministic | 200 ExplanationResult; explanation audit saved | 404 evaluation; 422 invalid mode; provider timeout, missing key or bad output return 200 explicit deterministic fallback; storage failure 503 | deterministic facts/templates, AI prose only when requested and configured |
@@ -64,36 +64,29 @@ Implemented request:
 
 This fictional pair yields one reopening_risk, a two-calendar-day gap, computed polygon overlap and shared R-001, with approximate-location/source-schedule warnings and required human review. No loss, savings, safe-deferral or clearance value is calculated. Query `/conflict-analyses/{id}` to retrieve complete provenance; numerical/source methods are documented in ARCHITECTURE.
 
-**ComparisonResult**: `evaluation_ids`, `common_basis` (snapshot, horizon, cost_scope, currency, price basis and method), `rows` (evaluation ID, cost range or null, budget and status, upper-bound status, elapsed days, lane-closure-days, per-action lifespan ranges, known findings count, indeterminate checks count, review flags), `deltas` (pair IDs and central cost/closure-day differences, nullable when incomplete), `warnings`. No ranking is implied. Delta savings use the same cost scope and remain hypothetical when synthetic inputs occur.
+**ComparisonResult**: `evaluation_ids`, `common_basis` (snapshot, baseline_source_hash, horizon, cost_scope, currency, price basis and method versions), `rows` (evaluation ID, cost range or null, budget and status, upper-bound status, elapsed days, lane-closure-days, per-action lifespan ranges, known findings count, indeterminate checks count, review flags), `deltas` (pair IDs and central cost/closure-day differences, nullable when incomplete), `warnings`. No ranking is implied. Delta savings use the same cost scope and remain hypothetical when synthetic inputs occur.
 
 **ExplanationResult**: `id`, `evaluation_id`, `mode_used` deterministic/ai, `fallback_reason` nullable enum not_configured/provider_unavailable/timeout/invalid_output/unsupported_claim, `summary`, `claims` (claim_id, fact_refs, evidence_ids, rendered_text), `unknowns`, `limitations`, `human_review_required=true`, `input_hash`, `prompt_version` nullable, `model_label` nullable. Claims expose source references even in deterministic mode. AI_SYSTEM defines the stricter provider-only contract; its raw output is not the public response.
 
-## Illustrative request, not a working endpoint
+## Proposed scenario transport (M3.5 design; no working endpoint)
+
+The future POST `/scenarios` accepts `contract_version=scenario-v1`, name, dataset_snapshot_id, budget_usd, `currency=USD`, planning_start/end, `cost_scope=roadwork_only`, and 1–50 actions conforming to DATA_MODEL's `scenario-action-v1`. Optional cost_scope_note/review_note have the documented length bounds. `assumptions`, `external_project_ids`, `project_overrides` and `mobilization_groups` default to empty lists. Dates remain half-open local civil dates; money and quantities are decimal strings. Scenario ID, provenance metadata, resolved quantities, source contents, hashes, hypothetical/synthetic status and timestamps are server-controlled output, not trusted request fields. Nonblank text, strict integer counts, finite numbers and unknown-field rejection follow existing Pydantic boundary conventions.
+
+Action requests contain id, contract_version, road_segment_id, action_kind, repair_category, nullable repair_option_id, scope, quantity, input_provenance, unknown_reasons, related_project_ids, nullable schedule and constraints. The DATA_MODEL tables define the nested fields and cross-field validation, not an unversioned flat quantity/date override. `source_project_id`, top-level action `start_date`/`end_date`, flat `quantity` string and `assumption_evidence_ids` from the former draft are superseded; no compatibility alias is needed because the draft was never implemented.
+
+For example, this is only a QuantityProposal fragment for whole-segment R-001, not a complete POST body:
 
 ```json
-{
-  "name": "Demo coordinated repair",
-  "dataset_snapshot_id": "demo-v1",
-  "budget_usd": "150000.00",
-  "planning_start": "2027-04-01",
-  "planning_end": "2027-05-01",
-  "cost_scope": "roadwork only; utility construction excluded",
-  "actions": [{
-    "id": "demo-action-coordinated",
-    "road_segment_id": "demo-r-001",
-    "repair_option_id": "demo-resurface",
-    "source_project_id": "demo-road-project",
-    "action_kind": "repair",
-    "start_date": "2027-04-15",
-    "end_date": "2027-04-22",
-    "quantity": "800.00",
-    "lanes_closed": 1,
-    "assumption_evidence_ids": ["demo-assumptions-v1"]
-  }]
-}
+{"value":null,"unit":"m2","derivation":"road_dimensions","length_m":null,"width_m":null}
 ```
 
-This synthetic example asserts no real road dimensions, prices, schedule, or municipal budget. No update or approval is implied. Pagination and endpoint compatibility need contract tests as each milestone implements them; document the implemented subset explicitly.
+The future service resolves the exact frozen road inputs to 100 m × 8 m = 800 m², preserving synthetic dimension provenance. It does not derive scope from the map geometry. A partial-area fragment instead uses explicit_area with a positive sourced value or unknown with a missing-input reason; there is no implicit whole-road fallback. Inline assumptions must be authored and referenced as specified in DATA_MODEL, not presented as observed records.
+
+Future validation/save: 201 for a structurally valid draft, including explicit unknown quantity/method/dates; until shared-cost support exists, nonempty mobilization_groups must instead return an explicit 422 unsupported-adjustment error. 422 for invalid geometry, inconsistent quantities/units/category, extra fields, duplicate actions/IDs, reversed/out-of-horizon dates, constraint cycles, malformed overrides or negative budget; 404 for unknown non-null road/option/project/source references; 409 for incompatible snapshot or source contents. A known category with null method is allowed only with a reason and unavailable cost; a named option inconsistent with category is 422. Missing required estimate inputs still return 422 on the existing `/estimates` endpoint, whose request shape is unchanged.
+
+Future evaluation uses frozen proposal/source contents and the internal hypothetical adapter. Unknown quantity/method yields null complete cost and indeterminate budget status. Unknown dates/closures yield null affected metrics and incomplete checks. Nonempty mobilization_groups must be explicitly rejected until the documented adjustment path is implemented. Comparison basis includes baseline_source_hash (original common source contents before scenario overrides), horizon, currency, price basis, cost scope, action/cost/adapter/method versions; scenario-specific action assumptions and quantities may differ; incompatible bases return 409. Patch/restoration prices and lifespans remain unavailable until reviewed source-backed catalog extensions exist.
+
+The hypothetical adapter is internal: no new endpoint accepts arbitrary client WorkProject snapshots, and `/conflicts/analyze` continues to accept persisted project IDs only. Future ScenarioEvaluation exposes `conflict_screen` with adapter version, hypothetical analysis context, project/action origin mapping, override history, hashes and complete M3 spatial/temporal/source evidence. Findings involving proposals are labeled hypothetical; existing-project pairs are labeled existing_project_screen, never observed collisions. They are not inserted into the existing `/conflicts` history. A missing or empty screening scope has an explicit not-run reason, not an empty-clearance response. See ARCHITECTURE for projection, source-shape limits and replay semantics.
 
 ## M1 validation evidence
 
