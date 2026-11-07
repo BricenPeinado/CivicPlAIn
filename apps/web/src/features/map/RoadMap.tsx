@@ -2,17 +2,24 @@ import { useEffect, useRef, useState } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import type { GeoJSONSource, Map as MapInstance, MapLayerMouseEvent } from 'maplibre-gl';
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
-import type { RoadsCollection } from '../../types/api';
+import type { RoadsCollection, WorkProject, InfrastructureCategory } from '../../types/api';
+import { categoryColors } from '../conflicts/ConflictReview';
 // Bundle the ESM worker locally; MapLibre v6 cannot infer its URL after Vite bundling.
 maplibregl.setWorkerUrl(workerUrl);
 export const colors = { good: '#277953', fair: '#bd831f', poor: '#c45e4d', unknown: '#859198' };
 const BOUNDS: [number, number, number, number] = [-74.012, 40.710, -74.000, 40.720];
-interface Props { roads: RoadsCollection; selectedId: string | null; onSelect: (id: string) => void }
-export function RoadMap({ roads, selectedId, onSelect }: Props) {
+interface Props { roads: RoadsCollection; selectedId: string | null; onSelect: (id: string) => void;
+  projects?: WorkProject[]; highlightedProjects?: string[]; highlightedRoads?: string[];
+  onSelectProject?: (id: string) => void; showProjects?: boolean; visibleCategories?: InfrastructureCategory[] }
+const EMPTY: never[] = [];
+export function RoadMap({ roads, selectedId, onSelect, projects = EMPTY, highlightedProjects = EMPTY, highlightedRoads = EMPTY,
+  onSelectProject, showProjects = true, visibleCategories = EMPTY }: Props) {
   const container = useRef<HTMLDivElement>(null);
   const map = useRef<MapInstance | null>(null);
   const select = useRef(onSelect);
   select.current = onSelect;
+  const selectProject = useRef(onSelectProject);
+  selectProject.current = onSelectProject;
   const [ready, setReady] = useState(false);
   const [failure, setFailure] = useState(false);
   const [hover, setHover] = useState<string | null>(null);
@@ -40,6 +47,12 @@ export function RoadMap({ roads, selectedId, onSelect }: Props) {
         instance.addLayer({ id: 'road-selected', type: 'line', source: 'roads', filter: ['==', ['get', 'road_id'], ''], paint: { 'line-color': '#173f3a', 'line-width': 16, 'line-opacity': .32 } }, 'road-color');
         instance.addLayer({ id: 'road-hover', type: 'line', source: 'roads', filter: ['==', ['get', 'road_id'], ''], paint: { 'line-color': '#142e2b', 'line-width': 11, 'line-opacity': .25 } });
         instance.addLayer({ id: 'road-hit', type: 'line', source: 'roads', paint: { 'line-width': 24, 'line-opacity': 0 } });
+        instance.addLayer({ id: 'road-conflict', type: 'line', source: 'roads', filter: ['in', ['get', 'road_id'], ['literal', []]], paint: { 'line-color': '#402543', 'line-width': 11, 'line-dasharray': [2, 1] } });
+        instance.addSource('projects', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+        const projectColor: maplibregl.ExpressionSpecification = ['get', 'color'];
+        instance.addLayer({ id: 'project-fill', type: 'fill', source: 'projects', filter: ['==', ['geometry-type'], 'Polygon'], paint: { 'fill-color': projectColor, 'fill-opacity': .22 } });
+        instance.addLayer({ id: 'project-lines', type: 'line', source: 'projects', paint: { 'line-color': projectColor, 'line-width': 3, 'line-dasharray': [2, 1] } });
+        instance.addLayer({ id: 'project-selected', type: 'line', source: 'projects', filter: ['in', ['get', 'project_id'], ['literal', []]], paint: { 'line-color': '#24112d', 'line-width': 7 } });
         instance.on('click', 'road-hit', (e: MapLayerMouseEvent) => {
           const id = e.features?.[0]?.properties?.road_id;
           if (id) select.current(String(id));
@@ -54,6 +67,12 @@ export function RoadMap({ roads, selectedId, onSelect }: Props) {
           instance!.getCanvas().style.cursor = '';
           instance!.setFilter('road-hover', ['==', ['get', 'road_id'], '']); setHover(null);
         });
+        for (const layer of ['project-fill', 'project-lines']) {
+          instance.on('click', layer, (e: MapLayerMouseEvent) => {
+            const id = e.features?.[0]?.properties?.project_id;
+            if (id) selectProject.current?.(String(id));
+          });
+        }
         instance.fitBounds(BOUNDS, { padding: 65, duration: 0 });
         setReady(true);
       });
@@ -73,6 +92,15 @@ export function RoadMap({ roads, selectedId, onSelect }: Props) {
   useEffect(() => {
     if (ready) map.current?.setFilter('road-selected', ['==', ['get', 'road_id'], selectedId || '']);
   }, [selectedId, ready]);
+  useEffect(() => {
+    if (!ready || !map.current) return;
+    const visible = showProjects ? projects.filter(p => p.geometry && visibleCategories.includes(p.infrastructure_category)) : [];
+    (map.current.getSource('projects') as GeoJSONSource).setData({ type: 'FeatureCollection', features: visible.map(p => ({
+      type: 'Feature', id: p.id, geometry: p.geometry!, properties: { project_id: p.id, category: p.infrastructure_category, color: categoryColors[p.infrastructure_category], name: p.title },
+    })) });
+    map.current.setFilter('project-selected', ['in', ['get', 'project_id'], ['literal', highlightedProjects]]);
+    map.current.setFilter('road-conflict', ['in', ['get', 'road_id'], ['literal', highlightedRoads]]);
+  }, [projects, highlightedProjects, highlightedRoads, showProjects, visibleCategories, ready]);
   return <section className="map-stage" aria-label="Interactive schematic infrastructure map">
     <div ref={container} className="map-canvas" />
     <div className="map-stamp"><span className="live-dot" /> LOCAL SCHEMATIC <span>EPSG:4326</span></div>

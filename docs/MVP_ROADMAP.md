@@ -1,6 +1,6 @@
 # MVP implementation roadmap
 
-Status: M0 and M1 are complete; M2 is complete; M3–M6 are unimplemented. M2 verification is recorded in [M2_IMPLEMENTATION](M2_IMPLEMENTATION.md). M1 verification is recorded in [M1_IMPLEMENTATION](M1_IMPLEMENTATION.md). Each milestone must satisfy its gate before the next; keep scope viable for one developer. M1/M2 file locations now exist; M3–M6 file locations remain planned.
+Status: M0–M3 are complete locally; M4–M6 are unimplemented. M3 verification is recorded in [M3_IMPLEMENTATION](M3_IMPLEMENTATION.md). M2 verification is recorded in [M2_IMPLEMENTATION](M2_IMPLEMENTATION.md). M1 verification is recorded in [M1_IMPLEMENTATION](M1_IMPLEMENTATION.md). Each milestone must satisfy its gate before the next; keep scope viable for one developer. M1–M3 file locations now exist; M4–M6 file locations remain planned.
 
 ## M0 — Foundation and repository setup
 
@@ -35,7 +35,7 @@ Status: M0 and M1 are complete; M2 is complete; M3–M6 are unimplemented. M2 ve
 
 M2 result: five linked maintenance fixtures, 26 assessment records, three treatments, read-only history, comparison previews, explicit dimension assumptions, Decimal line/contingency math, duration allowances, saved source snapshots, and UI breakdowns. No project lifecycle, conflicts, scenarios or AI were added. See M2_IMPLEMENTATION for actual checks.
 
-## M3 — Geospatial and temporal conflict detection
+## M3 — Geospatial and temporal conflict detection (complete)
 
 - Objective: flag concurrent work and near-term reopening risks while preserving unknown coverage.
 - Dependencies: M2; freeze CRS, proximity tolerance, interval, and horizon semantics in ARCHITECTURE.
@@ -44,6 +44,8 @@ M2 result: five linked maintenance fixtures, 26 assessment records, three treatm
 - Acceptance: overlapping synthetic road/utility case is detected; adjacent dates do not overlap; later utility case triggers reopening rule; missing utility geometry/schedule produces a warning; no screen says excavation is safe.
 - Testing: projected metre thresholds including exact boundary, crossing/grade ambiguity, date adjacency, 0/30/31-day horizons, missing inputs, invalid geometry, duplicate findings, stable input-order-independent results.
 - Definition of done: fixtures and manual reasoning agree; API and map reference identical findings; coverage limitations persist even with zero findings.
+
+M3 result: seven persisted fictional work projects, multi-road links, explicit approximate/unknown location and schedule provenance; EPSG:32618 spatial screening with STRtree; concurrent work, multiple closures, potential rework and sequencing findings; separate indeterminate checks; immutable source/parameter snapshots and stable IDs; six REST routes; project map layers, category controls, selection/filtering and evidence panels. Default demo: 8 findings, 10 indeterminate checks, 16 candidates of 21 possible pairs. Contract reconciliation: `/conflicts/analyze` replaces the unimplemented `/conflicts/check`; utility classification/scope fields are part of WorkProject, avoiding an unnecessary subtype table. Full generic assets and AuditEvent/review-note workflows remain deferred. See M3_IMPLEMENTATION for actual verification and limits.
 
 ## M4 — Budget-aware scenario comparison
 

@@ -41,3 +41,25 @@ it('preserves backend missing-input reasons in estimate failures', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 422, json: async () => ({ error: { message: 'width_m is unknown' } }) }));
   await expect(createEstimate({ road_segment_id: 'demo-r-004', repair_option_id: 'demo-resurface', dataset_snapshot_id: 'demo-m1-v1' })).rejects.toThrow('width_m is unknown');
 });
+
+it('loads projects, posts analysis scope and retrieves immutable evidence', async () => {
+  const { getProjects, analyzeConflicts, getConflict, getConflictAnalysis } = await import('./api');
+  const { projects, analysis, finding } = await import('../features/conflicts/testData');
+  const fetcher = vi.fn().mockResolvedValueOnce({ ok: true, json: async () => ({ data: projects, meta: page.meta }) })
+    .mockResolvedValue({ ok: true, json: async () => ({ data: analysis, meta: page.meta }) });
+  vi.stubGlobal('fetch', fetcher);
+  expect((await getProjects()).data).toHaveLength(7);
+  await analyzeConflicts('demo-m1-v1', ['demo-road-project', 'demo-utility-project']);
+  expect(fetcher.mock.calls[1][1]).toMatchObject({ method: 'POST', body: JSON.stringify({ dataset_snapshot_id: 'demo-m1-v1', project_ids: ['demo-road-project', 'demo-utility-project'] }) });
+  await getConflict(finding.id); await getConflictAnalysis(analysis.id);
+  expect(fetcher.mock.calls[2][0]).toContain('/conflicts/conflict-test');
+  expect(fetcher.mock.calls[3][0]).toContain('/conflict-analyses/analysis-test');
+});
+it('rejects duplicated project records and pagination loops', async () => {
+  const { getProjects } = await import('./api');
+  const { projects } = await import('../features/conflicts/testData');
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ data: [projects[0], projects[0]], meta: page.meta }) }));
+  await expect(getProjects()).rejects.toThrow('Duplicate project IDs');
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ data: [], meta: { ...page.meta, next_cursor: 'loop' } }) }));
+  await expect(getProjects()).rejects.toThrow('Invalid project pagination');
+});

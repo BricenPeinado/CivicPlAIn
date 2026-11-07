@@ -65,3 +65,24 @@ it('ignores late errors from the disposed StrictMode instance', () => {
   expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   expect(screen.getByRole('button', {name:/Study area/})).toBeEnabled();
 });
+
+it('renders project geometry, toggles the work-zone source and highlights all finding assets', async () => {
+  const { projects } = await import('../conflicts/testData');
+  const { infrastructureCategories } = await import('../../types/api');
+  const onProject = vi.fn();
+  const props = { roads, selectedId: null, onSelect: vi.fn(), projects, visibleCategories: [...infrastructureCategories],
+    highlightedProjects: ['demo-road-project', 'demo-utility-project'], highlightedRoads: ['demo-r-001'], onSelectProject: onProject };
+  const view = render(<RoadMap {...props}/>);
+  const map = state.maps[0]; act(() => map.handlers.get('load')());
+  const projectData = map.source.setData.mock.calls.at(-1)[0];
+  expect(projectData.features).toHaveLength(projects.filter(p => p.geometry).length);
+  expect(projectData.features.some((f: any) => f.id === 'demo-unknown-location')).toBe(false);
+  expect(map.setFilter).toHaveBeenCalledWith('project-selected', ['in', ['get', 'project_id'], ['literal', props.highlightedProjects]]);
+  expect(map.setFilter).toHaveBeenCalledWith('road-conflict', ['in', ['get', 'road_id'], ['literal', ['demo-r-001']]]);
+  act(() => map.handlers.get('click:project-fill')({ features: [{ properties: { project_id: 'demo-road-project' } }] }));
+  expect(onProject).toHaveBeenCalledWith('demo-road-project');
+  view.rerender(<RoadMap {...props} showProjects={false}/>);
+  expect(map.source.setData.mock.calls.at(-1)[0].features).toEqual([]);
+  view.rerender(<RoadMap {...props} visibleCategories={['water']}/>);
+  expect(map.source.setData.mock.calls.at(-1)[0].features.every((f: any) => f.properties.category === 'water')).toBe(true);
+});

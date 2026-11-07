@@ -1,6 +1,6 @@
 # REST API contract
 
-**Implemented through M2:** the five M1 GET paths plus GET `/api/v1/road-segments/{id}/conditions`, GET `/api/v1/repair-options`, GET `/api/v1/road-segments/{id}/repair-options`, POST `/api/v1/estimates`, GET `/api/v1/estimates/{id}`. All projects, conflicts, scenarios, comparisons, reviews and explanation routes below remain proposed. Base `/api/v1`, local server `http://127.0.0.1:8000`; no `/api/roads` or root `/health` aliases.
+**Implemented through M3:** the five M1 GET paths plus GET `/api/v1/road-segments/{id}/conditions`, GET `/api/v1/repair-options`, GET `/api/v1/road-segments/{id}/repair-options`, POST `/api/v1/estimates`, GET `/api/v1/estimates/{id}`. M3 additionally implements project list/detail, conflict analysis/list/detail and saved analysis retrieval below. Scenarios, comparisons, reviews and explanation routes remain proposed. Base `/api/v1`, local server `http://127.0.0.1:8000`; no `/api/roads` or root `/health` aliases.
 
 ## Transport conventions
 
@@ -14,7 +14,7 @@ The local MVP has no authentication and must not be publicly exposed. There are 
 
 ## Endpoint contracts
 
-Only the ten paths identified above are implemented. Assets/projects, conflict/scenario/review/explanation routes remain future work. The table includes their future contracts explicitly for planning; it does not claim implementation.
+Roads, planning, projects and M3 conflict routes listed as implemented below work locally. Generic assets, scenario/review/explanation routes remain future contracts; their inclusion in this table does not claim implementation.
 
 | Method and path | Input | Output / success | Validation and specific errors | Computation |
 | --- | --- | --- | --- | --- |
@@ -24,14 +24,16 @@ Only the ten paths identified above are implemented. Assets/projects, conflict/s
 | GET `/road-segments/{id}` | ID | 200 RoadSegment | 404 missing ID | deterministic read |
 | GET `/road-segments/{id}/assets` | road ID, limit/cursor | 200 InfrastructureAsset list | 404 road not found | deterministic read |
 | GET `/road-segments/{id}/conditions` | road ID; complete bounded fixture history (no pagination) | 200 Assessment list in newest-date/stable-ID order; meta.latest_usable_id nullable | 404 road not found; latest selection uses date/stable-ID rule | deterministic read |
-| GET `/projects` | road_segment_id, kind, schedule_status, start_date, end_date, limit/cursor optional | 200 WorkProject list with nullable UtilityWork `utility_work` child | 422 enum/date range; 404 supplied road missing; missing project dates included with warnings when filtering cannot resolve | deterministic read/filter |
-| GET `/projects/{id}` | ID | 200 WorkProject plus nullable UtilityWork child | 404 missing ID | deterministic read |
+| GET `/projects` | road_segment_id, kind, schedule_status, limit/cursor optional | 200 WorkProject list, stable ID order; no utility_work child | 422 invalid enum/cursor; 404 supplied road missing | implemented deterministic read/filter |
+| GET `/projects/{id}` | ID | 200 WorkProject including uncertainty and provenance | 404 missing ID | implemented deterministic read |
 | GET `/repair-options` | none; complete bounded catalog | 200 RepairOption list with full rates/productivity and assumption evidence | storage 503 | deterministic read |
 | GET `/road-segments/{id}/repair-options` | road ID | 200 list of {option, suitability, preview, unavailable_reason}; preview is Calculation or null | 404 missing road; missing dimensions produce null preview and explicit reason | deterministic preview, no persistence |
 | POST `/estimates` | road_segment_id!, repair_option_id!, dataset_snapshot_id!, optional planning_assumptions {length_m?,width_m?,unit:m,note!} | 201 saved Estimate; full input/output and sources | 404 road/option; 409 snapshot/evidence mismatch; 422 unknown fields, missing dimensions, nonpositive/nonfinite dimensions, invalid units or blank note | deterministic estimate, no AI |
 | GET `/estimates/{id}` | ID | 200 saved CostEstimate | 404 missing ID | deterministic read |
-| POST `/conflicts/check` | dataset_snapshot_id!, project_ids! nonempty distinct list capped at 50, proximity_m optional ≥0 default 5, reopening_horizon_days optional integer 0–365 default 30 | 200 ConflictCheckResult; persists positive findings and audit | 404 references; 409 snapshot mismatch; 422 invalid parameters; incomplete project fields produce indeterminate checks | deterministic geometry/date rules |
-| GET `/conflicts/{id}` | ID | 200 ConflictFinding | 404 missing ID | deterministic read |
+| POST `/conflicts/analyze` | dataset_snapshot_id!, project_ids! 1–50 distinct IDs; proximity_m 0–100 default 5; corridor_m 0–50 default 5; reopening_horizon_days integer 0–365 default 30 | 200 saved ConflictAnalysis, positive findings and separate incomplete checks | 404 projects; 409 snapshot/evidence mismatch; 422 malformed/extra fields or invalid references/parameters; missing dates/geometry return explicit warnings/checks | implemented deterministic geometry/date rules; no LLM |
+| GET `/conflicts` | project_id, road_segment_id, analysis_id, limit/cursor optional | 200 saved ConflictFinding list in stable ID order | 404 missing filter references; 422 cursor/filter mismatch | implemented deterministic read |
+| GET `/conflict-analyses/{id}` | analysis ID | 200 immutable ConflictAnalysis with complete input/source snapshot and parameters | 404 missing ID | implemented deterministic read |
+| GET `/conflicts/{id}` | ID | 200 saved ConflictFinding, including analysis_id | 404 missing ID | implemented deterministic read |
 | POST `/scenarios` | name!, dataset_snapshot_id!, budget_usd!, planning_start!, planning_end!, cost_scope!, actions! per ScenarioAction; review_note optional | 201 saved Scenario with system-populated RecordMeta | 422 invalid dates, duplicates, no actions, invalid budget/units; 404 references; 409 snapshot mismatch | deterministic validation/save |
 | GET `/scenarios` | dataset_snapshot_id optional, limit/cursor | 200 Scenario list | 422 invalid filters | deterministic read |
 | GET `/scenarios/{id}` | ID | 200 Scenario | 404 missing ID | deterministic read |
@@ -46,7 +48,21 @@ Road conditions are read-only assessments in the MVP. Project and asset creation
 
 ## Calculation response details
 
-**ConflictCheckResult**: `findings` (ConflictFinding list), `indeterminate_checks` (pair IDs, missing fields, reasons), `utility_coverage` (status plus scope/as-of/evidence), `checked_pair_count`, `method_version`, `input_hash`, `warnings`. One input project produces zero pairs and a warning; it never proves clearance. Check the selected set only and expose that scope. Scenario evaluation checks proposed action projects against all non-cancelled external projects within the saved snapshot and records that exact set. Hypothetical action-project records and stable IDs are embedded in the evaluation snapshot; findings can resolve both stored and hypothetical project references.
+**ConflictAnalysis** (M3): concrete fields are specified in DATA_MODEL. Includes findings, indeterminate_checks with spatial evidence, excluded_project_ids, utility_coverage=unknown, possible_pair_count, checked_pair_count, method_version, parameters, detection time, complete input_snapshot, input_hash, result_hash and stable ID. Only the explicit selected project set is checked. All roads are retained for corridor analysis; this does not imply all projects or utilities are known. A one-project scope returns zero pairs and a warning. Empty project_ids is 422. Missing project geometry/dates are accepted and remain unknown. Invalid topology is rejected, not repaired.
+
+The previous proposed `/conflicts/check` and ConflictCheckResult draft are superseded by `/conflicts/analyze` and ConflictAnalysis; no compatibility alias is implemented. There is no date-range project-list filter in M3. M3 flattens utility scope/category fields into WorkProject and has no UtilityWork child. Saved analysis history provides reproducibility; the general AuditEvent and review-note workflow remains M5 work.
+
+Project/conflict lists use the existing limit 1–100/default 30, stable-ID order and opaque cursors. M3 cursors bind to snapshot plus endpoint filters and reject reuse with different filters. Findings across all saved analyses are returned by default; use analysis_id for one version. Different input snapshots can intentionally retain findings for the same pair, with distinct analysis IDs. Valid no-match filters return empty arrays; incomplete coverage warning remains in metadata. Empty unseeded databases return empty lists. Unknown filter references return 404. GET never triggers analysis.
+
+POST persists immutable analyses/findings transactionally. Identical inputs return the existing record/time; no duplicate findings are added. Changed inputs/parameters yield a new analysis. GET returns saved output without recomputation. The web client checks all loaded projects automatically after loading them (≤50); its layer controls only affect presentation. Project editing/creation is a fixture adapter responsibility, without an open mutation endpoint.
+
+Implemented request:
+
+```json
+{"dataset_snapshot_id":"demo-m1-v1","project_ids":["demo-road-project","demo-utility-project"],"proximity_m":5,"corridor_m":5,"reopening_horizon_days":30}
+```
+
+This fictional pair yields one reopening_risk, a two-calendar-day gap, computed polygon overlap and shared R-001, with approximate-location/source-schedule warnings and required human review. No loss, savings, safe-deferral or clearance value is calculated. Query `/conflict-analyses/{id}` to retrieve complete provenance; numerical/source methods are documented in ARCHITECTURE.
 
 **ComparisonResult**: `evaluation_ids`, `common_basis` (snapshot, horizon, cost_scope, currency, price basis and method), `rows` (evaluation ID, cost range or null, budget and status, upper-bound status, elapsed days, lane-closure-days, per-action lifespan ranges, known findings count, indeterminate checks count, review flags), `deltas` (pair IDs and central cost/closure-day differences, nullable when incomplete), `warnings`. No ranking is implied. Delta savings use the same cost scope and remain hypothetical when synthetic inputs occur.
 

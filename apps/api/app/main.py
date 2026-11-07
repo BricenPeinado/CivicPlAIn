@@ -16,6 +16,8 @@ from app.routes.roads import router
 from app.routes.planning import router as planning_router
 from app.core.planning_repository import PlanningRepository
 from app.services.estimates import MissingInputs
+from app.core.conflict_repository import ConflictRepository
+from app.routes.conflicts import router as conflicts_router
 
 
 def error(request, status, code, message, fields=None):
@@ -39,6 +41,7 @@ def create_app(settings: Settings | None = None):
     app = FastAPI(title="CivicPlAIn local API", version="0.1.0", lifespan=lifespan)
     app.state.repository = RoadRepository(settings.database_path)
     app.state.planning = PlanningRepository(settings.database_path)
+    app.state.conflicts = ConflictRepository(settings.database_path)
     app.add_middleware(CORSMiddleware, allow_origins=list(settings.allowed_origins),
                        allow_methods=["GET", "POST"], allow_headers=["Accept", "Content-Type"], expose_headers=["X-Request-ID"])
 
@@ -79,6 +82,7 @@ def create_app(settings: Settings | None = None):
 
     app.include_router(router)
     app.include_router(planning_router)
+    app.include_router(conflicts_router)
     return app
 
 

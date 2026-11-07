@@ -1,0 +1,56 @@
+{
+  "fixture_id": "demo-m3-v1",
+  "dataset_snapshot_id": "demo-m1-v1",
+  "synthetic_input": true,
+  "file": "projects.json",
+  "checksum_sha256": "c9ba3bb2b75e93acceac8689b8a1ce13463ebf1f90a790c12920d6abd89c0b1b",
+  "generator": "scripts/create_m3_fixture.py",
+  "project_count": 7,
+  "project_ids": [
+    "demo-road-project",
+    "demo-utility-project",
+    "demo-concurrent-project",
+    "demo-unrelated-project",
+    "demo-unknown-location",
+    "demo-unknown-schedule",
+    "demo-nearby-project"
+  ],
+  "expected_examples": {
+    "reopening_pair": [
+      "demo-road-project",
+      "demo-utility-project"
+    ],
+    "reopening_gap_days": 2,
+    "concurrent_pair": [
+      "demo-road-project",
+      "demo-concurrent-project"
+    ],
+    "overlap": [
+      "2027-04-05",
+      "2027-04-08"
+    ],
+    "unrelated": "demo-unrelated-project",
+    "unknown_location": "demo-unknown-location",
+    "unknown_schedule": "demo-unknown-schedule"
+  },
+  "evidence_source": {
+    "id": "demo-project-assumptions-v1",
+    "title": "CivicPlAIn fictional M3 work zones and coordination schedules",
+    "publisher": "CivicPlAIn demo authors",
+    "source_kind": "demo_assumption",
+    "verification_status": "synthetic_demo",
+    "uri": "data/demo/projects.json",
+    "retrieved_at": null,
+    "observed_on": null,
+    "version": "demo-m3-v1",
+    "checksum_sha256": "c9ba3bb2b75e93acceac8689b8a1ce13463ebf1f90a790c12920d6abd89c0b1b",
+    "original_crs": "EPSG:4326",
+    "coverage_note": "Seven fictional projects inside the schematic study window; includes incomplete location and schedule.",
+    "reliability_note": "Authored approximate polygons, categories, organizations, lane closures and dates; no observed utilities or real municipal schedules.",
+    "license_note": "Original fictional CivicPlAIn demo records; no redistributed third-party utility data.",
+    "unknown_reasons": {
+      "observed_on": "not_observed",
+      "retrieved_at": "authored_fixture"
+    }
+  }
+}

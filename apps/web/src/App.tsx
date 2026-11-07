@@ -3,6 +3,9 @@ import { useEffect, useState } from 'react';
 import { RoadMap, colors } from './features/map/RoadMap';
 import { getEvidence, getRoad, getRoads } from './services/api';
 import { categories, summarize, type Evidence, type Road, type RoadsCollection } from './types/api';
+import { infrastructureCategories, type InfrastructureCategory } from './types/api';
+import { ConflictReview } from './features/conflicts/ConflictReview';
+import { useConflicts } from './features/conflicts/useConflicts';
 
 function Glyph({ kind }: { kind: 'map' | 'grid' | 'layers' | 'road' }) {
   return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
@@ -27,6 +30,15 @@ export default function App() {
   const [detailRetry, setDetailRetry] = useState(0);
   const [query, setQuery] = useState('');
   const [view, setView] = useState<'map' | 'dashboard'>('map');
+  const coordination = useConflicts(roads);
+  const [selectedProject, setSelectedProject] = useState<string | null>(null);
+  const [selectedFinding, setSelectedFinding] = useState<string | null>(null);
+  const [showProjects, setShowProjects] = useState(true);
+  const [visibleCategories, setVisibleCategories] = useState<InfrastructureCategory[]>([...infrastructureCategories]);
+  const chooseRoad = (id: string) => { setSelected(id); setSelectedProject(null); setSelectedFinding(null); };
+  const chooseProject = (id: string) => { setSelectedProject(id); setSelectedFinding(null); };
+  const highlighted = coordination.analysis?.findings.find(f => f.id === selectedFinding);
+  useEffect(() => { setSelectedProject(null); setSelectedFinding(null); }, [coordination.analysis]);
   useEffect(() => {
     const controller = new AbortController();
     setRoads(null); setError(''); setSelected(null);
@@ -60,11 +72,11 @@ export default function App() {
       <nav aria-label="Workspace navigation">
         <button className={view === 'dashboard' ? 'nav-item active' : 'nav-item'} onClick={() => setView('dashboard')}><Glyph kind="grid"/>Dashboard</button>
         <button className={view === 'map' ? 'nav-item active' : 'nav-item'} onClick={() => setView('map')}><Glyph kind="map"/>Infrastructure map</button>
-        <div className="nav-item unavailable"><Glyph kind="layers"/>Projects <small>SOON</small></div>
+        <a className="nav-item" href="#coordination"><Glyph kind="layers"/>Project coordination</a>
         <div className="nav-item unavailable"><Glyph kind="road"/>Scenario planner <small>SOON</small></div>
         <div className="nav-item unavailable"><span aria-hidden="true">⚙</span>Settings <small>SOON</small></div>
       </nav>
-      <div className="sidebar-bottom"><span className="outline-label">MILESTONE 02</span><h3>Inspect every planning assumption.</h3><p>Compare deterministic repair estimates and inspect their evidence.</p><div className="sidebar-foot">LOCAL DEVELOPMENT <span>v0.1</span></div></div>
+      <div className="sidebar-bottom"><span className="outline-label">MILESTONE 03</span><h3>Coordinate with evidence.</h3><p>Inspect work zones, schedules and uncertainty before human review.</p><div className="sidebar-foot">LOCAL DEVELOPMENT <span>v0.1</span></div></div>
     </aside>
     <div className="workspace" id="workspace">
       <header className="topbar"><div><span className="breadcrumb">Workspace</span><span className="slash">/</span><strong>Lower Manhattan</strong></div><div className="source-status"><span className={error ? 'status-dot error-dot' : 'status-dot'} />{error ? 'API unavailable' : roads ? 'Local snapshot loaded' : 'Connecting to local API'}</div></header>
@@ -78,7 +90,10 @@ export default function App() {
         {error ? <section className="state-card" role="alert"><h2>Unable to load road data</h2><p>{error}</p><p>Start the local API and check its configured address, then try again.</p><button className="primary-button" onClick={() => setReload(v => v + 1)}>Retry connection</button></section> : !roads ? <section className="state-card" role="status"><span className="loading-ring"/><h2>Loading the study area</h2><p>Fetching road geometry and provenance from the local API…</p></section> : roads.features.length === 0 ? <section className="state-card"><h2>No road segments loaded</h2><p>The API is connected. Seed the local demonstration database to explore synthetic roads.</p><button className="primary-button" onClick={() => setReload(v => v + 1)}>Reload dataset</button></section> : <>
           <div className="explorer-grid">
             <section className="map-card"><div className="card-heading"><div><Glyph kind="map"/><h2>{view === 'map' ? 'Study area' : 'Study area preview'}</h2><span className="quiet-tag">Lower Manhattan, NYC</span></div><span className="subtle">{roads.features.length} segments</span></div>
-              <RoadMap roads={roads} selectedId={selected} onSelect={setSelected}/>
+              <RoadMap roads={roads} selectedId={selected} onSelect={chooseRoad} projects={coordination.projects}
+                onSelectProject={chooseProject} showProjects={showProjects} visibleCategories={visibleCategories}
+                highlightedProjects={highlighted?.project_ids || (selectedProject ? [selectedProject] : [])}
+                highlightedRoads={highlighted?.affected_road_ids || []}/>
               <div className="legend" aria-label="Road condition legend"><strong>DEMO CONDITION</strong>{categories.map(category => <span key={category}><i style={{ background: colors[category] }}/>{title(category)}</span>)}</div>
             </section>
             <aside className="detail-card" aria-label="Road details"><div className="card-heading"><h2>Segment details</h2><span className="subtle">{selected ? '01 selected' : 'No selection'}</span></div>
@@ -93,9 +108,13 @@ export default function App() {
               <div className="coverage-note"><strong>Utility information is unknown.</strong><p>This map does not establish excavation safety or authorize work.</p></div>
             </aside>
           </div>
+          <div id="coordination"><ConflictReview {...coordination} selectedRoad={selected} selectedProject={selectedProject}
+            selectedFinding={selectedFinding} onProject={chooseProject} onFinding={setSelectedFinding}
+            onAll={() => { setSelected(null); setSelectedProject(null); setSelectedFinding(null); }}
+            showProjects={showProjects} setShowProjects={setShowProjects} visibleCategories={visibleCategories} setVisibleCategories={setVisibleCategories}/></div>
           {detail && <RepairPlanner key={detail.id} road={detail}/>}
           <section className="road-list-card" aria-label="Keyboard accessible road list"><div className="list-heading"><div><p className="eyebrow">EXPLORE THE SNAPSHOT</p><h2>Road segments <span>{filtered.length}</span></h2></div><label className="search-box"><span aria-hidden="true">⌕</span><input aria-label="Find road segments" placeholder="Find a segment by name or ID" value={query} onChange={e => setQuery(e.target.value)}/></label></div>
-            <div className="road-list">{filtered.map(f => <button key={f.properties.id} className={selected === f.properties.id ? 'road-row selected' : 'road-row'} aria-pressed={selected === f.properties.id} onClick={() => setSelected(f.properties.id)}><span className="road-row-icon"><Glyph kind="road"/></span><span className="road-row-name"><strong>{f.properties.name || f.properties.id}</strong><small>{f.properties.id} · Synthetic geometry</small></span><Condition category={f.properties.condition_summary.category}/><span className="row-arrow" aria-hidden="true">↗</span></button>)}</div>
+            <div className="road-list">{filtered.map(f => <button key={f.properties.id} className={selected === f.properties.id ? 'road-row selected' : 'road-row'} aria-pressed={selected === f.properties.id} onClick={() => chooseRoad(f.properties.id)}><span className="road-row-icon"><Glyph kind="road"/></span><span className="road-row-name"><strong>{f.properties.name || f.properties.id}</strong><small>{f.properties.id} · Synthetic geometry</small></span><Condition category={f.properties.condition_summary.category}/><span className="row-arrow" aria-hidden="true">↗</span></button>)}</div>
             {filtered.length === 0 && <p className="search-empty">No segments match this search.</p>}
           </section>
         </>}

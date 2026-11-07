@@ -2,7 +2,7 @@
 
 BUHACKS 2026 — local municipal infrastructure decision-support prototype.
 
-Milestones 1 and 2 are implemented: React/TypeScript/Vite, Tailwind CSS, a selectable MapLibre map, FastAPI, and SQLite-backed synthetic roads. The map, road list, detail panel, provenance, and summary counts all use the same API dataset. M2 adds read-only assessment history, three repair alternatives, deterministic Decimal cost/duration calculations, immutable saved estimates, and comparison/detail panels. Conflicts, forecasting, optimization, scenarios and AI remain unimplemented. See [M2 implementation and verification](docs/M2_IMPLEMENTATION.md) and the historical [M1 report](docs/M1_IMPLEMENTATION.md).
+Milestones 1, 2 and 3 are implemented: React/TypeScript/Vite, Tailwind CSS, a selectable MapLibre map, FastAPI, and SQLite-backed synthetic roads. The map, road list, detail panel, provenance, and summary counts all use the same API dataset. M2 adds read-only assessment history, three repair alternatives, deterministic Decimal cost/duration calculations, immutable saved estimates, and comparison/detail panels. M3 adds persisted fictional work projects, projected spatial/temporal screening, immutable conflict snapshots and map/review panels. Forecasting, optimization, scenarios and AI remain unimplemented. See [M3 implementation and verification](docs/M3_IMPLEMENTATION.md). See [M2 implementation and verification](docs/M2_IMPLEMENTATION.md) and the historical [M1 report](docs/M1_IMPLEMENTATION.md).
 
 **DEMO DATA:** the 24 road segments are an authored schematic inside the chosen Lower Manhattan study window, not actual streets or municipal condition observations. There are six good, six fair, six poor, and six unknown demo conditions. M2 explicitly adds synthetic planning dimensions and dated synthetic assessments to four roads, plus an incomplete fifth asset. These dimensions are authored rectangular scopes, not measurements from geometry. Other dimensions, lane counts and utility information remain unknown. This application cannot establish excavation safety or authorize work.
 
@@ -103,9 +103,9 @@ apps/api/
     main.py, seed.py
     core/          configuration and road repository
     models/        SQLite schema/connection management
-    routes/        road and planning REST routes
+    routes/        roads, planning, projects and conflicts REST routes
     schemas/       Pydantic geometry, roads, planning, evidence and envelopes
-    services/      pure deterministic estimate engine
+    services/      pure deterministic estimate and conflict engines
   tests/           backend contract and persistence tests
 apps/web/
   package.json, package-lock.json, vite.config.ts, tsconfig.json, index.html
@@ -127,7 +127,7 @@ docs/              contracts, roadmap, design and verification evidence
 
 One React client calls one FastAPI modular monolith through REST. Standard-library `sqlite3` provides short-lived connections, parameterized SQL, foreign keys and transactional imports. Pydantic validates stored/read records and API responses; Shapely validates geometry and bbox intersections. No ORM or migration framework is needed; versioned additive SQLite DDL extends the three M1 tables without rewriting their payloads.
 
-M2 extends the existing repository with related maintenance attributes, normalized assessment history, a repair catalog and append-only estimates. Projects and utility-work lifecycle are deferred to M3, where they are needed; there is no duplicate application. AI, conflicts, scenarios, deployment and production authentication remain later work.
+M2 extends the existing repository with related maintenance attributes, normalized assessment history, a repair catalog and append-only estimates. M3 extends the same application with projects, conflict analysis and evidence review. AI, scenarios, deployment and production authentication remain later work.
 
 ## Documentation
 
@@ -156,3 +156,24 @@ Select R-001 (poor), R-002 (good), R-003 (fair), R-004 (unknown), or R-005 (larg
 `active_workdays = ceil(area / productivity_m2_per_active_workday)`; `total_preliminary_days = active_workdays + setup_days + curing_days`. No calendar completion date, weather/weekend model or contractor schedule is supplied. Missing dimensions block estimates unless explicitly supplied as planning assumptions. Every alternative requires engineering review; no price establishes feasibility or excavation safety.
 
 Rates, exclusions, productivity, source IDs and fixtures are in `data/demo/maintenance.json`, checked by `maintenance-manifest.json`; reproduce them with `python3 scripts/create_m2_fixture.py`. Estimates preserve complete input and evidence snapshots, hashes and `repair-estimate-v1`, with integer-cent totals and immutable JSON. See [M2 contracts](docs/DATA_MODEL.md) and [API request examples](docs/API_SPEC.md).
+
+## M3 project coordination workflow
+
+Install the updated pinned requirements (`.venv/bin/python -m pip install -r apps/api/requirements.txt`) and rerun the existing seed command to add seven **fictional** projects while preserving roads, estimates and local project edits. It now reports `M3 projects 7`. Restart the API to load M3; startup alone never imports fixtures. No key, LLM, external tiles, spatial database or remote projection service is used.
+
+The map loads all seven project records and automatically checks that bounded set. Select **Project coordination** in the sidebar, then a project or road to filter the review panel. Select **Potential pavement rework** to highlight both supplied work zones and related roads; inspect the two-day gap, sources, assumptions and required human review. The master checkbox and category checkboxes control map visibility only. Unknown-location records remain selectable in the list. Every finding has text, a selection mark and a thick outline; color is supplemented by category labels. See [demo steps](docs/DEMO_PLAN.md).
+
+The default fictional dataset yields **8 findings and 10 incomplete pair checks**, from 16 indexed candidate pairs out of 21 possible pairs. A finding is a coordination signal, never a final engineering determination, clearance, validated safety priority, proven damage or financial loss. Utility coverage stays unknown even with zero findings. No redundant cost or savings value is calculated.
+
+| Method/path | M3 behavior |
+| --- | --- |
+| GET `/api/v1/projects` | Stable-ID project list; road/kind/status filters and cursor pagination |
+| GET `/api/v1/projects/{id}` | Full project, schedule/location uncertainty and provenance |
+| POST `/api/v1/conflicts/analyze` | Validated selected scope, deterministic analysis, saved immutable source snapshot |
+| GET `/api/v1/conflicts` | Saved findings; project/road/analysis filters and pagination |
+| GET `/api/v1/conflicts/{id}` | Saved finding and analysis reference |
+| GET `/api/v1/conflict-analyses/{id}` | Saved inputs, sources, parameters, findings, unknown checks and hashes |
+
+Analysis uses valid GeoJSON in EPSG:4326, longitude/latitude, transformed by pinned pyproj to EPSG:32618 meters. STRtree narrows distance/corridor candidates; shared road references and unknown footprints are handled explicitly. Defaults: 5 m footprint proximity, 5 m centerline corridor tolerance, and a 30-calendar-day sequencing review window. These are screening assumptions, not positional accuracy. Civil-date intervals are half-open `[start, end)` in America/New_York; adjacent intervals do not overlap. Invalid topology and reversed intervals are rejected without geometry repair. Work zones must lie inside the bounded study window. See [method and limitations](docs/ARCHITECTURE.md).
+
+Fixtures: `data/demo/projects.json` and `projects-manifest.json`; reproduce with `python3 scripts/create_m3_fixture.py`. Additive schema version 3 stores projects, project-road links, analyses and findings; estimate immutability and original road payloads are retained. Identical input snapshots reuse the original analysis/findings and detection timestamp. Changed source contents or parameters produce a distinct snapshot. General project editing/import, observed municipal adapters and full review audit-event workflows remain future work. M4 is the next milestone and has not started.

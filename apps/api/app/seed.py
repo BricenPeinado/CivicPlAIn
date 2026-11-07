@@ -55,5 +55,6 @@ def seed(path, fixture_dir=ROOT / "data/demo"):
 
 if __name__ == "__main__":
     from app.seed_m2 import seed_m2
+    from app.seed_m3 import seed_m3
     path = Settings().database_path
-    print(f"Demo fixture ready: {seed(path)} synthetic road segments; M2 counts {seed_m2(path)}.")
+    print(f"Demo fixture ready: {seed(path)} synthetic road segments; M2 counts {seed_m2(path)}; M3 projects {seed_m3(path)}.")
