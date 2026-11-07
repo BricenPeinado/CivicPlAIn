@@ -1,6 +1,6 @@
 # MVP implementation roadmap
 
-Status: M0–M3 and M3.5 are complete locally; M4–M6 are unimplemented. M3.5 verification is recorded in [M3_5_COMPATIBILITY](M3_5_COMPATIBILITY.md). M3 verification is recorded in [M3_IMPLEMENTATION](M3_IMPLEMENTATION.md). M2 verification is recorded in [M2_IMPLEMENTATION](M2_IMPLEMENTATION.md). M1 verification is recorded in [M1_IMPLEMENTATION](M1_IMPLEMENTATION.md). Each milestone must satisfy its gate before the next; keep scope viable for one developer. M1–M3 file locations now exist; M4–M6 file locations remain planned.
+Status: M0–M3 and M3.5 are complete locally; M4 is implemented locally; M5–M6 remain unimplemented. See [M4_IMPLEMENTATION](M4_IMPLEMENTATION.md). M3.5 verification is recorded in [M3_5_COMPATIBILITY](M3_5_COMPATIBILITY.md). M3 verification is recorded in [M3_IMPLEMENTATION](M3_IMPLEMENTATION.md). M2 verification is recorded in [M2_IMPLEMENTATION](M2_IMPLEMENTATION.md). M1 verification is recorded in [M1_IMPLEMENTATION](M1_IMPLEMENTATION.md). Each milestone must satisfy its gate before the next; keep scope viable for one developer. M1–M3 file locations now exist; M4 files now exist; M5–M6 file locations remain planned.
 
 ## M0 — Foundation and repository setup
 
@@ -56,15 +56,17 @@ M3 result: seven persisted fictional work projects, multi-road links, explicit a
 - Acceptance: clean isolated npm ci, frontend tests/typecheck/build, backend regressions, database integrity and saved-input replay pass; existing data preserved; no scenario runtime models/tables/routes/evaluator/UI or calendar optimizer added. Actual commands and results are in M3_5_COMPATIBILITY.
 - Remaining M4 work: implement the frozen proposed contracts, shared quantity/cost helper and hypothetical adapter, snapshot persistence and comparison UI under separate authorization. Either retain honest indeterminate patch/restoration rows or add reviewed versioned catalog methods; never invent prices to complete a narrative.
 
-## M4 — Budget-aware scenario comparison
+## M4 — Budget-aware scenario comparison (complete locally)
 
 - Objective: compare three manually constructed alternatives with transparent scope and tradeoffs.
 - Dependencies: M3.5 contracts and regression gate; explicit repair/action assumptions and common source contents, roadwork-only budget basis and planning horizon.
 - Files/modules: models/schemas Scenario and ScenarioEvaluation; services scenarios/evaluation; routes scenarios/evaluations; web comparison; tests; demo scenarios.
 - Tasks: save draft scenarios with actions and budget; calculate costs, bounds, supplied-calendar elapsed time, explicit lane-closure-days, sourced-or-unknown lifespan and review flags; check central/upper affordability; store immutable snapshots/hashes; show exclusions and explicit repeat-restoration costs.
-- Acceptance: immediate/coordinated/staged results match the authoritative M2 components in DEMO_PLAN, retaining indeterminate totals for unpriced patch/restoration scopes; budget changes are visible; missing cost returns indeterminate; coordination includes a deferral review warning; no global optimality or safety claim.
+- Acceptance: before/after/coordinated synthetic scenarios match authoritative M2 components in DEMO_PLAN; optional explicit unpriced patch/restoration actions retain indeterminate totals; budget changes are visible; missing cost returns indeterminate; coordination includes a deferral review warning; no global optimality or safety claim.
 - Testing: totals and bounds, budget equality/zero, empty or duplicate actions, mismatched snapshots/cost scopes, unknown rates, shared mobilization, repeat runs, source mutation producing a new snapshot, immutable old evaluation.
 - Definition of done: complete comparison from saved input to UI is reproducible; constraints and assumptions are inspectable; all affordability labels qualified.
+
+M4 reconciliation: the authorized demo now uses the same resurfacing scope in three supplied schedule alternatives (before, after, coordinated overlap). The older immediate-plus-restoration/staged-patch narrative remains unpriced, with unavailable-input behavior tested rather than invented methods. Empty drafts are allowed; mutable drafts carry optimistic revisions; saved evaluations remain append-only. Calendar assumptions are recorded, not optimized. Nonempty shared-mobilization groups are explicitly rejected. M4 includes conservative Pareto comparison of fully available comparable objectives, with no weighted winner. See M4_IMPLEMENTATION for actual verification and limitations.
 
 ## M5 — AI explanations and responsible-AI controls
 

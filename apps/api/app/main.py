@@ -18,6 +18,8 @@ from app.core.planning_repository import PlanningRepository
 from app.services.estimates import MissingInputs
 from app.core.conflict_repository import ConflictRepository
 from app.routes.conflicts import router as conflicts_router
+from app.core.scenario_repository import ScenarioRepository
+from app.routes.scenarios import router as scenarios_router
 
 
 def error(request, status, code, message, fields=None):
@@ -42,8 +44,9 @@ def create_app(settings: Settings | None = None):
     app.state.repository = RoadRepository(settings.database_path)
     app.state.planning = PlanningRepository(settings.database_path)
     app.state.conflicts = ConflictRepository(settings.database_path)
+    app.state.scenarios = ScenarioRepository(settings.database_path)
     app.add_middleware(CORSMiddleware, allow_origins=list(settings.allowed_origins),
-                       allow_methods=["GET", "POST"], allow_headers=["Accept", "Content-Type"], expose_headers=["X-Request-ID"])
+                       allow_methods=["GET", "POST", "PATCH", "DELETE"], allow_headers=["Accept", "Content-Type"], expose_headers=["X-Request-ID"])
 
     @app.middleware("http")
     async def request_id(request: Request, call_next):
@@ -83,6 +86,7 @@ def create_app(settings: Settings | None = None):
     app.include_router(router)
     app.include_router(planning_router)
     app.include_router(conflicts_router)
+    app.include_router(scenarios_router)
     return app
 
 

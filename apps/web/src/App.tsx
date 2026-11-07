@@ -1,3 +1,4 @@
+import { ScenarioPlanner } from './features/scenarios/ScenarioPlanner';
 import { RepairPlanner } from './features/estimates/RepairPlanner';
 import { useEffect, useState } from 'react';
 import { RoadMap, colors } from './features/map/RoadMap';
@@ -29,6 +30,7 @@ export default function App() {
   const [detailError, setDetailError] = useState('');
   const [detailRetry, setDetailRetry] = useState(0);
   const [query, setQuery] = useState('');
+  const [plannerOpen, setPlannerOpen] = useState(false);
   const [view, setView] = useState<'map' | 'dashboard'>('map');
   const coordination = useConflicts(roads);
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
@@ -73,10 +75,10 @@ export default function App() {
         <button className={view === 'dashboard' ? 'nav-item active' : 'nav-item'} onClick={() => setView('dashboard')}><Glyph kind="grid"/>Dashboard</button>
         <button className={view === 'map' ? 'nav-item active' : 'nav-item'} onClick={() => setView('map')}><Glyph kind="map"/>Infrastructure map</button>
         <a className="nav-item" href="#coordination"><Glyph kind="layers"/>Project coordination</a>
-        <div className="nav-item unavailable"><Glyph kind="road"/>Scenario planner <small>SOON</small></div>
+        <button className={plannerOpen ? "nav-item active" : "nav-item"} onClick={() => { setPlannerOpen(v => !v); }}><Glyph kind="road"/>Scenario planner</button>
         <div className="nav-item unavailable"><span aria-hidden="true">⚙</span>Settings <small>SOON</small></div>
       </nav>
-      <div className="sidebar-bottom"><span className="outline-label">MILESTONE 03</span><h3>Coordinate with evidence.</h3><p>Inspect work zones, schedules and uncertainty before human review.</p><div className="sidebar-foot">LOCAL DEVELOPMENT <span>v0.1</span></div></div>
+      <div className="sidebar-bottom"><span className="outline-label">MILESTONE 04</span><h3>Coordinate with evidence.</h3><p>Inspect work zones, schedules and uncertainty before human review.</p><div className="sidebar-foot">LOCAL DEVELOPMENT <span>v0.1</span></div></div>
     </aside>
     <div className="workspace" id="workspace">
       <header className="topbar"><div><span className="breadcrumb">Workspace</span><span className="slash">/</span><strong>Lower Manhattan</strong></div><div className="source-status"><span className={error ? 'status-dot error-dot' : 'status-dot'} />{error ? 'API unavailable' : roads ? 'Local snapshot loaded' : 'Connecting to local API'}</div></header>
@@ -88,6 +90,7 @@ export default function App() {
           {categories.map(category => <article key={category}><div className="metric-label"><span className="metric-dot" style={{ background: colors[category] }}/>{title(category)}</div><strong>{roads ? counts[category] : '—'}</strong><small>{category === 'unknown' ? 'No demo assessment' : 'Synthetic condition'}</small></article>)}
         </section>
         {error ? <section className="state-card" role="alert"><h2>Unable to load road data</h2><p>{error}</p><p>Start the local API and check its configured address, then try again.</p><button className="primary-button" onClick={() => setReload(v => v + 1)}>Retry connection</button></section> : !roads ? <section className="state-card" role="status"><span className="loading-ring"/><h2>Loading the study area</h2><p>Fetching road geometry and provenance from the local API…</p></section> : roads.features.length === 0 ? <section className="state-card"><h2>No road segments loaded</h2><p>The API is connected. Seed the local demonstration database to explore synthetic roads.</p><button className="primary-button" onClick={() => setReload(v => v + 1)}>Reload dataset</button></section> : <>
+          {plannerOpen && <ScenarioPlanner roads={roads} selectedRoad={selected} projects={coordination.projects}/>}
           <div className="explorer-grid">
             <section className="map-card"><div className="card-heading"><div><Glyph kind="map"/><h2>{view === 'map' ? 'Study area' : 'Study area preview'}</h2><span className="quiet-tag">Lower Manhattan, NYC</span></div><span className="subtle">{roads.features.length} segments</span></div>
               <RoadMap roads={roads} selectedId={selected} onSelect={chooseRoad} projects={coordination.projects}

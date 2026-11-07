@@ -1,0 +1,506 @@
+[
+  {
+    "id": "demo-scenario-a",
+    "draft": {
+      "name": "A — repair before utility work",
+      "description": "SYNTHETIC HYPOTHETICAL DEMONSTRATION. Road repair precedes the supplied utility interval; potential rework is unpriced.",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "budget_usd": "60000.00",
+      "planning_start": "2027-04-01",
+      "planning_end": "2027-05-01",
+      "actions": [
+        {
+          "id": "road-repair",
+          "road_segment_id": "demo-r-001",
+          "action_kind": "repair",
+          "repair_category": "resurface",
+          "repair_option_id": "demo-resurface",
+          "scope": {
+            "extent": "whole_segment",
+            "description": "SYNTHETIC whole-road 100 m × 8 m authored repair scope; approximate project footprint only.",
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -74.0106,
+                    40.71148
+                  ],
+                  [
+                    -74.0094,
+                    40.71148
+                  ],
+                  [
+                    -74.0094,
+                    40.71172
+                  ],
+                  [
+                    -74.0106,
+                    40.71172
+                  ],
+                  [
+                    -74.0106,
+                    40.71148
+                  ]
+                ]
+              ]
+            },
+            "location_status": "approximate"
+          },
+          "quantity": {
+            "value": null,
+            "unit": "m2",
+            "derivation": "road_dimensions",
+            "length_m": null,
+            "width_m": null
+          },
+          "input_provenance": {
+            "repair_category": {
+              "basis": "planning_assumption",
+              "evidence_ids": [
+                "assumption:planning"
+              ],
+              "note": "SYNTHETIC DEMO: $60,000 roadwork-only budget, approximate footprint, calendar dates and one-lane closure are authored planning assumptions. Road repair precedes the supplied utility interval; potential rework is unpriced."
+            },
+            "repair_option_id": {
+              "basis": "planning_assumption",
+              "evidence_ids": [
+                "assumption:planning"
+              ],
+              "note": "SYNTHETIC DEMO: $60,000 roadwork-only budget, approximate footprint, calendar dates and one-lane closure are authored planning assumptions. Road repair precedes the supplied utility interval; potential rework is unpriced."
+            },
+            "scope": {
+              "basis": "planning_assumption",
+              "evidence_ids": [
+                "assumption:planning"
+              ],
+              "note": "SYNTHETIC DEMO: $60,000 roadwork-only budget, approximate footprint, calendar dates and one-lane closure are authored planning assumptions. Road repair precedes the supplied utility interval; potential rework is unpriced."
+            },
+            "quantity": {
+              "basis": "planning_assumption",
+              "evidence_ids": [
+                "assumption:planning"
+              ],
+              "note": "SYNTHETIC DEMO: $60,000 roadwork-only budget, approximate footprint, calendar dates and one-lane closure are authored planning assumptions. Road repair precedes the supplied utility interval; potential rework is unpriced."
+            },
+            "schedule": {
+              "basis": "planning_assumption",
+              "evidence_ids": [
+                "assumption:planning"
+              ],
+              "note": "SYNTHETIC DEMO: $60,000 roadwork-only budget, approximate footprint, calendar dates and one-lane closure are authored planning assumptions. Road repair precedes the supplied utility interval; potential rework is unpriced."
+            },
+            "constraints": {
+              "basis": "planning_assumption",
+              "evidence_ids": [
+                "assumption:planning"
+              ],
+              "note": "SYNTHETIC DEMO: $60,000 roadwork-only budget, approximate footprint, calendar dates and one-lane closure are authored planning assumptions. Road repair precedes the supplied utility interval; potential rework is unpriced."
+            },
+            "scope.geometry": {
+              "basis": "source_record",
+              "evidence_ids": [
+                "demo-project-assumptions-v1"
+              ],
+              "record_id": "demo-road-project",
+              "record_field": "geometry"
+            }
+          },
+          "unknown_reasons": {},
+          "related_project_ids": [
+            "demo-road-project",
+            "demo-utility-project"
+          ],
+          "schedule": {
+            "start_date": "2027-04-01",
+            "end_date": "2027-04-08",
+            "assumption_evidence_ids": [
+              "assumption:planning"
+            ],
+            "note": "SYNTHETIC DEMO: $60,000 roadwork-only budget, approximate footprint, calendar dates and one-lane closure are authored planning assumptions. Road repair precedes the supplied utility interval; potential rework is unpriced.",
+            "closure_intervals": [
+              {
+                "start_date": "2027-04-01",
+                "end_date": "2027-04-08",
+                "lanes_closed": 1,
+                "evidence_ids": [
+                  "assumption:planning"
+                ],
+                "note": "SYNTHETIC one-lane closure includes setup/curing; independent of preliminary estimate days."
+              }
+            ]
+          }
+        }
+      ],
+      "assumptions": [
+        {
+          "id": "planning",
+          "note": "SYNTHETIC DEMO: $60,000 roadwork-only budget, approximate footprint, calendar dates and one-lane closure are authored planning assumptions. Road repair precedes the supplied utility interval; potential rework is unpriced.",
+          "field_paths": [
+            "repair_category",
+            "repair_option_id",
+            "scope",
+            "quantity",
+            "schedule",
+            "constraints",
+            "project_overrides",
+            "budget_usd"
+          ]
+        }
+      ],
+      "external_project_ids": [
+        "demo-road-project",
+        "demo-utility-project"
+      ],
+      "project_overrides": [
+        {
+          "project_id": "demo-road-project",
+          "operation": "replace",
+          "replacement_action_ids": [
+            "road-repair"
+          ],
+          "reason": "SYNTHETIC alternative to original road schedule; original record remains untouched.",
+          "evidence_ids": [
+            "assumption:planning"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "demo-scenario-b",
+    "draft": {
+      "name": "B — repair after utility work",
+      "description": "SYNTHETIC HYPOTHETICAL DEMONSTRATION. Road repair follows the utility interval. Deferral needs engineering review.",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "budget_usd": "60000.00",
+      "planning_start": "2027-04-01",
+      "planning_end": "2027-05-01",
+      "actions": [
+        {
+          "id": "road-repair",
+          "road_segment_id": "demo-r-001",
+          "action_kind": "repair",
+          "repair_category": "resurface",
+          "repair_option_id": "demo-resurface",
+          "scope": {
+            "extent": "whole_segment",
+            "description": "SYNTHETIC whole-road 100 m × 8 m authored repair scope; approximate project footprint only.",
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -74.0106,
+                    40.71148
+                  ],
+                  [
+                    -74.0094,
+                    40.71148
+                  ],
+                  [
+                    -74.0094,
+                    40.71172
+                  ],
+                  [
+                    -74.0106,
+                    40.71172
+                  ],
+                  [
+                    -74.0106,
+                    40.71148
+                  ]
+                ]
+              ]
+            },
+            "location_status": "approximate"
+          },
+          "quantity": {
+            "value": null,
+            "unit": "m2",
+            "derivation": "road_dimensions",
+            "length_m": null,
+            "width_m": null
+          },
+          "input_provenance": {
+            "repair_category": {
+              "basis": "planning_assumption",
+              "evidence_ids": [
+                "assumption:planning"
+              ],
+              "note": "SYNTHETIC DEMO: $60,000 roadwork-only budget, approximate footprint, calendar dates and one-lane closure are authored planning assumptions. Road repair follows the utility interval. Deferral needs engineering review."
+            },
+            "repair_option_id": {
+              "basis": "planning_assumption",
+              "evidence_ids": [
+                "assumption:planning"
+              ],
+              "note": "SYNTHETIC DEMO: $60,000 roadwork-only budget, approximate footprint, calendar dates and one-lane closure are authored planning assumptions. Road repair follows the utility interval. Deferral needs engineering review."
+            },
+            "scope": {
+              "basis": "planning_assumption",
+              "evidence_ids": [
+                "assumption:planning"
+              ],
+              "note": "SYNTHETIC DEMO: $60,000 roadwork-only budget, approximate footprint, calendar dates and one-lane closure are authored planning assumptions. Road repair follows the utility interval. Deferral needs engineering review."
+            },
+            "quantity": {
+              "basis": "planning_assumption",
+              "evidence_ids": [
+                "assumption:planning"
+              ],
+              "note": "SYNTHETIC DEMO: $60,000 roadwork-only budget, approximate footprint, calendar dates and one-lane closure are authored planning assumptions. Road repair follows the utility interval. Deferral needs engineering review."
+            },
+            "schedule": {
+              "basis": "planning_assumption",
+              "evidence_ids": [
+                "assumption:planning"
+              ],
+              "note": "SYNTHETIC DEMO: $60,000 roadwork-only budget, approximate footprint, calendar dates and one-lane closure are authored planning assumptions. Road repair follows the utility interval. Deferral needs engineering review."
+            },
+            "constraints": {
+              "basis": "planning_assumption",
+              "evidence_ids": [
+                "assumption:planning"
+              ],
+              "note": "SYNTHETIC DEMO: $60,000 roadwork-only budget, approximate footprint, calendar dates and one-lane closure are authored planning assumptions. Road repair follows the utility interval. Deferral needs engineering review."
+            },
+            "scope.geometry": {
+              "basis": "source_record",
+              "evidence_ids": [
+                "demo-project-assumptions-v1"
+              ],
+              "record_id": "demo-road-project",
+              "record_field": "geometry"
+            }
+          },
+          "unknown_reasons": {},
+          "related_project_ids": [
+            "demo-road-project",
+            "demo-utility-project"
+          ],
+          "schedule": {
+            "start_date": "2027-04-15",
+            "end_date": "2027-04-22",
+            "assumption_evidence_ids": [
+              "assumption:planning"
+            ],
+            "note": "SYNTHETIC DEMO: $60,000 roadwork-only budget, approximate footprint, calendar dates and one-lane closure are authored planning assumptions. Road repair follows the utility interval. Deferral needs engineering review.",
+            "closure_intervals": [
+              {
+                "start_date": "2027-04-15",
+                "end_date": "2027-04-22",
+                "lanes_closed": 1,
+                "evidence_ids": [
+                  "assumption:planning"
+                ],
+                "note": "SYNTHETIC one-lane closure includes setup/curing; independent of preliminary estimate days."
+              }
+            ]
+          }
+        }
+      ],
+      "assumptions": [
+        {
+          "id": "planning",
+          "note": "SYNTHETIC DEMO: $60,000 roadwork-only budget, approximate footprint, calendar dates and one-lane closure are authored planning assumptions. Road repair follows the utility interval. Deferral needs engineering review.",
+          "field_paths": [
+            "repair_category",
+            "repair_option_id",
+            "scope",
+            "quantity",
+            "schedule",
+            "constraints",
+            "project_overrides",
+            "budget_usd"
+          ]
+        }
+      ],
+      "external_project_ids": [
+        "demo-road-project",
+        "demo-utility-project"
+      ],
+      "project_overrides": [
+        {
+          "project_id": "demo-road-project",
+          "operation": "replace",
+          "replacement_action_ids": [
+            "road-repair"
+          ],
+          "reason": "SYNTHETIC alternative to original road schedule; original record remains untouched.",
+          "evidence_ids": [
+            "assumption:planning"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "demo-scenario-c",
+    "draft": {
+      "name": "C — explicitly coordinated work",
+      "description": "SYNTHETIC HYPOTHETICAL DEMONSTRATION. Authored coordination assumption: roadwork and utility teams share an overlapping work window. This does not remove screening findings or produce savings.",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "budget_usd": "60000.00",
+      "planning_start": "2027-04-01",
+      "planning_end": "2027-05-01",
+      "actions": [
+        {
+          "id": "road-repair",
+          "road_segment_id": "demo-r-001",
+          "action_kind": "repair",
+          "repair_category": "resurface",
+          "repair_option_id": "demo-resurface",
+          "scope": {
+            "extent": "whole_segment",
+            "description": "SYNTHETIC whole-road 100 m × 8 m authored repair scope; approximate project footprint only.",
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -74.0106,
+                    40.71148
+                  ],
+                  [
+                    -74.0094,
+                    40.71148
+                  ],
+                  [
+                    -74.0094,
+                    40.71172
+                  ],
+                  [
+                    -74.0106,
+                    40.71172
+                  ],
+                  [
+                    -74.0106,
+                    40.71148
+                  ]
+                ]
+              ]
+            },
+            "location_status": "approximate"
+          },
+          "quantity": {
+            "value": null,
+            "unit": "m2",
+            "derivation": "road_dimensions",
+            "length_m": null,
+            "width_m": null
+          },
+          "input_provenance": {
+            "repair_category": {
+              "basis": "planning_assumption",
+              "evidence_ids": [
+                "assumption:planning"
+              ],
+              "note": "SYNTHETIC DEMO: $60,000 roadwork-only budget, approximate footprint, calendar dates and one-lane closure are authored planning assumptions. Authored coordination assumption: roadwork and utility teams share an overlapping work window. This does not remove screening findings or produce savings."
+            },
+            "repair_option_id": {
+              "basis": "planning_assumption",
+              "evidence_ids": [
+                "assumption:planning"
+              ],
+              "note": "SYNTHETIC DEMO: $60,000 roadwork-only budget, approximate footprint, calendar dates and one-lane closure are authored planning assumptions. Authored coordination assumption: roadwork and utility teams share an overlapping work window. This does not remove screening findings or produce savings."
+            },
+            "scope": {
+              "basis": "planning_assumption",
+              "evidence_ids": [
+                "assumption:planning"
+              ],
+              "note": "SYNTHETIC DEMO: $60,000 roadwork-only budget, approximate footprint, calendar dates and one-lane closure are authored planning assumptions. Authored coordination assumption: roadwork and utility teams share an overlapping work window. This does not remove screening findings or produce savings."
+            },
+            "quantity": {
+              "basis": "planning_assumption",
+              "evidence_ids": [
+                "assumption:planning"
+              ],
+              "note": "SYNTHETIC DEMO: $60,000 roadwork-only budget, approximate footprint, calendar dates and one-lane closure are authored planning assumptions. Authored coordination assumption: roadwork and utility teams share an overlapping work window. This does not remove screening findings or produce savings."
+            },
+            "schedule": {
+              "basis": "planning_assumption",
+              "evidence_ids": [
+                "assumption:planning"
+              ],
+              "note": "SYNTHETIC DEMO: $60,000 roadwork-only budget, approximate footprint, calendar dates and one-lane closure are authored planning assumptions. Authored coordination assumption: roadwork and utility teams share an overlapping work window. This does not remove screening findings or produce savings."
+            },
+            "constraints": {
+              "basis": "planning_assumption",
+              "evidence_ids": [
+                "assumption:planning"
+              ],
+              "note": "SYNTHETIC DEMO: $60,000 roadwork-only budget, approximate footprint, calendar dates and one-lane closure are authored planning assumptions. Authored coordination assumption: roadwork and utility teams share an overlapping work window. This does not remove screening findings or produce savings."
+            },
+            "scope.geometry": {
+              "basis": "source_record",
+              "evidence_ids": [
+                "demo-project-assumptions-v1"
+              ],
+              "record_id": "demo-road-project",
+              "record_field": "geometry"
+            }
+          },
+          "unknown_reasons": {},
+          "related_project_ids": [
+            "demo-road-project",
+            "demo-utility-project"
+          ],
+          "schedule": {
+            "start_date": "2027-04-10",
+            "end_date": "2027-04-17",
+            "assumption_evidence_ids": [
+              "assumption:planning"
+            ],
+            "note": "SYNTHETIC DEMO: $60,000 roadwork-only budget, approximate footprint, calendar dates and one-lane closure are authored planning assumptions. Authored coordination assumption: roadwork and utility teams share an overlapping work window. This does not remove screening findings or produce savings.",
+            "closure_intervals": [
+              {
+                "start_date": "2027-04-10",
+                "end_date": "2027-04-17",
+                "lanes_closed": 1,
+                "evidence_ids": [
+                  "assumption:planning"
+                ],
+                "note": "SYNTHETIC one-lane closure includes setup/curing; independent of preliminary estimate days."
+              }
+            ]
+          }
+        }
+      ],
+      "assumptions": [
+        {
+          "id": "planning",
+          "note": "SYNTHETIC DEMO: $60,000 roadwork-only budget, approximate footprint, calendar dates and one-lane closure are authored planning assumptions. Authored coordination assumption: roadwork and utility teams share an overlapping work window. This does not remove screening findings or produce savings.",
+          "field_paths": [
+            "repair_category",
+            "repair_option_id",
+            "scope",
+            "quantity",
+            "schedule",
+            "constraints",
+            "project_overrides",
+            "budget_usd"
+          ]
+        }
+      ],
+      "external_project_ids": [
+        "demo-road-project",
+        "demo-utility-project"
+      ],
+      "project_overrides": [
+        {
+          "project_id": "demo-road-project",
+          "operation": "replace",
+          "replacement_action_ids": [
+            "road-repair"
+          ],
+          "reason": "SYNTHETIC alternative to original road schedule; original record remains untouched.",
+          "evidence_ids": [
+            "assumption:planning"
+          ]
+        }
+      ]
+    }
+  }
+]

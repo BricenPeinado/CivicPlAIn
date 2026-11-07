@@ -278,7 +278,7 @@ def test_additive_migration_and_seed_preserve_existing(db):
         assert conn.execute('SELECT payload FROM roads ORDER BY id').fetchall() == before
         assert conn.execute("SELECT payload FROM work_projects WHERE id='demo-road-project'").fetchone()[0] == changed
         assert conn.execute('SELECT count(*) FROM project_roads').fetchone()[0] == 6
-        assert conn.execute('SELECT max(version) FROM schema_migrations').fetchone()[0] == 3
+        assert conn.execute('SELECT max(version) FROM schema_migrations').fetchone()[0] == 4
 
 
 def test_unseeded_api_no_auto_import(tmp_path):
