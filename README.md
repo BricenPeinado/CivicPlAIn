@@ -2,7 +2,9 @@
 
 BUHACKS 2026 — local municipal infrastructure decision-support prototype.
 
-Milestones 1, 2 and 3 are implemented: React/TypeScript/Vite, Tailwind CSS, a selectable MapLibre map, FastAPI, and SQLite-backed synthetic roads. The map, road list, detail panel, provenance, and summary counts all use the same API dataset. M2 adds read-only assessment history, three repair alternatives, deterministic Decimal cost/duration calculations, immutable saved estimates, and comparison/detail panels. M3 adds persisted fictional work projects, projected spatial/temporal screening, immutable conflict snapshots and map/review panels. M3.5 fixes frontend dependency portability and documents versioned proposed-action, scheduling and hypothetical-screening contracts. M4 adds editable hypothetical scenarios, immutable evaluations, budget sensitivity, reused conflict screening and side-by-side comparison. M5 adds an evidence-grounded advisor, optional server-side OpenAI selection, deterministic offline explanations, and append-only interaction/review audits. Forecasting remains unimplemented. See [M5 implementation and verification](docs/M5_IMPLEMENTATION.md). See [M4 implementation and verification](docs/M4_IMPLEMENTATION.md). See [M3.5 compatibility verification](docs/M3_5_COMPATIBILITY.md). See [M3 implementation and verification](docs/M3_IMPLEMENTATION.md). See [M2 implementation and verification](docs/M2_IMPLEMENTATION.md) and the historical [M1 report](docs/M1_IMPLEMENTATION.md).
+Milestones **0–6 are complete locally** for the bounded hackathon demonstrator. One React/TypeScript/Vite client calls one FastAPI modular monolith with SQLite. Select a road on the local MapLibre schematic, inspect synthetic condition/provenance, compare deterministic repair estimates, review spatial/date conflicts, compare saved hypothetical scenarios and inspect evidence-grounded explanations with useful offline fallback. M6 adds an API-backed **Explore Demo** guide, focused accessibility/readability fixes, lazy map/scenario loading, local request safeguards and an isolated startup helper. See [final QA and the 24-item acceptance checklist](docs/FINAL_QA_REPORT.md), [demo script](docs/HACKATHON_DEMO.md), [limitations](docs/KNOWN_LIMITATIONS.md) and [presentation outline](docs/PRESENTATION_OUTLINE.md).
+
+No production municipal use, verified cost savings, excavation clearance, automatic approval, live data ingestion or forecasting is claimed. Historical milestone reports record their original scope; the M6 report and current shared contracts describe this release.
 
 **DEMO DATA:** the 24 road segments are an authored schematic inside the chosen Lower Manhattan study window, not actual streets or municipal condition observations. There are six good, six fair, six poor, and six unknown demo conditions. M2 explicitly adds synthetic planning dimensions and dated synthetic assessments to four roads, plus an incomplete fifth asset. These dimensions are authored rectangular scopes, not measurements from geometry. Other dimensions, lane counts and utility information remain unknown. This application cannot establish excavation safety or authorize work.
 
@@ -21,7 +23,19 @@ PYTHONPATH=apps/api .venv/bin/python -m app.seed
 
 Python's complete resolved dependency set is pinned in `apps/api/requirements.txt`; direct dependency ranges are recorded in `requirements.in`. JavaScript dependencies use exact versions and `package-lock.json`, including project-local `@types/node` 22.20.5 with explicit Node typing for the test/configuration imports. No parent-directory type installation is required. No global installs, external database, map-provider key, or OpenAI key are required.
 
-## Start and stop
+## Quick isolated demo
+
+After installing dependencies above, run:
+
+```sh
+.venv/bin/python scripts/demo.py
+```
+
+Open **http://127.0.0.1:5173/** → **Explore Demo**. Every run creates a fresh ignored `data/tmp/m6-demo-*/demo.sqlite3`, seeds deterministically and forces no-key deterministic AI. The ordinary database and every earlier demo remain intact. Ctrl+C stops only the helper's child servers; files are retained. This is the safe reset procedure: initialize a new isolated environment, with no deletion/reset of existing records.
+
+Occupied ports: `.venv/bin/python scripts/demo.py --api-port 8016 --web-port 5186`. Production assets: add `--production` (builds first). The helper waits for API health, refuses occupied ports, and never installs dependencies. It supports the verified POSIX/macOS environment. See [exact demo interactions and recovery](docs/HACKATHON_DEMO.md).
+
+## Start and stop with the ordinary persistent database
 
 Start the API in terminal 1, from the repository root:
 
@@ -82,7 +96,7 @@ npm run build --prefix apps/web
 git diff --check
 ```
 
-No lint command is configured. The frontend build emits Vite's large-chunk advisory for MapLibre; the build succeeds. Starlette currently emits a deprecation warning for its httpx-based test client; tests pass. These limits are recorded in the M1 report.
+No lint command is configured. M6 verification: **212 backend / 57 frontend tests pass**, typecheck and production build pass, including clean dependency installations. MapLibre is lazy-loaded separately from the ~273 kB application shell; its ~1,069 kB module and ~519 kB local worker retain Vite's large-chunk advisory. Starlette's httpx test-client deprecation remains nonblocking. Browser dev/production checks and scoped npm audit results are recorded in FINAL_QA_REPORT; no lint command is configured.
 
 To preview the production build, allow `http://127.0.0.1:4173` in the API's local origins, restart the API, then run `npm run preview --prefix apps/web`. The ordinary dev commands use port 5173.
 
@@ -123,7 +137,7 @@ data/tmp/          ignored local runtime database
 docs/              contracts, roadmap, design and verification evidence
 ```
 
-## Architecture and next milestone
+## Architecture and release boundary
 
 One React client calls one FastAPI modular monolith through REST. Standard-library `sqlite3` provides short-lived connections, parameterized SQL, foreign keys and transactional imports. Pydantic validates stored/read records and API responses; Shapely validates geometry and bbox intersections. No ORM or migration framework is needed; versioned additive SQLite DDL extends the three M1 tables without rewriting their payloads.
 
@@ -140,7 +154,11 @@ M2 extends the existing repository with related maintenance attributes, normaliz
 - [AI system](docs/AI_SYSTEM.md)
 - [Responsible AI](docs/RESPONSIBLE_AI.md)
 - [Data sources and study area](docs/DATA_SOURCES.md)
-- [Demo plan](docs/DEMO_PLAN.md)
+- [Current hackathon demo and recovery](docs/HACKATHON_DEMO.md)
+- [Final QA report](docs/FINAL_QA_REPORT.md)
+- [Known limitations](docs/KNOWN_LIMITATIONS.md)
+- [Presentation outline](docs/PRESENTATION_OUTLINE.md)
+- [Demo plan index](docs/DEMO_PLAN.md)
 - [M3.5 compatibility verification](docs/M3_5_COMPATIBILITY.md)
 - [Historical foundation inspection](docs/FOUNDATION_INSPECTION.md)
 - [M1 implementation and verification](docs/M1_IMPLEMENTATION.md)
@@ -218,4 +236,4 @@ Run the offline demonstration without modifying existing databases:
 PYTHONPATH=apps/api .venv/bin/python scripts/verify_m5.py
 ```
 
-See [AI_SYSTEM](docs/AI_SYSTEM.md), [RESPONSIBLE_AI](docs/RESPONSIBLE_AI.md), [M5 verification](docs/M5_IMPLEMENTATION.md) and the [demo walkthrough](docs/DEMO_PLAN.md). M6 has not started.
+See [AI_SYSTEM](docs/AI_SYSTEM.md), [RESPONSIBLE_AI](docs/RESPONSIBLE_AI.md), historical [M5 verification](docs/M5_IMPLEMENTATION.md), the current [demo walkthrough](docs/HACKATHON_DEMO.md) and [final M6 verification](docs/FINAL_QA_REPORT.md).

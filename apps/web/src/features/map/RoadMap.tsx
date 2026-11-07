@@ -6,7 +6,8 @@ import type { RoadsCollection, WorkProject, InfrastructureCategory } from '../..
 import { categoryColors } from '../conflicts/ConflictReview';
 // Bundle the ESM worker locally; MapLibre v6 cannot infer its URL after Vite bundling.
 maplibregl.setWorkerUrl(workerUrl);
-export const colors = { good: '#277953', fair: '#bd831f', poor: '#c45e4d', unknown: '#859198' };
+import { colors } from './colors';
+export { colors } from './colors';
 const BOUNDS: [number, number, number, number] = [-74.012, 40.710, -74.000, 40.720];
 interface Props { roads: RoadsCollection; selectedId: string | null; onSelect: (id: string) => void;
   projects?: WorkProject[]; highlightedProjects?: string[]; highlightedRoads?: string[];
@@ -98,9 +99,12 @@ export function RoadMap({ roads, selectedId, onSelect, projects = EMPTY, highlig
     (map.current.getSource('projects') as GeoJSONSource).setData({ type: 'FeatureCollection', features: visible.map(p => ({
       type: 'Feature', id: p.id, geometry: p.geometry!, properties: { project_id: p.id, category: p.infrastructure_category, color: categoryColors[p.infrastructure_category], name: p.title },
     })) });
+  }, [projects, showProjects, visibleCategories, ready]);
+  useEffect(() => {
+    if (!ready || !map.current) return;
     map.current.setFilter('project-selected', ['in', ['get', 'project_id'], ['literal', highlightedProjects]]);
     map.current.setFilter('road-conflict', ['in', ['get', 'road_id'], ['literal', highlightedRoads]]);
-  }, [projects, highlightedProjects, highlightedRoads, showProjects, visibleCategories, ready]);
+  }, [highlightedProjects, highlightedRoads, ready]);
   return <section className="map-stage" aria-label="Interactive schematic infrastructure map">
     <div ref={container} className="map-canvas" />
     <div className="map-stamp"><span className="live-dot" /> LOCAL SCHEMATIC <span>EPSG:4326</span></div>

@@ -172,3 +172,14 @@ React `features/scenarios` integrates with App's current selected road and exist
 The provider has no SQL, files, arbitrary Python, web access or mutation tools. Only selected fact/evidence IDs, template/review codes and the exact context hash are accepted; the server renders all claims. No model-written factual prose is returned. The existing monolith and `/api/v1` boundary are preserved. Runtime table creation is additive migration 5; no existing estimate, conflict or scenario payload is rewritten. See [AI_SYSTEM](AI_SYSTEM.md) for configuration, limits, privacy and residual risks.
 
 `features/ai/AIAdvisor` is shared by the existing road, project, estimate, conflict, evaluation and scenario-comparison views. It calls the central typed API client, displays server values and evidence references, keeps facts distinct from review templates, and cancels requests when context changes. It never invents output on API failure. ReviewNote submits only a human-authored local annotation, independently of the model.
+
+
+## M6 final integration and runtime boundary
+
+The modular monolith, REST boundary, SQLite schema and M1–M5 calculation/provider contracts remain unchanged. No migration, new dependency, pricing method or post-MVP capability was introduced. The current status/verification authority is [FINAL_QA_REPORT](FINAL_QA_REPORT.md).
+
+React lazily imports MapLibre and the scenario planner separately from the shell. Shared condition colors reside in a small module so legends do not import the WebGL engine. Feature error boundaries preserve the rest of the workspace if a module fails; maps retain their existing construction/resource-error road-list fallback. Map project-source updates are separate from highlight-filter changes. Planner navigation opens the existing editor instead of toggling/unmounting it. A lightweight guide resolves known synthetic IDs against actual loaded API records and only navigates/selects; it never seeds or creates analytical results.
+
+`core/http_limits.py` buffers at most 1 MiB of request body before parsing, applies a 10-second arrival deadline and rejects foreign browser origins for mutation methods. CORS and request correlation surround this guard; errors stay sanitized. This limits one class of local resource/origin misuse without claiming a production rate limiter or identity system. AI retains its independent evidence/output/concurrency/hourly bounds.
+
+`scripts/demo.py` uses standard-library subprocesses, explicit loopback ports, API readiness polling, forced deterministic AI and a new ignored SQLite path per run. It retains every database and stops only child process groups. A production invocation builds the frontend with the matching API URL before preview. Safe recovery is fresh isolated initialization rather than deleting/editing existing demo records. POSIX/macOS was verified; cross-platform packaging is outside M6.

@@ -10,6 +10,7 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException
 
 from app.core.config import Settings
+from app.core.http_limits import RequestLimits
 from app.core.repository import InvalidQuery, RoadRepository
 from app.models.database import initialize
 from app.routes.roads import router
@@ -51,6 +52,7 @@ def create_app(settings: Settings | None = None, ai_settings=None, ai_provider=N
     app.state.scenarios = ScenarioRepository(settings.database_path)
     ai_settings = ai_settings or AISettings()
     app.state.ai = AIExplanationService(ai_settings, ai_provider or OpenAIProvider(ai_settings), AIInteractionAuditRepository(settings.database_path))
+    app.add_middleware(RequestLimits, allowed_origins=settings.allowed_origins)
     app.add_middleware(CORSMiddleware, allow_origins=list(settings.allowed_origins),
                        allow_methods=["GET", "POST", "PATCH", "DELETE"], allow_headers=["Accept", "Content-Type"], expose_headers=["X-Request-ID"])
 

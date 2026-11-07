@@ -1,6 +1,6 @@
 # CivicPlAIn product specification
 
-Status: M2 implements local map/list selection, synthetic maintenance attributes and assessment history, three repair categories, deterministic cost/preliminary-duration estimates, immutable snapshots and comparison/breakdown panels. M3 additionally implements persisted fictional work projects, deterministic spatial/temporal conflict screening, source snapshots and map/review panels. M4 adds hypothetical scenario editing, immutable evaluation and budget/tradeoff comparison. Generative explanations and review-note submission remain unimplemented.
+Status: M2 implements local map/list selection, synthetic maintenance attributes and assessment history, three repair categories, deterministic cost/preliminary-duration estimates, immutable snapshots and comparison/breakdown panels. M3 additionally implements persisted fictional work projects, deterministic spatial/temporal conflict screening, source snapshots and map/review panels. M4 adds hypothetical scenario editing, immutable evaluation and budget/tradeoff comparison. M5 implements bounded evidence explanations, optional provider fact selection, offline fallback and human review-note submission. M6 verifies final local integration/demo readiness; see FINAL_QA_REPORT. No unrestricted generative factual prose or production authorization is offered.
 
 ## Users and problem
 
@@ -46,7 +46,7 @@ These may be panels on one page; separate routed pages are not required.
 ## Nonfunctional requirements
 
 - NFR1: Repeated domain calculations with identical canonical inputs and method version yield identical semantic results; timestamps/IDs may differ and are excluded from result hashes.
-- NFR2: Target map readiness within 3 seconds and domain evaluations within 1 second on a documented local demo machine, for at most 30 segments and 50 projects. These are unmeasured targets, verified in M6.
+- NFR2: Target map readiness within 3 seconds and domain evaluations within 1 second on a documented local demo machine, for at most 30 segments and 50 projects. M6 measured warm loopback domain requests on the small fixture below one second; cold map readiness remains an unmeasured target. See FINAL_QA_REPORT for samples and limits.
 - NFR3: Core demo runs locally without an API key or external data service after setup; local GeoJSON remains usable when map tiles fail.
 - NFR4: Keyboard selection, text alternatives, visible focus, and non-color warning indicators are required. M6 records accessibility checks; no certification is claimed.
 - NFR5: Reject malformed geometry, invalid schedules, inconsistent units, and missing references. Errors identify fields without exposing stack traces or secrets.

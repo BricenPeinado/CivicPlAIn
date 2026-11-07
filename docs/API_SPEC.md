@@ -1,10 +1,10 @@
 # REST API contract
 
-**Implemented through M4:** the five M1 GET paths plus GET `/api/v1/road-segments/{id}/conditions`, GET `/api/v1/repair-options`, GET `/api/v1/road-segments/{id}/repair-options`, POST `/api/v1/estimates`, GET `/api/v1/estimates/{id}`. M3 additionally implements project list/detail, conflict analysis/list/detail and saved analysis retrieval below. M3.5 provided the scenario contracts; M4 implements scenario CRUD, immutable evaluation and comparison below. M5 explanation and human-review routes are implemented in the M5 section below. Base `/api/v1`, local server `http://127.0.0.1:8000`; no `/api/roads` or root `/health` aliases.
+**Implemented through M5; integrated/verified in M6:** the five M1 GET paths plus GET `/api/v1/road-segments/{id}/conditions`, GET `/api/v1/repair-options`, GET `/api/v1/road-segments/{id}/repair-options`, POST `/api/v1/estimates`, GET `/api/v1/estimates/{id}`. M3 additionally implements project list/detail, conflict analysis/list/detail and saved analysis retrieval below. M3.5 provided the scenario contracts; M4 implements scenario CRUD, immutable evaluation and comparison below. M5 explanation and human-review routes are implemented in the M5 section below. Base `/api/v1`, local server `http://127.0.0.1:8000`; no `/api/roads` or root `/health` aliases.
 
 ## Transport conventions
 
-JSON except road feature collection responses, which use `application/geo+json`. Required request fields are listed with `!`; other fields are optional. IDs reference the same snapshot. Unknown fields are rejected in mutation/calculation inputs. Money is a two-decimal USD string; dates and geometry follow DATA_MODEL. Lists use `limit` 1–100 (default 30), opaque `cursor`, and stable ID ordering. M1 cursors encode the last ID, snapshot and bbox and reject mismatched filters/snapshots; clients must treat them as opaque. Bbox is an exact geometry intersection filter, including boundary contact. Proposed deterministic routes never invoke an LLM.
+JSON except road feature collection responses, which use `application/geo+json`. Required request fields are listed with `!`; other fields are optional. IDs reference the same snapshot. Unknown fields are rejected in mutation/calculation inputs. Money is a two-decimal USD string; dates and geometry follow DATA_MODEL. Lists use `limit` 1–100 (default 30), opaque `cursor`, and stable ID ordering. M1 cursors encode the last ID, snapshot and bbox and reject mismatched filters/snapshots; clients must treat them as opaque. Bbox is an exact geometry intersection filter, including boundary contact. Deterministic domain routes never invoke an LLM. Only explicit AI-mode requests to /ai/* may attempt a configured provider.
 
 Ordinary success: `{ "data": <entity or list>, "meta": { "request_id": "...", "dataset_snapshot_id": "...", "warnings": [], "next_cursor": null } }`. For health, dataset_snapshot_id is null before seed. For GeoJSON, the top-level object is a FeatureCollection with `features` plus foreign member `meta` using the same metadata. Each feature ID is the RoadSegment ID and properties contain RecordMeta and non-geometry RoadSegment fields. M1 also includes the documented synthetic `condition_summary` projection (category, nullable decimal rating/scale/date, evidence_ids, data_kind and synthetic_input); it is not a municipal assessment or a separate mutable entity. Record detail includes nullable fields and unknown reasons, not fabricated defaults.
 
@@ -22,7 +22,7 @@ Roads, planning, projects and M3 conflict routes listed as implemented below wor
 | GET `/road-segments` | bbox optional `[west,south,east,north]` as comma-separated query; limit/cursor | 200 RoadSegment list | valid lon/lat bounds, west<east, south<north; 422 invalid cursor/bbox | deterministic read |
 | GET `/road-segments/geojson` | same filters/pagination as list | 200 GeoJSON FeatureCollection | same 422 rules; implement static route before `/{id}` | deterministic read |
 | GET `/road-segments/{id}` | ID | 200 RoadSegment | 404 missing ID | deterministic read |
-| GET `/road-segments/{id}/assets` | road ID, limit/cursor | 200 InfrastructureAsset list | 404 road not found | deterministic read |
+| GET `/road-segments/{id}/assets` | Future contract only | Not implemented (404) | Generic asset ingestion remains deferred | none |
 | GET `/road-segments/{id}/conditions` | road ID; complete bounded fixture history (no pagination) | 200 Assessment list in newest-date/stable-ID order; meta.latest_usable_id nullable | 404 road not found; latest selection uses date/stable-ID rule | deterministic read |
 | GET `/projects` | road_segment_id, kind, schedule_status, limit/cursor optional | 200 WorkProject list, stable ID order; no utility_work child | 422 invalid enum/cursor; 404 supplied road missing | implemented deterministic read/filter |
 | GET `/projects/{id}` | ID | 200 WorkProject including uncertainty and provenance | 404 missing ID | implemented deterministic read |
@@ -79,7 +79,7 @@ For example, this is only a QuantityProposal fragment for whole-segment R-001, n
 {"value":null,"unit":"m2","derivation":"road_dimensions","length_m":null,"width_m":null}
 ```
 
-The future service resolves the exact frozen road inputs to 100 m × 8 m = 800 m², preserving synthetic dimension provenance. It does not derive scope from the map geometry. A partial-area fragment instead uses explicit_area with a positive sourced value or unknown with a missing-input reason; there is no implicit whole-road fallback. Inline assumptions must be authored and referenced as specified in DATA_MODEL, not presented as observed records.
+The implemented service resolves the exact frozen road inputs to 100 m × 8 m = 800 m², preserving synthetic dimension provenance. It does not derive scope from the map geometry. A partial-area fragment instead uses explicit_area with a positive sourced value or unknown with a missing-input reason; there is no implicit whole-road fallback. Inline assumptions must be authored and referenced as specified in DATA_MODEL, not presented as observed records.
 
 Validation/save: 201 for a structurally valid draft, including explicit unknown quantity/method/dates; until shared-cost support exists, nonempty mobilization_groups must instead return an explicit 422 unsupported-adjustment error. 422 for invalid geometry, inconsistent quantities/units/category, extra fields, duplicate actions/IDs, reversed/out-of-horizon dates, constraint cycles, malformed overrides or negative budget; 404 for unknown non-null road/option/project/source references; 409 for incompatible snapshot or source contents. A known category with null method is allowed only with a reason and unavailable cost; a named option inconsistent with category is 422. Missing required estimate inputs still return 422 on the existing `/estimates` endpoint, whose request shape is unchanged.
 
@@ -164,3 +164,12 @@ Examples (replace saved IDs with API results):
 ```
 
 The established local-only unauthenticated deployment remains; no production authorization/tenant isolation is introduced. No endpoint exposes AI mutation tools or changes existing municipal/domain records.
+
+
+## M6 transport reliability and security boundary
+
+No domain route shape, calculation version or fixture changed. All HTTP request bodies are capped at **1,048,576 bytes (1 MiB)** before JSON parsing, including chunked bodies without Content-Length. Oversize requests return **413 REQUEST_TOO_LARGE**; invalid content lengths return **400 INVALID_CONTENT_LENGTH**; body arrival exceeding 10 seconds returns **408 REQUEST_TIMEOUT**. These errors use the existing sanitized envelope and X-Request-ID. Domain-specific count/length/geometry validation still applies within this cap.
+
+POST/PATCH/DELETE carrying an Origin outside the configured explicit loopback origins return **403 ORIGIN_NOT_ALLOWED**, including Origin null. Missing Origin remains supported for local CLI clients. CORS continues restricting browser reads/preflights to the configured loopback origins. These are local demo protections, not authentication or authorization; untrusted local processes remain outside the protection boundary. Bind only to loopback. The frontend retains its 10-second request deadline and explicit retry states; never assume an interrupted POST did not persist.
+
+M6 browser checks exercise actual REST requests in development and production, including saved estimate creation/retrieval, conflict evidence, scenario creation/evaluation/comparison and explanation fallback. Exact evidence is in [FINAL_QA_REPORT](FINAL_QA_REPORT.md).

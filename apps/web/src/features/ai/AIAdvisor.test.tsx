@@ -35,6 +35,9 @@ it.each([
   const links=screen.getAllByRole('link',{name:'Inspect source 1'});
   const target=links[0].getAttribute('href')!.slice(1);
   expect(document.getElementById(target)).toHaveTextContent('saved-estimate');
+  await user.click(links[0]);
+  expect(screen.getByText('Supporting evidence (1)').closest('details')).toHaveAttribute('open');
+  expect(document.getElementById(target)).toHaveFocus();
 });
 it('submits a bounded question, optional provider mode, and transparent disclosure',async()=>{
   const user=userEvent.setup();render(<AIAdvisor context={{type:'road',record_ids:['road-a']}}/>);

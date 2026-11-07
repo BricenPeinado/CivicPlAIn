@@ -17,6 +17,13 @@ function Advisor({ context, label }: { context: AIContext; label: string }) {
   const pending = useRef<AbortController | null>(null);
   const statusPending = useRef<AbortController | null>(null);
   const sourcePrefix = useId();
+  const sources = useRef<HTMLDetailsElement>(null);
+  function inspectSource(id: string) {
+    if (sources.current) sources.current.open = true;
+    const target = document.getElementById(id);
+    target?.scrollIntoView?.({ block: 'nearest' });
+    target?.focus();
+  }
   useEffect(() => () => { pending.current?.abort(); statusPending.current?.abort(); }, []);
   async function run(ask = false) {
     pending.current?.abort(); const controller = new AbortController(); pending.current = controller;
@@ -35,7 +42,7 @@ function Advisor({ context, label }: { context: AIContext; label: string }) {
   const findings = (classification: string) => answer?.key_findings.filter(f => f.classification === classification) || [];
   const list = (items: string[]) => <ul>{items.map((s,i) => <li key={i}>{s}</li>)}</ul>;
   function factList(classification: string) {
-    return <ul className="advisor-findings" tabIndex={0} aria-label="Scrollable source-backed findings">{findings(classification).map(f => <li key={f.finding_id}><p>{f.claim_text}</p><small>{f.classification.replaceAll('_',' ')}</small> {f.supporting_evidence_ids.map(ref => <a key={ref} href={`#${sourcePrefix}-${ref}`}>Inspect source {answer!.citations.findIndex(c => c.evidence_id === ref)+1}</a>)}</li>)}</ul>;
+    return <ul className="advisor-findings" tabIndex={0} aria-label="Scrollable source-backed findings">{findings(classification).map(f => <li key={f.finding_id}><p>{f.claim_text}</p><small>{f.classification.replaceAll('_',' ')}</small> {f.supporting_evidence_ids.map(ref => <a key={ref} href={`#${sourcePrefix}-${ref}`} onClick={e => { e.preventDefault(); inspectSource(`${sourcePrefix}-${ref}`); }}>Inspect source {answer!.citations.findIndex(c => c.evidence_id === ref)+1}</a>)}</li>)}</ul>;
   }
   return <section className="ai-advisor" aria-label={`Contextual advisor: ${context.type}`}>
     <button className="primary-button" disabled={busy} onClick={() => run()}>{label}</button>
@@ -63,7 +70,7 @@ function Advisor({ context, label }: { context: AIContext; label: string }) {
         <h4>Suggested human review</h4>{list(answer.suggested_review_actions)}
         <details open><summary>Uncertainty and limitations</summary>{list(answer.uncertainties)}</details>
         {answer.evidence.truncated && <p className="coverage-note">Evidence truncated: {answer.evidence.omitted_fact_count} facts omitted. Inspect original source snapshots.</p>}
-        <details><summary>Supporting evidence ({answer.citations.length})</summary>{answer.citations.map((s,i) => <div key={s.evidence_id} id={`${sourcePrefix}-${s.evidence_id}`} className="advisor-source" tabIndex={-1}>
+        <details ref={sources}><summary>Supporting evidence ({answer.citations.length})</summary>{answer.citations.map((s,i) => <div key={s.evidence_id} id={`${sourcePrefix}-${s.evidence_id}`} className="advisor-source" tabIndex={-1}>
           <h4>Source {i+1} · {s.entity_type} · {s.synthetic_input ? 'SYNTHETIC' : 'Source reported'}</h4>
           <p>Record: {s.record_id}</p><p>{s.calculation_version || 'Recorded fields'} · Dataset: {s.dataset_snapshot_id || 'See saved inputs'}</p>
           <p className="checksum">Record SHA-256: {s.record_hash}</p><p className="checksum">Input SHA-256: {s.input_hash || 'Not a calculation'}</p>

@@ -97,7 +97,7 @@ export function ScenarioPlanner({ roads, selectedRoad, projects }: { roads: Road
         <label>Explicit synthetic planning assumptions<textarea required value={note} maxLength={2000} onChange={e=>setNote(e.target.value)} placeholder="Explain method, scope, quantity, date, closure and budget assumptions; these are not observations."/></label>
       </div>
       <h4>Repair actions</h4><button type="button" className="text-button" disabled={!selectedRoad} onClick={()=>selectedRoad&&addRoad(selectedRoad)}>Add selected map road{selectedRoad?` (${selectedRoad})`:''}</button>
-      <label>Add a road<select value="" onChange={e=>e.target.value&&addRoad(e.target.value)}><option value="">Choose road…</option>{roads.features.map(f=><option key={f.properties.id} value={f.properties.id}>{f.properties.name || f.properties.id} ({f.properties.id})</option>)}</select></label>
+      <label>Add a road<select aria-label="Add a road" value="" onChange={e=>e.target.value&&addRoad(e.target.value)}><option value="">Choose road…</option>{roads.features.map(f=><option key={f.properties.id} value={f.properties.id}>{f.properties.name || f.properties.id} ({f.properties.id})</option>)}</select></label>
       {!draft.actions.length&&<p>No repair actions. Evaluation will be incomplete.</p>}
       {draft.actions.map((a,i)=><ActionEditor key={a.id} action={a} index={i} options={options} roads={roads} projects={projects} onChange={a=>updateAction(i,a)} onRemove={()=>change({...draft,actions:draft.actions.filter((_,n)=>n!==i)})}/>)}
       <h4>External project screening scope</h4><p>Select known projects explicitly. Related project links do not exclude or replace records.</p>

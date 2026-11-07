@@ -1,6 +1,6 @@
 # MVP implementation roadmap
 
-Status: M0–M3 and M3.5 are complete locally; M4 is implemented locally; M5 is implemented locally; M6 remains unimplemented. See [M5_IMPLEMENTATION](M5_IMPLEMENTATION.md). See [M4_IMPLEMENTATION](M4_IMPLEMENTATION.md). M3.5 verification is recorded in [M3_5_COMPATIBILITY](M3_5_COMPATIBILITY.md). M3 verification is recorded in [M3_IMPLEMENTATION](M3_IMPLEMENTATION.md). M2 verification is recorded in [M2_IMPLEMENTATION](M2_IMPLEMENTATION.md). M1 verification is recorded in [M1_IMPLEMENTATION](M1_IMPLEMENTATION.md). Each milestone must satisfy its gate before the next; keep scope viable for one developer. M1–M3 file locations now exist; M4 files now exist; M5 file locations now exist; M6 remains planned.
+Status: **M0–M6 complete locally** for the synthetic hackathon MVP. M6 verification, acceptance evidence and remaining release limits are in [FINAL_QA_REPORT](FINAL_QA_REPORT.md). Reproducible judging instructions are in [HACKATHON_DEMO](HACKATHON_DEMO.md). Historical milestone reports describe the gates when they were completed; they are not current feature-status summaries. No post-hackathon work or deployment is included.
 
 ## M0 — Foundation and repository setup
 
@@ -80,7 +80,7 @@ M4 reconciliation: the authorized demo now uses the same resurfacing scope in th
 
 M5 result: seven bounded context types; frozen estimate/analysis/evaluation replay and content/source hashes; strict fact/template selections through the official server-side SDK; deterministic default/fallback; contextual REST advisor integrated into existing views; inspectable evidence, synthetic/unknown labels, How AI works and separate human-review notes; additive append-only evidence/interaction/review persistence. The explicit M5 request selects `/api/v1/ai/*` instead of the older proposed `/explanations` path, reconciled in API_SPEC. No arbitrary AI prose, tools, source mutations, paid calls, new demo prices or autonomous agents. Local acceptance and limitations are recorded in [M5_IMPLEMENTATION](M5_IMPLEMENTATION.md).
 
-## M6 — Integration testing, demo and presentation
+## M6 — Integration testing, demo and presentation (complete locally)
 
 - Objective: reliable end-to-end demo with clear limits and a defensible presentation.
 - Dependencies: M1–M5 gates; frozen reviewed manifest and offline fallback.
@@ -89,6 +89,8 @@ M5 result: seven bounded context types; frozen estimate/analysis/evaluation repl
 - Acceptance: complete map → asset → estimate → conflict → three-scenario comparison → evidence/review journey; no-key/no-network-data demonstration; all displayed demo numbers reconcile; no synthetic observation is presented as real.
 - Testing: integration and regression suite, build/typecheck, snapshot reproducibility, secret checks, accessibility smoke checks, performance measurements on documented hardware, demo rehearsal checklist.
 - Definition of done: verified demo can be repeated from documented instructions; outstanding failures and municipal-use limits are disclosed; no production readiness claim or deployment required.
+
+M6 result: full actual-browser dev workflow and production map/comparison verification; isolated fresh startup, three scenario tradeoffs, missing-data/timeout/retry and no-key fallback; 212 backend and 57 frontend tests; clean installations, typecheck/build, SQLite integrity/FKs, idempotent seeds and saved replay. Added lightweight API-record guide, working source disclosure/focus, persistent planner navigation, accessible table scrolling, readable labels, split bundles and bounded local transport. Four fixture/manifest pairs remain byte-identical and all 17 original database table hashes are preserved. Full limitations, unrun checks, security findings and the 24 acceptance items are recorded in FINAL_QA_REPORT. This completes the final MVP milestone; the separate backlogs below were not started.
 
 ## Separate stretch backlog
 
