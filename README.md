@@ -2,9 +2,9 @@
 
 BUHACKS 2026 — local municipal infrastructure decision-support prototype.
 
-Milestone 1 is implemented: React/TypeScript/Vite, Tailwind CSS, a selectable MapLibre map, FastAPI, and SQLite-backed synthetic roads. The map, road list, detail panel, provenance, and summary counts all use the same API dataset. There are no estimates, conflicts, forecasting, optimization, scenarios, or AI calls yet. See [M1 implementation and verification](docs/M1_IMPLEMENTATION.md).
+Milestones 1 and 2 are implemented: React/TypeScript/Vite, Tailwind CSS, a selectable MapLibre map, FastAPI, and SQLite-backed synthetic roads. The map, road list, detail panel, provenance, and summary counts all use the same API dataset. M2 adds read-only assessment history, three repair alternatives, deterministic Decimal cost/duration calculations, immutable saved estimates, and comparison/detail panels. Conflicts, forecasting, optimization, scenarios and AI remain unimplemented. See [M2 implementation and verification](docs/M2_IMPLEMENTATION.md) and the historical [M1 report](docs/M1_IMPLEMENTATION.md).
 
-**DEMO DATA:** the 24 road segments are an authored schematic inside the chosen Lower Manhattan study window, not actual streets or municipal condition observations. There are six good, six fair, six poor, and six unknown demo conditions. Assessment dates, dimensions, lane counts, and utility information are unknown. This application cannot establish excavation safety or authorize work.
+**DEMO DATA:** the 24 road segments are an authored schematic inside the chosen Lower Manhattan study window, not actual streets or municipal condition observations. There are six good, six fair, six poor, and six unknown demo conditions. M2 explicitly adds synthetic planning dimensions and dated synthetic assessments to four roads, plus an incomplete fifth asset. These dimensions are authored rectangular scopes, not measurements from geometry. Other dimensions, lane counts and utility information remain unknown. This application cannot establish excavation safety or authorize work.
 
 ## Prerequisites and installation
 
@@ -51,17 +51,22 @@ No environment file is required. `.env.example` documents supported variable nam
 
 For a frontend override, create ignored `apps/web/.env.local` containing `VITE_API_BASE_URL=http://127.0.0.1:8000/api/v1`, then restart Vite. Blank backend values use the documented defaults. Never place credentials in `VITE_*` variables.
 
-## Implemented read-only API
+## Implemented API
 
 The documented `/api/v1` boundary is preserved; `/api/roads` and root `/health` aliases are not implemented.
 
-| GET path | Response |
+| Method/path | Response |
 | --- | --- |
-| `/api/v1/health` | Status, API version, data-ready flag, deterministic mode in envelope |
-| `/api/v1/road-segments` | Validated roads, stable ID order, bbox filtering and cursor pagination |
-| `/api/v1/road-segments/geojson` | `application/geo+json` FeatureCollection with provenance and metadata |
-| `/api/v1/road-segments/{id}` | Road metadata/geometry and synthetic condition summary; unknown ID → 404 |
-| `/api/v1/evidence-sources/{id}` | Fixture provenance, checksum, CRS, limitations; unknown ID → 404 |
+| GET `/api/v1/health` | Status, API version, data-ready flag, deterministic mode in envelope |
+| GET `/api/v1/road-segments` | Validated roads, stable ID order, bbox filtering and cursor pagination |
+| GET `/api/v1/road-segments/geojson` | `application/geo+json` FeatureCollection with provenance and metadata |
+| GET `/api/v1/road-segments/{id}` | Road metadata/geometry and synthetic condition summary; unknown ID → 404 |
+| GET `/api/v1/evidence-sources/{id}` | Fixture provenance, checksum, CRS, limitations; unknown ID → 404 |
+| GET `/api/v1/road-segments/{id}/conditions` | Complete bounded assessment history, latest usable ID in meta |
+| GET `/api/v1/repair-options` | Three synthetic treatment/rate/productivity definitions |
+| GET `/api/v1/road-segments/{id}/repair-options` | Three suitability results and nonpersisted previews; unavailable reasons for missing dimensions |
+| POST `/api/v1/estimates` | 201 immutable estimate; explicit planning dimensions optional |
+| GET `/api/v1/estimates/{id}` | Saved output and complete reproducible input/source snapshot |
 
 See [API contract](docs/API_SPEC.md). Roads support `limit=1..100` (default 30), `bbox=west,south,east,north`, and opaque `cursor`. The web client enforces the study's hard cap of 30 records. A valid no-match filter returns an empty collection. Invalid inputs return a sanitized 422 error; unavailable storage returns 503.
 
@@ -98,15 +103,15 @@ apps/api/
     main.py, seed.py
     core/          configuration and road repository
     models/        SQLite schema/connection management
-    routes/        read-only REST routes
-    schemas/       Pydantic geometry, roads, evidence and envelopes
-    services/      reserved domain-services package (no calculations yet)
+    routes/        road and planning REST routes
+    schemas/       Pydantic geometry, roads, planning, evidence and envelopes
+    services/      pure deterministic estimate engine
   tests/           backend contract and persistence tests
 apps/web/
   package.json, package-lock.json, vite.config.ts, tsconfig.json, index.html
   src/
     App.tsx, main.tsx, styles.css
-    features/map/  MapLibre component and regression tests
+    features/      MapLibre map and repair comparison/detail components with tests
     services/      typed API client and request tests
     types/         shared frontend transport types and dataset counts
     *.test.tsx     workspace interaction tests
@@ -120,9 +125,9 @@ docs/              contracts, roadmap, design and verification evidence
 
 ## Architecture and next milestone
 
-One React client calls one FastAPI modular monolith through REST. Standard-library `sqlite3` provides short-lived connections, parameterized SQL, foreign keys and transactional imports. Pydantic validates stored/read records and API responses; Shapely validates geometry and bbox intersections. No ORM or migration framework is needed for three M1 tables.
+One React client calls one FastAPI modular monolith through REST. Standard-library `sqlite3` provides short-lived connections, parameterized SQL, foreign keys and transactional imports. Pydantic validates stored/read records and API responses; Shapely validates geometry and bbox intersections. No ORM or migration framework is needed; versioned additive SQLite DDL extends the three M1 tables without rewriting their payloads.
 
-The requested persisted end-to-end M1 expands the original roadmap's file-backed M1: only road/evidence persistence and a read-only synthetic condition summary move forward from M2. Full normalized assessments, assets/projects, reproducible repair estimates and their UI remain **M2**, which has not begun. AI, conflicts, scenarios, deployment and production authentication remain later work.
+M2 extends the existing repository with related maintenance attributes, normalized assessment history, a repair catalog and append-only estimates. Projects and utility-work lifecycle are deferred to M3, where they are needed; there is no duplicate application. AI, conflicts, scenarios, deployment and production authentication remain later work.
 
 ## Documentation
 
@@ -138,3 +143,16 @@ The requested persisted end-to-end M1 expands the original roadmap's file-backed
 - [Demo plan](docs/DEMO_PLAN.md)
 - [Historical foundation inspection](docs/FOUNDATION_INSPECTION.md)
 - [M1 implementation and verification](docs/M1_IMPLEMENTATION.md)
+- [M2 implementation and verification](docs/M2_IMPLEMENTATION.md)
+
+## M2 planning workflow and formulas
+
+Re-run the documented seed command against an existing M1 database to **add** M2 records. Startup only initializes the schema. Seeding verifies both manifests, inserts missing stable IDs, and preserves existing records. Never delete/reset an existing database to upgrade it. The command reports 24 roads and M2 counts `(5, 26, 3)`.
+
+Select R-001 (poor), R-002 (good), R-003 (fair), R-004 (unknown), or R-005 (large scope), then **Compare Repair Options**. Inspect history, suitability, scope and sensitivity previews; optionally enter a positive length/width in meters with a planning assumption note. **Save & inspect** creates an estimate and retrieves the saved result. Previews use stored dimensions; entered overrides apply to the saved result. There is no assessment editing, arbitrary unit-rate override or area-only override.
+
+`area_m2 = length_m × width_m`. For each low/base/high scenario, round `area × bundled_rate` and each mobilization/traffic allowance to cents; sum those lines; round `subtotal × contingency_fraction` to cents; add subtotal and contingency. Bundled roadwork already includes materials/labor/equipment. Use USD, Decimal, ROUND_HALF_UP. Low/high bundled rates are explicitly −20%/+30% from base; allowances, quantity, contingency rate and productivity stay fixed. These are sensitivity assumptions, not probabilities or official NYC prices.
+
+`active_workdays = ceil(area / productivity_m2_per_active_workday)`; `total_preliminary_days = active_workdays + setup_days + curing_days`. No calendar completion date, weather/weekend model or contractor schedule is supplied. Missing dimensions block estimates unless explicitly supplied as planning assumptions. Every alternative requires engineering review; no price establishes feasibility or excavation safety.
+
+Rates, exclusions, productivity, source IDs and fixtures are in `data/demo/maintenance.json`, checked by `maintenance-manifest.json`; reproduce them with `python3 scripts/create_m2_fixture.py`. Estimates preserve complete input and evidence snapshots, hashes and `repair-estimate-v1`, with integer-cent totals and immutable JSON. See [M2 contracts](docs/DATA_MODEL.md) and [API request examples](docs/API_SPEC.md).

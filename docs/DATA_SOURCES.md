@@ -14,7 +14,7 @@ If a usable public geometry extract cannot be prepared, author simplified synthe
 
 - **Verified and accessible**: the stated resource was actually readable during review; the verification level is explicitly limited to that resource. A readable index is not a verified data payload.
 - **Candidate, not yet verified**: proposed input requiring payload retrieval, schema/coverage/license review and validation before use. A search result or catalog shell is insufficient for ingestion readiness.
-- **Synthetic/demo**: intentionally authored assumptions for demonstration; no real-world observation is asserted. M1 road fixtures exist; later domain fixtures remain planned.
+- **Synthetic/demo**: intentionally authored assumptions for demonstration; no real-world observation is asserted. M1 road fixtures exist; M2 maintenance, assessment and rate fixtures are implemented; utility/scenario fixtures remain planned.
 
 ## Source register
 
@@ -25,7 +25,7 @@ If a usable public geometry extract cannot be prepared, author simplified synthe
 | DOT Street Assessment / Pavement Ratings | **Candidate, not yet verified**. The readable [DOT index](https://www.nyc.gov/html/dot/html/about/datafeeds.shtml) links ratings resources; linked GeoJSON retrieval failed in this review. | Candidate condition observations. Validate actual scale semantics, assessment dates, geography and join keys from payload/metadata before use; do not assume every selected segment has a recent rating. No direct payload URL is promised here. |
 | DOT Street Construction Permits (2022–Present) | **Candidate, not yet verified** for import. [Official catalog](https://data.cityofnewyork.us/Transportation/Street-Construction-Permits-2022-Present-/tqtj-sjs8/about_data) was located through official search metadata; live extraction returned a shell. | Candidate street-work and possible utility-work indicators. Inspect permit categories, location/schedule fields, statuses and revisions; permit windows are not confirmed construction schedules. No utility network or exhaustive future-work coverage is implied. |
 | Utility-owner planned-work / subsurface information | **Candidate, not yet verified**; no public authoritative geometry/schedule dataset has been established for this MVP. No invented URL. | Use synthetic UtilityWork unless suitable public inputs are verified. Real integration requires owner coordination, permissions, sensitivity review, and coverage evidence. |
-| CivicPlAIn fixture manifest, geometry and assumptions | **Synthetic/demo**, M1 roads.geojson and manifest.json under data/demo/ now implemented; later domain fixtures remain planned | M1 includes bounded schematic geometry and synthetic condition labels/ratings. Utility projects, repair options, cost/duration/lifespan assumptions, scenarios and expected rule results remain future fixtures. DEMO_PLAN defines proposed arithmetic. Not a municipal dataset. |
+| CivicPlAIn fixture manifest, geometry and assumptions | **Synthetic/demo**, M1 roads.geojson and manifest.json under data/demo/ now implemented; M2 maintenance, assessment and rate fixtures are implemented; utility/scenario fixtures remain planned | M1 includes bounded schematic geometry and synthetic condition labels/ratings. M2 adds synthetic dimensions, assessment history, repair options, cost rates and productivity. Utility projects, lifespan, scenarios and conflict rule results remain future fixtures. DEMO_PLAN defines proposed arithmetic. Not a municipal dataset. |
 
 Publication/update cadence, field names, spatial completeness, and price accuracy are deliberately unasserted for unvalidated payloads. Capture the actual source version and retrieval date at import rather than promising freshness from a catalog title. Other DOT construction layers may be investigated later, but no source beyond this register is needed for MVP acceptance.
 
@@ -49,3 +49,17 @@ TBD: actual source release, verified payload schemas and terms, join strategy, a
 ## M1 fixture coverage
 
 `demo-m1-v1` contains 24 stable `demo-r-001`…`demo-r-024` records: a 4×3 schematic lattice of 12 horizontal and 12 vertical segments, all inside the specified window. It meets the 20–30 target with no rejected records or manual exclusions. It is unrelated to actual street centerlines, does not imply full-area coverage, and redistributes no third-party geographic data. All condition assessment dates, dimensions and lane counts remain null with reasons. Six records per category exercise good/fair/poor/unknown styling. The manifest contains the synthetic rating thresholds, per-file checksum, source record, field assumptions and generator version. `scripts/create_demo_fixture.py` reproduces exact fixture bytes; it does not download data.
+
+## M2 synthetic planning catalog (`demo-m2-v1`)
+
+`data/demo/maintenance.json` and `maintenance-manifest.json` add five related road assets, 26 assessment records (18 undated M1 summaries plus eight dated demo records), and three repair options to the unchanged `demo-m1-v1` geometry snapshot. Stable road IDs: R-001 poor 100×8 m; R-002 good 120×7 m; R-003 fair 150×8 m; R-004 unknown dimensions/surface/assessment; R-005 poor 900×12 m. Every number/date is synthetic and each source is `demo-maintenance-assumptions-v1` or the original M1 source. No geometric distance is calculated. The 10,800 m² case illustrates large cost differences and cannot establish which treatment is feasible.
+
+| Demo treatment | Bundled base USD/m² | Low/high USD/m² | Mobilization / traffic USD | Contingency | Productivity m²/active_workday | Setup / curing days |
+| --- | --- | --- | --- | --- | --- | --- |
+| Preventive | 6.00 | 4.80 / 7.80 | 1,500 / 500 | 20% | 1,200 | 1 / 0 |
+| Resurface | 45.00 | 36.00 / 58.50 | 6,000 / 2,500 | 20% | 600 | 2 / 1 |
+| Reconstruct | 140.00 | 112.00 / 182.00 | 20,000 / 6,000 | 25% | 200 | 3 / 3 |
+
+Bundled rates include materials/labor/equipment; mobilization and traffic allowances are additional and no crew/resource costs are added again. Utility relocation, drainage redesign, permits, taxes and design fees are excluded. Quantities assume full rectangular scope; structural condition, layer design, actual resources, traffic phasing, weekends/weather and subsurface information are unverified. Low/high vary only the bundled unit rate by −20%/+30%; this is an authored sensitivity assumption, not calibrated uncertainty. Curing/setup/productivity are illustrative, not a contractor schedule. Basis date 2026-11-07 identifies an authored rate version, not market research.
+
+No reviewed external construction-price payload was available in the repository. M2 intentionally uses no official price claim or inferred accuracy. `scripts/create_m2_fixture.py` reproduces exact JSON and SHA-256 manifest bytes; seed verifies counts, IDs, references and checksums before transactional insert. A changed manifest cannot overwrite an imported fixture. The prior DEMO_PLAN's scenario rates/arithmetic remain illustrative future M4 fixtures, not this M2 catalog. Future scenarios must select and freeze an explicit consistent rate/scope basis rather than assume that earlier narrative is implemented.

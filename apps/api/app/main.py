@@ -13,6 +13,9 @@ from app.core.config import Settings
 from app.core.repository import InvalidQuery, RoadRepository
 from app.models.database import initialize
 from app.routes.roads import router
+from app.routes.planning import router as planning_router
+from app.core.planning_repository import PlanningRepository
+from app.services.estimates import MissingInputs
 
 
 def error(request, status, code, message, fields=None):
@@ -35,8 +38,9 @@ def create_app(settings: Settings | None = None):
 
     app = FastAPI(title="CivicPlAIn local API", version="0.1.0", lifespan=lifespan)
     app.state.repository = RoadRepository(settings.database_path)
+    app.state.planning = PlanningRepository(settings.database_path)
     app.add_middleware(CORSMiddleware, allow_origins=list(settings.allowed_origins),
-                       allow_methods=["GET"], allow_headers=["Accept"], expose_headers=["X-Request-ID"])
+                       allow_methods=["GET", "POST"], allow_headers=["Accept", "Content-Type"], expose_headers=["X-Request-ID"])
 
     @app.middleware("http")
     async def request_id(request: Request, call_next):
@@ -49,6 +53,11 @@ def create_app(settings: Settings | None = None):
     async def validation(request, exc):
         return error(request, 422, "VALIDATION_ERROR", "Invalid request fields", [
             {"path": ".".join(map(str, e["loc"])), "reason": e["msg"]} for e in exc.errors()])
+
+    @app.exception_handler(MissingInputs)
+    async def missing_inputs(request, exc):
+        return error(request, 422, "MISSING_ESTIMATE_INPUTS", str(exc),
+                     [{"path": "planning_assumptions", "reason": str(exc)}])
 
     @app.exception_handler(InvalidQuery)
     async def invalid_query(request, exc):
@@ -69,6 +78,7 @@ def create_app(settings: Settings | None = None):
         return error(request, 500, "INTERNAL_ERROR", "Unexpected service error")
 
     app.include_router(router)
+    app.include_router(planning_router)
     return app
 
 

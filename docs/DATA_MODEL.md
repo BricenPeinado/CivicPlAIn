@@ -1,12 +1,12 @@
 # Preliminary data model
 
-Status: M1 implements RecordMeta/RoadSegment and EvidenceSource for synthetic fixtures, plus the limited condition_summary projection below. Other entities remain proposed. API_SPEC uses these shapes. M1 stores validated JSON in SQLite using sqlite3; normalization of assessments/assets/projects belongs to M2.
+Status: M2 implements synthetic RoadSegment maintenance attributes, related asset records, normalized ConditionAssessment history, a synthetic RepairOption catalog and immutable CostEstimate snapshots. Other entities remain proposed. The concrete M2 shapes below supersede their former planning drafts. Existing M1 JSON remains unchanged in storage; enriched reads preserve its API shape.
 
 ## Shared conventions
 
-`!` means required and non-null; `?` means optional/nullable. Collections marked `!` must be present (empty allowed unless specified). IDs are stable opaque strings, unique by entity; demo IDs use `demo-` prefixes. Foreign keys must resolve in the same dataset snapshot. Dates are ISO `YYYY-MM-DD`; work intervals are `[start_date, end_date)` local to America/New_York. Instants are RFC3339 UTC. Money is a nonnegative two-decimal USD string over REST, integer cents in storage. Finite decimal quantities/rates use decimal strings; counts are integers.
+`!` means required and non-null; `?` means optional/nullable. Collections marked `!` must be present (empty allowed unless specified). IDs are stable opaque strings, unique by entity; demo IDs use `demo-` prefixes. Foreign keys must resolve in the same dataset snapshot. Dates are ISO `YYYY-MM-DD`; work intervals are `[start_date, end_date)` local to America/New_York. Instants are RFC3339 UTC. Money is a nonnegative two-decimal USD string over REST. M2 stores low/base/high totals in integer-cent columns alongside immutable JSON that preserves response strings and decimal inputs. Finite decimal quantities/rates use decimal strings; counts are integers.
 
-All domain entities below except EvidenceSource and AuditEvent include this **RecordMeta**:
+The general planned entity convention is **RecordMeta** below (except EvidenceSource/AuditEvent). Implemented RoadSegment and Assessment use these applicable provenance fields. M2 catalog configuration and calculation/snapshot transport use their explicit source-aware shapes below: calculation provenance is in dimension_provenance/evidence_ids/input_snapshot and limits are in warnings/assumptions, rather than duplicate RecordMeta maps. Those concrete M2 definitions take precedence over the earlier generic draft:
 
 | Field | Type / validation |
 | --- | --- |
@@ -36,7 +36,12 @@ Null means unknown/not applicable with a reason; zero is a known zero, never a r
 | width_m? | positive decimal; explicitly measured or assumed, never inferred from centerline |
 | lane_count? | integer ≥1 |
 | utility_coverage! | enum unknown, partial, verified_for_scope; last requires documented scope/time evidence, never excavation clearance |
-| coverage_as_of? | date; mandatory for verified_for_scope |
+| coverage_as_of? | date; mandatory for verified_for_scope in future observed ingestion |
+| surface_material! | asphalt, concrete, gravel, unknown; unknown by default |
+| functional_class! | local, collector, arterial, unknown |
+| dimension_basis! | map length_m/width_m to synthetic_planning_assumption in current fixtures; legacy M1 sourced dimensions without basis are labeled legacy_synthetic_basis_unknown, never measured |
+| repairable_area_m2? | nonnegative decimal, exactly length × width; null unless both dimensions known; zero cannot be estimated |
+| notes? | authored planning note; never an inspection claim |
 
 Relationships: one segment has many assets, assessments, and projects via their IDs; do not duplicate mutable lists on this record. Geometry provenance and width uncertainty are field-level evidence. Missing width blocks area-based estimates unless an explicitly sourced scenario assumption supplies it.
 
@@ -54,20 +59,13 @@ Relationships: one segment has many assets, assessments, and projects via their 
 
 Validation: at least segment reference or geometry for pavement; utilities may have neither and remain unknown. Location status must match provenance. Asset existence is not proof of planned utility work. Assessments reference assets when appropriate.
 
-## ConditionAssessment
+## ConditionAssessment (implemented M2)
 
-| Field | Type / validation |
-| --- | --- |
-| road_segment_id! | RoadSegment ID |
-| asset_id? | InfrastructureAsset ID associated with the same segment |
-| assessed_on? | date; null for undated evidence, which cannot be called current |
-| rating? | finite decimal within rating_scale; null for missing assessment |
-| rating_scale! | object: name, min, max, direction (`higher_better` or `lower_better`); min < max |
-| condition_label? | string; source-specific categorization, no unsupported normalization |
-| safety_note? | string; sourced observation or explicit demo assumption, never certification |
-| assessment_method! | string; e.g. published survey or synthetic fixture |
+Read-only records contain `id`, `road_segment_id`, `dataset_snapshot_id`, `category` (good/fair/poor/unknown), nullable decimal `rating`, nullable `rating_scale`, nullable `assessed_on`, `assessment_method=synthetic_fixture`, `notes`, nonempty `evidence_ids`, `data_kind=synthetic`, `synthetic_input=true`, `field_evidence`, `unknown_reasons`, `limitations`, and offset-aware `created_at`. Populated rating/category/date fields require evidence; null fields require unknown reasons. These are authored demo dates, not certified inspections. No observed import or edit endpoint is implemented.
 
-Rating and assessed_on carry field evidence. Latest usable assessment is max assessed_on, tie-break by stable ID ascending; undated records remain visible but do not supersede dated ones. Freshness threshold is TBD with a recommendation to show age without asserting current safety.
+Preserve the established `synthetic-1-10-higher-better` scale: 1 ≤ rating ≤10; good ≥8, fair ≥5 and <8, poor <5. Unknown has no rating, scale or date. This is not official PCI. Configuring a different scale is deferred until a reviewed source requires it. History retains dated and undated records. Latest usable = newest dated record with rating, stable ID ascending ties; if only undated ratings exist, lowest ID is the undated summary. Undated rows never supersede dated evidence and never mean current. No freshness/engineering safety certification is inferred.
+
+The API returns the complete bounded per-road history and `meta.latest_usable_id`; road collection, GeoJSON and detail share the same derived condition summary. In an M1-only database, the original undated summary remains visible until the explicit M2 seed adds historical records.
 
 ## WorkProject
 
@@ -99,41 +97,25 @@ Relationships: one optional UtilityWork subtype; scenarios reference source proj
 
 Schedule/geometry live on WorkProject to prevent contradictory copies. A permit may imply potential utility work only with supporting classification evidence. No sensitive underground route data is required for MVP.
 
-## RepairOption
+## RepairOption (implemented M2 catalog)
 
-| Field | Type / validation |
-| --- | --- |
-| label! | nonempty string |
-| treatment! | enum patch, resurface, reconstruct, restoration |
-| quantity_unit! | enum m2, m; compatible with chosen rate |
-| unit_rate_usd! | decimal ≥0 per quantity_unit; assumed unless supported by a reviewed price source |
-| mobilization_usd! | money |
-| contingency_fraction! | decimal in [0,1]; explicit assumption |
-| productivity_per_day? | decimal >0 in quantity_unit/day |
-| setup_days! | integer ≥0 |
-| assumed_duration_days? | integer >0; alternative to productivity-derived duration |
-| lifespan_years? | Range in years |
-| price_basis_date! | date; required even for a synthetic assumption |
-| cost_scope! | nonempty string describing inclusions/exclusions |
+`id`, `treatment` (preventive, resurface, reconstruct), `label`, `description`, `scope_of_work`, `suitability_conditions`, `material_assumptions`, `work_activities`, `quantity_unit=m2`, `unit_rates_usd={low,base,high}`, `rate_inclusions`, `mobilization_usd`, `traffic_management_usd`, `contingency_fraction`, `productivity_per_day`, `productivity_unit=m2/active_workday`, nonnegative integer `setup_days`/`curing_days`, `price_basis_date`, `sensitivity_basis`, `exclusions`, `limitations`, `evidence_ids`, `data_kind=synthetic`, `synthetic_input=true`. Catalog configuration is not a municipal observation or independently mutable domain asset.
 
-At least productivity or assumed duration is required. If both exist, request must select a duration method explicitly. Applicability to real pavement requires engineering review; fixture options do not establish fitness.
+Rates and allowances are finite nonnegative Decimals; low ≤ base ≤ high; contingency in [0,1]; productivity strictly positive. Only metric m² quantity and m²/active_workday productivity are accepted. Bundled rates include materials/labor/equipment once. The reviewed fixture explicitly defines low bundled rates at −20%, high at +30% from base; quantity, mobilization, traffic allowance, productivity and contingency fraction remain fixed. No statistical confidence is implied. No arbitrary rate, area-only, productivity or duration override API is supported.
 
-## CostEstimate
+Suitability is `candidate_requires_review` when a dated synthetic asphalt assessment's category matches its demo treatment (good→preventive, fair→resurface, poor→reconstruct); `not_indicated` for another category/treatment pairing; `requires_review` for missing/undated assessment or unknown/non-asphalt surface. Every result has `rule_id`, rationale and `human_review_required=true`. These are condition-screening rules, not feasibility judgments or safe-work labels.
 
-| Field | Type / validation |
-| --- | --- |
-| road_segment_id!, repair_option_id! | corresponding entity IDs |
-| quantity! | positive decimal with unit matching option |
-| line_items! | nonempty list: label, quantity decimal, unit, unit_rate_usd decimal, amount_usd money, evidence_ids; amount obeys rounding contract |
-| subtotal_usd!, contingency_usd! | money, derived exactly from items and option |
-| total_usd! | Range in USD, values formatted as money; central=subtotal+contingency |
-| duration_days! | integer >0, calendar days |
-| duration_method! | enum assumed, productivity |
-| lifespan_years? | Range in years; inherited assumption with evidence |
-| cost_scope! | string, inherited or explicitly narrowed |
-| method_version!, input_hash! | nonempty strings |
+## CostEstimate (implemented M2)
 
-data_kind=derived. Quantity/duration overrides require evidence. No persisted CostEstimate is created for missing mandatory inputs; return 422 field errors. Scenario evaluation may report missing estimates as indeterminate. Uncertainty bounds need explicit multipliers or item ranges, saved in evidence; do not manufacture confidence.
+An estimate has `id`, UTC `created_at`, `dataset_snapshot_id`, `road_segment_id`, `repair_option_id`, `repair_category`, `currency=USD`, positive decimal `quantity` with `quantity_unit=m2`, `dimension_provenance`, three `scenarios` (low/base/high), `duration`, `suitability`, `assumptions`, `warnings`, `evidence_ids`, `method_version=repair-estimate-v1`, `data_kind=derived`, `synthetic_input=true`, `input_snapshot`, `input_hash` and `result_hash`.
+
+Each scenario has `line_items` (label, decimal quantity, unit m2/allowance, decimal unit_rate_usd, two-decimal amount_usd, evidence_ids), two-decimal `subtotal_usd`, decimal `contingency_fraction`, two-decimal `contingency_usd` and `total_usd`. Round each line using Decimal ROUND_HALF_UP, sum lines, round contingency, then add. Mobilization/traffic each use quantity 1 allowance. No component double counting. Monetary totals persist as integer cents alongside frozen JSON; REST amounts are strings. Unit rates retain decimal precision instead of being rounded before multiplication.
+
+`duration` has `active_workdays=ceil(quantity/productivity_per_day)`, `setup_days`, `curing_days`, `total_preliminary_days` (their sum), productivity and unit, and a basis/limitation string. These preliminary sequential days are not a contractor calendar. No calendar date or lifespan is manufactured.
+
+`dimension_provenance` records each input's value, meter unit, basis, evidence IDs and note. A request may supply `planning_assumptions={length_m?,width_m?,unit:m,note}` with at least one positive dimension and a nonblank note. Dimensions support at most three decimal places (input resolution, not measured accuracy). Length is capped at 100,000 m, width at 100 m for this bounded prototype. Unknown required dimensions return 422; no estimate is saved. Overrides are labeled `user_planning_assumption` and stored under inline source ID `user-planning-assumption`, not silently treated as measured evidence.
+
+`input_snapshot` contains the exact enriched road, chosen assessment, complete repair option, request, evidence records and method version; user assumptions are retained inline. SHA-256 hashes use sorted-key compact ASCII JSON; input hash covers snapshot, result hash covers the Calculation fields. IDs and creation times are excluded from semantic result hashing. Replay calls the pure calculation engine with these saved model inputs. Subsequent record/catalog changes cannot rewrite history. No estimate update/delete route exists; SQLite triggers reject both operations.
 
 ## ConflictFinding
 
@@ -226,9 +208,9 @@ Catalog accessibility and imported payload validation are different facts. Candi
 
 Append-only at the application boundary, not claimed tamper-proof. Never store API keys, authorization headers, hidden model reasoning, raw personal information, or unredacted prompts. A review note records acknowledgement and remaining questions, not engineering approval or spending consent.
 
-## Implemented M1 storage and condition projection
+## Historical M1 storage and condition projection
 
-SQLite tables: `dataset(id PRIMARY KEY, manifest_json)`, `evidence(id PRIMARY KEY, dataset_id REFERENCES dataset(id), payload)`, `roads(id PRIMARY KEY, dataset_id REFERENCES dataset(id), payload)`. Payloads are JSON validated through Pydantic on import and read, preserving nullable decimal strings, dates, geometry and per-field provenance. Only synthetic records are accepted by the M1 implementation; observed/derived entities above are future contracts, not working import types. M1 supports exactly one snapshot per database. Imports use stable IDs, checksum validation, foreign keys and a transaction. No mutation endpoint exists.
+SQLite tables: `dataset(id PRIMARY KEY, manifest_json)`, `evidence(id PRIMARY KEY, dataset_id REFERENCES dataset(id), payload)`, `roads(id PRIMARY KEY, dataset_id REFERENCES dataset(id), payload)`. Payloads are JSON validated through Pydantic on import and read, preserving nullable decimal strings, dates, geometry and per-field provenance. Only synthetic records are accepted by the M1 implementation; observed/derived entities above are future contracts, not working import types. M1 supports exactly one snapshot per database. Imports use stable IDs, checksum validation, foreign keys and a transaction. No mutation endpoint existed in M1; M2 adds only estimate creation.
 
 The RoadSegment transport additionally includes a required, read-only **condition_summary** for this milestone:
 
@@ -243,4 +225,12 @@ The RoadSegment transport additionally includes a required, read-only **conditio
 
 The fixture-only categorization rule is good ≥8, fair ≥5 and <8, poor <5; unknown has no rating, scale or date. This is an authored demo rule, not normalization of an official NYC scale. The manifest freezes it. Material populated fields have field_evidence; null material fields have unknown_reasons. Geometry is a nonzero valid EPSG:4326 LineString. All records preserve unknown utility coverage.
 
-The projection carries no independently mutable assessment list. Full ConditionAssessment records, latest-dated selection and stable-ID tie-breaking remain M2, at which point the summary should be derived from those records. No costs, dimensions, observed dates, utility routes or schedules are inferred for M1.
+The projection carries no independently mutable assessment list. M2 now derives this projection from full ConditionAssessment history using latest-dated/stable-ID selection when M2 records exist. No costs, dimensions, observed dates, utility routes or schedules are inferred for M1.
+
+## M2 related records and storage
+
+`maintenance_assets(road_id REFERENCES roads PRIMARY KEY, payload)` stores one optional AssetAttributes record per road: nullable positive `length_m`/`width_m`, surface, functional class, synthetic dimension basis, evidence IDs, synthetic designation and notes. This is a related pavement-planning extension, not the proposed generic InfrastructureAsset lifecycle. The read projection copies related dimensions/provenance, derives rectangular area, and retains raw M1 JSON. All current imports remain synthetic-only; future observed ingestion must extend schemas with reviewed provenance semantics first.
+
+`assessments(id PRIMARY KEY, road_id REFERENCES roads, assessed_on, payload)` retains history with a road/date/ID index. `repair_options(id PRIMARY KEY, dataset_id REFERENCES dataset, payload)` holds the validated catalog. `fixture_imports` freezes M2 manifest identity without changing the M1 dataset manifest. `schema_migrations` records additive version 2. `estimates(id, road_id, dataset_id, payload, low_cents, base_cents, high_cents)` enforces nonnegative ordered totals and immutable records. All JSON is validated on import/read. Referenced road and source IDs must resolve in the same dataset during seed. Startup creates schema only; the explicit CLI adds fixtures idempotently without overwriting existing records.
+
+The proposed WorkProject/UtilityWork, generic assets, scenarios, conflicts and audit-event workflows above remain unimplemented. M2 was deliberately limited to the requested maintenance/estimate slice; those entities enter when their milestone needs them.

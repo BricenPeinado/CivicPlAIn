@@ -919,3 +919,30 @@ h1 {
   scroll-behavior:auto!important}
 }
 
+
+/* M2 repair planning panels reuse the existing workspace typography and controls. */
+.repair-planner { margin: 24px 0; }
+.repair-workspace { margin-top: 18px; padding: 24px; border: 1px solid #dbe3e5; border-radius: 12px; background: #fff; }
+.repair-workspace p { color: #52656c; line-height: 1.6; }
+.repair-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 24px; }
+.repair-option { padding: 20px; border: 1px solid #d9e3df; border-radius: 10px; min-width: 0; }
+.repair-option h3 { margin: 16px 0; font-size: 19px; }
+.repair-option .primary-button { margin-top: 20px; width: 100%; }
+.repair-total { display: block; font-size: 28px; margin-top: 20px; }
+.suitability, .unavailable-estimate { padding: 10px; background: #fff6e3; border-radius: 6px; }
+.planning-inputs { margin: 20px 0; border: 1px solid #dbe3e5; padding: 16px; border-radius: 8px; }
+.planning-inputs label { display: inline-flex; flex-direction: column; gap: 7px; margin: 8px 16px 8px 0; max-width: 100%; }
+.planning-inputs input, .estimate-detail select { padding: 10px; border: 1px solid #a3b6b0; border-radius: 5px; max-width: 100%; }
+.assessment-history, .estimate-detail { margin-top: 24px; }
+.repair-workspace details summary { cursor: pointer; font-weight: 600; padding: 10px 0; }
+.estimate-detail { border-top: 1px solid #dbe3e5; padding-top: 24px; }
+.estimate-detail .metadata { max-width: 650px; }
+.table-scroll { overflow-x: auto; margin-top: 20px; }
+.estimate-detail table { width: 100%; text-align: left; border-collapse: collapse; }
+.estimate-detail th, .estimate-detail td { padding: 12px; border-bottom: 1px solid #dbe3e5; }
+.estimate-detail th small { display: block; margin-top: 6px; font-weight: normal; }
+.estimate-detail pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 500px; overflow: auto; background: #f4f7f6; padding: 16px; }
+.repair-workspace li { margin: 10px 0; overflow-wrap: anywhere; }
+.repair-workspace button:disabled { opacity: .6; cursor: wait; }
+@media (max-width: 1150px) { .repair-grid { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { .repair-workspace { padding: 14px; } .planning-inputs label { width: 100%; margin-right: 0; } }

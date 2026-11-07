@@ -1,6 +1,6 @@
 # REST API contract
 
-**M1 implemented subset:** GET `/api/v1/health`, `/api/v1/road-segments`, `/api/v1/road-segments/geojson`, `/api/v1/road-segments/{id}`, `/api/v1/evidence-sources/{id}`. All other routes below remain proposed and return no implemented domain functionality. Base path: `/api/v1`; local server: `http://127.0.0.1:8000`. Shared entities and validation are defined in DATA_MODEL; database-only representations are not exposed. There are no `/api/roads` or root `/health` aliases.
+**Implemented through M2:** the five M1 GET paths plus GET `/api/v1/road-segments/{id}/conditions`, GET `/api/v1/repair-options`, GET `/api/v1/road-segments/{id}/repair-options`, POST `/api/v1/estimates`, GET `/api/v1/estimates/{id}`. All projects, conflicts, scenarios, comparisons, reviews and explanation routes below remain proposed. Base `/api/v1`, local server `http://127.0.0.1:8000`; no `/api/roads` or root `/health` aliases.
 
 ## Transport conventions
 
@@ -14,7 +14,7 @@ The local MVP has no authentication and must not be publicly exposed. There are 
 
 ## Endpoint contracts
 
-Only the five GET paths identified above are implemented in M1. Conditions, assets, projects, repair options and every calculation/mutation route remain future work.
+Only the ten paths identified above are implemented. Assets/projects, conflict/scenario/review/explanation routes remain future work. The table includes their future contracts explicitly for planning; it does not claim implementation.
 
 | Method and path | Input | Output / success | Validation and specific errors | Computation |
 | --- | --- | --- | --- | --- |
@@ -23,11 +23,12 @@ Only the five GET paths identified above are implemented in M1. Conditions, asse
 | GET `/road-segments/geojson` | same filters/pagination as list | 200 GeoJSON FeatureCollection | same 422 rules; implement static route before `/{id}` | deterministic read |
 | GET `/road-segments/{id}` | ID | 200 RoadSegment | 404 missing ID | deterministic read |
 | GET `/road-segments/{id}/assets` | road ID, limit/cursor | 200 InfrastructureAsset list | 404 road not found | deterministic read |
-| GET `/road-segments/{id}/conditions` | road ID, limit/cursor | 200 ConditionAssessment list; meta.latest_usable_id nullable | 404 road not found; latest selection uses date/stable-ID rule | deterministic read |
+| GET `/road-segments/{id}/conditions` | road ID; complete bounded fixture history (no pagination) | 200 Assessment list in newest-date/stable-ID order; meta.latest_usable_id nullable | 404 road not found; latest selection uses date/stable-ID rule | deterministic read |
 | GET `/projects` | road_segment_id, kind, schedule_status, start_date, end_date, limit/cursor optional | 200 WorkProject list with nullable UtilityWork `utility_work` child | 422 enum/date range; 404 supplied road missing; missing project dates included with warnings when filtering cannot resolve | deterministic read/filter |
 | GET `/projects/{id}` | ID | 200 WorkProject plus nullable UtilityWork child | 404 missing ID | deterministic read |
-| GET `/repair-options` | treatment optional, limit/cursor | 200 RepairOption list with assumption evidence | 422 invalid treatment/cursor | deterministic read |
-| POST `/estimates` | road_segment_id!, repair_option_id!, dataset_snapshot_id!, quantity optional decimal, duration_method optional enum; assumption_evidence_ids required for any override | 201 saved CostEstimate | 404 references; 409 snapshot mismatch; 422 missing width/quantity, unit mismatch, ambiguous duration method or invalid overrides | deterministic estimate, no AI |
+| GET `/repair-options` | none; complete bounded catalog | 200 RepairOption list with full rates/productivity and assumption evidence | storage 503 | deterministic read |
+| GET `/road-segments/{id}/repair-options` | road ID | 200 list of {option, suitability, preview, unavailable_reason}; preview is Calculation or null | 404 missing road; missing dimensions produce null preview and explicit reason | deterministic preview, no persistence |
+| POST `/estimates` | road_segment_id!, repair_option_id!, dataset_snapshot_id!, optional planning_assumptions {length_m?,width_m?,unit:m,note!} | 201 saved Estimate; full input/output and sources | 404 road/option; 409 snapshot/evidence mismatch; 422 unknown fields, missing dimensions, nonpositive/nonfinite dimensions, invalid units or blank note | deterministic estimate, no AI |
 | GET `/estimates/{id}` | ID | 200 saved CostEstimate | 404 missing ID | deterministic read |
 | POST `/conflicts/check` | dataset_snapshot_id!, project_ids! nonempty distinct list capped at 50, proximity_m optional ≥0 default 5, reopening_horizon_days optional integer 0–365 default 30 | 200 ConflictCheckResult; persists positive findings and audit | 404 references; 409 snapshot mismatch; 422 invalid parameters; incomplete project fields produce indeterminate checks | deterministic geometry/date rules |
 | GET `/conflicts/{id}` | ID | 200 ConflictFinding | 404 missing ID | deterministic read |
@@ -83,3 +84,15 @@ This synthetic example asserts no real road dimensions, prices, schedule, or mun
 Health is read-only and checks SQLite availability; it returns data_ready=false and a null snapshot for a newly initialized, unseeded database. The absence of an AI key is never checked or required. An unseeded roads query is a successful empty collection. Seed import is an explicit local CLI, not an HTTP endpoint. Every current dataset is labeled synthetic; meta warnings retain unknown utility coverage.
 
 Backend tests cover the five route contracts, geometry/provenance validation, stable pagination, bbox errors, 404/405 envelopes, request IDs, CORS, storage 503, immutable fixture checks and persistence/repeated seed. Browser checks exercise GeoJSON loading, separate road/evidence reads and unavailable-API retry. See M1_IMPLEMENTATION.md for commands and actual outcomes.
+
+## Implemented M2 example and response
+
+```json
+{"road_segment_id":"demo-r-001","repair_option_id":"demo-resurface","dataset_snapshot_id":"demo-m1-v1"}
+```
+
+POST this body to `/api/v1/estimates` after explicit seeding. For unknown R-004 dimensions, add `"planning_assumptions":{"length_m":"100","width_m":"8","unit":"m","note":"Hypothetical rectangular scope for human review"}` and change the road ID. Extra request fields (including arbitrary rate/quantity overrides) are rejected. Unknown road/option is 404; incompatible snapshot is 409; missing mandatory dimensions is 422 `MISSING_ESTIMATE_INPUTS`; malformed requests are 422 `VALIDATION_ERROR`. No special 400 case is needed: typed boundary failures consistently use 422. CORS allows GET/POST and Content-Type only from configured local origins.
+
+The standard envelope's data is the implemented CostEstimate shape in DATA_MODEL. `scenarios.low/base/high` each expose three line items, subtotal, contingency and total. R-001 resurfacing (800 m²) returns base roadwork $36,000 + mobilization $6,000 + traffic $2,500 = subtotal $44,500; contingency $8,900; total $53,400; low $44,760 and high $66,360. Duration: ceil(800/600)=2 active +2 setup +1 curing =5 preliminary days. These are synthetic sensitivity examples, not official prices, probabilities or completion dates. Suitability for this poor-condition resurfacing case is `not_indicated`, with human review required.
+
+GET `/estimates/{id}` returns the saved data without recalculation. Input snapshot includes full evidence contents and the request, dimension basis and selected assessment/option. Hash/version details are inspectable. GET comparisons do not save estimates; POST saves a new record on each call. There is no idempotency key or deduplication of intentional estimate requests. Read-only conditions/catalog collections are small and returned in full; general ingestion/pagination is deferred. An M1-only seeded database returns no M2 options/history until the explicit seed upgrade.

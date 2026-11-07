@@ -1,0 +1,31 @@
+{
+  "fixture_id": "demo-m2-v1",
+  "dataset_snapshot_id": "demo-m1-v1",
+  "synthetic_input": true,
+  "file": "maintenance.json",
+  "checksum_sha256": "15debb6ed8092874976fd5f10ed52b55d0e2a43f45f0c75fbf1d88abd7a2e58d",
+  "generator": "scripts/create_m2_fixture.py",
+  "asset_count": 5,
+  "assessment_count": 26,
+  "repair_option_count": 3,
+  "evidence_source": {
+    "id": "demo-maintenance-assumptions-v1",
+    "title": "CivicPlAIn M2 synthetic dimensions, assessments, rates and productivity",
+    "publisher": "CivicPlAIn demo authors",
+    "source_kind": "demo_assumption",
+    "verification_status": "synthetic_demo",
+    "uri": "data/demo/maintenance.json",
+    "retrieved_at": null,
+    "observed_on": null,
+    "version": "demo-m2-v1",
+    "checksum_sha256": "15debb6ed8092874976fd5f10ed52b55d0e2a43f45f0c75fbf1d88abd7a2e58d",
+    "original_crs": "EPSG:4326",
+    "coverage_note": "Five linked synthetic assets; 26 assessment records; three demonstration treatments. No municipal observations.",
+    "reliability_note": "Every dimension, date, rate and productivity is invented for demonstration. Length is not computed from geometry.",
+    "license_note": "Original CivicPlAIn synthetic assumptions; no third-party prices or data.",
+    "unknown_reasons": {
+      "observed_on": "not_observed",
+      "retrieved_at": "authored_fixture"
+    }
+  }
+}

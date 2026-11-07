@@ -1,0 +1,1024 @@
+{
+  "fixture_id": "demo-m2-v1",
+  "dataset_snapshot_id": "demo-m1-v1",
+  "evidence_id": "demo-maintenance-assumptions-v1",
+  "synthetic_input": true,
+  "assets": [
+    {
+      "road_segment_id": "demo-r-001",
+      "length_m": "100",
+      "width_m": "8",
+      "surface_material": "asphalt",
+      "functional_class": "local",
+      "dimension_basis": "synthetic_planning_assumption",
+      "evidence_ids": [
+        "demo-maintenance-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "notes": "Authored rectangular repair scope, unrelated to measured geometry; not actual pavement dimensions."
+    },
+    {
+      "road_segment_id": "demo-r-002",
+      "length_m": "120",
+      "width_m": "7",
+      "surface_material": "asphalt",
+      "functional_class": "local",
+      "dimension_basis": "synthetic_planning_assumption",
+      "evidence_ids": [
+        "demo-maintenance-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "notes": "Authored rectangular repair scope, unrelated to measured geometry; not actual pavement dimensions."
+    },
+    {
+      "road_segment_id": "demo-r-003",
+      "length_m": "150",
+      "width_m": "8",
+      "surface_material": "asphalt",
+      "functional_class": "local",
+      "dimension_basis": "synthetic_planning_assumption",
+      "evidence_ids": [
+        "demo-maintenance-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "notes": "Authored rectangular repair scope, unrelated to measured geometry; not actual pavement dimensions."
+    },
+    {
+      "road_segment_id": "demo-r-004",
+      "length_m": null,
+      "width_m": null,
+      "surface_material": "unknown",
+      "functional_class": "unknown",
+      "dimension_basis": "synthetic_planning_assumption",
+      "evidence_ids": [
+        "demo-maintenance-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "notes": "Authored rectangular repair scope, unrelated to measured geometry; not actual pavement dimensions."
+    },
+    {
+      "road_segment_id": "demo-r-005",
+      "length_m": "900",
+      "width_m": "12",
+      "surface_material": "asphalt",
+      "functional_class": "local",
+      "dimension_basis": "synthetic_planning_assumption",
+      "evidence_ids": [
+        "demo-maintenance-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "notes": "Authored rectangular repair scope, unrelated to measured geometry; not actual pavement dimensions."
+    }
+  ],
+  "assessments": [
+    {
+      "category": "poor",
+      "rating": "3",
+      "rating_scale": "synthetic-1-10-higher-better",
+      "assessed_on": null,
+      "evidence_ids": [
+        "demo-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "id": "demo-r-001-assessment-m1",
+      "road_segment_id": "demo-r-001",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "assessment_method": "synthetic_fixture",
+      "notes": "Undated M1 authored condition, not an inspection.",
+      "created_at": "2026-11-07T00:00:00Z",
+      "field_evidence": {
+        "rating": [
+          "demo-assumptions-v1"
+        ],
+        "category": [
+          "demo-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {
+        "assessed_on": "not_supplied"
+      },
+      "limitations": [
+        "Authored synthetic condition scale and date; not an inspection or official PCI."
+      ]
+    },
+    {
+      "category": "good",
+      "rating": "8",
+      "rating_scale": "synthetic-1-10-higher-better",
+      "assessed_on": null,
+      "evidence_ids": [
+        "demo-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "id": "demo-r-002-assessment-m1",
+      "road_segment_id": "demo-r-002",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "assessment_method": "synthetic_fixture",
+      "notes": "Undated M1 authored condition, not an inspection.",
+      "created_at": "2026-11-07T00:00:00Z",
+      "field_evidence": {
+        "rating": [
+          "demo-assumptions-v1"
+        ],
+        "category": [
+          "demo-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {
+        "assessed_on": "not_supplied"
+      },
+      "limitations": [
+        "Authored synthetic condition scale and date; not an inspection or official PCI."
+      ]
+    },
+    {
+      "category": "fair",
+      "rating": "6",
+      "rating_scale": "synthetic-1-10-higher-better",
+      "assessed_on": null,
+      "evidence_ids": [
+        "demo-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "id": "demo-r-003-assessment-m1",
+      "road_segment_id": "demo-r-003",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "assessment_method": "synthetic_fixture",
+      "notes": "Undated M1 authored condition, not an inspection.",
+      "created_at": "2026-11-07T00:00:00Z",
+      "field_evidence": {
+        "rating": [
+          "demo-assumptions-v1"
+        ],
+        "category": [
+          "demo-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {
+        "assessed_on": "not_supplied"
+      },
+      "limitations": [
+        "Authored synthetic condition scale and date; not an inspection or official PCI."
+      ]
+    },
+    {
+      "category": "poor",
+      "rating": "3",
+      "rating_scale": "synthetic-1-10-higher-better",
+      "assessed_on": null,
+      "evidence_ids": [
+        "demo-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "id": "demo-r-005-assessment-m1",
+      "road_segment_id": "demo-r-005",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "assessment_method": "synthetic_fixture",
+      "notes": "Undated M1 authored condition, not an inspection.",
+      "created_at": "2026-11-07T00:00:00Z",
+      "field_evidence": {
+        "rating": [
+          "demo-assumptions-v1"
+        ],
+        "category": [
+          "demo-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {
+        "assessed_on": "not_supplied"
+      },
+      "limitations": [
+        "Authored synthetic condition scale and date; not an inspection or official PCI."
+      ]
+    },
+    {
+      "category": "good",
+      "rating": "8",
+      "rating_scale": "synthetic-1-10-higher-better",
+      "assessed_on": null,
+      "evidence_ids": [
+        "demo-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "id": "demo-r-006-assessment-m1",
+      "road_segment_id": "demo-r-006",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "assessment_method": "synthetic_fixture",
+      "notes": "Undated M1 authored condition, not an inspection.",
+      "created_at": "2026-11-07T00:00:00Z",
+      "field_evidence": {
+        "rating": [
+          "demo-assumptions-v1"
+        ],
+        "category": [
+          "demo-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {
+        "assessed_on": "not_supplied"
+      },
+      "limitations": [
+        "Authored synthetic condition scale and date; not an inspection or official PCI."
+      ]
+    },
+    {
+      "category": "fair",
+      "rating": "6",
+      "rating_scale": "synthetic-1-10-higher-better",
+      "assessed_on": null,
+      "evidence_ids": [
+        "demo-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "id": "demo-r-007-assessment-m1",
+      "road_segment_id": "demo-r-007",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "assessment_method": "synthetic_fixture",
+      "notes": "Undated M1 authored condition, not an inspection.",
+      "created_at": "2026-11-07T00:00:00Z",
+      "field_evidence": {
+        "rating": [
+          "demo-assumptions-v1"
+        ],
+        "category": [
+          "demo-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {
+        "assessed_on": "not_supplied"
+      },
+      "limitations": [
+        "Authored synthetic condition scale and date; not an inspection or official PCI."
+      ]
+    },
+    {
+      "category": "poor",
+      "rating": "3",
+      "rating_scale": "synthetic-1-10-higher-better",
+      "assessed_on": null,
+      "evidence_ids": [
+        "demo-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "id": "demo-r-009-assessment-m1",
+      "road_segment_id": "demo-r-009",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "assessment_method": "synthetic_fixture",
+      "notes": "Undated M1 authored condition, not an inspection.",
+      "created_at": "2026-11-07T00:00:00Z",
+      "field_evidence": {
+        "rating": [
+          "demo-assumptions-v1"
+        ],
+        "category": [
+          "demo-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {
+        "assessed_on": "not_supplied"
+      },
+      "limitations": [
+        "Authored synthetic condition scale and date; not an inspection or official PCI."
+      ]
+    },
+    {
+      "category": "good",
+      "rating": "8",
+      "rating_scale": "synthetic-1-10-higher-better",
+      "assessed_on": null,
+      "evidence_ids": [
+        "demo-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "id": "demo-r-010-assessment-m1",
+      "road_segment_id": "demo-r-010",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "assessment_method": "synthetic_fixture",
+      "notes": "Undated M1 authored condition, not an inspection.",
+      "created_at": "2026-11-07T00:00:00Z",
+      "field_evidence": {
+        "rating": [
+          "demo-assumptions-v1"
+        ],
+        "category": [
+          "demo-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {
+        "assessed_on": "not_supplied"
+      },
+      "limitations": [
+        "Authored synthetic condition scale and date; not an inspection or official PCI."
+      ]
+    },
+    {
+      "category": "fair",
+      "rating": "6",
+      "rating_scale": "synthetic-1-10-higher-better",
+      "assessed_on": null,
+      "evidence_ids": [
+        "demo-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "id": "demo-r-011-assessment-m1",
+      "road_segment_id": "demo-r-011",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "assessment_method": "synthetic_fixture",
+      "notes": "Undated M1 authored condition, not an inspection.",
+      "created_at": "2026-11-07T00:00:00Z",
+      "field_evidence": {
+        "rating": [
+          "demo-assumptions-v1"
+        ],
+        "category": [
+          "demo-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {
+        "assessed_on": "not_supplied"
+      },
+      "limitations": [
+        "Authored synthetic condition scale and date; not an inspection or official PCI."
+      ]
+    },
+    {
+      "category": "poor",
+      "rating": "3",
+      "rating_scale": "synthetic-1-10-higher-better",
+      "assessed_on": null,
+      "evidence_ids": [
+        "demo-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "id": "demo-r-013-assessment-m1",
+      "road_segment_id": "demo-r-013",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "assessment_method": "synthetic_fixture",
+      "notes": "Undated M1 authored condition, not an inspection.",
+      "created_at": "2026-11-07T00:00:00Z",
+      "field_evidence": {
+        "rating": [
+          "demo-assumptions-v1"
+        ],
+        "category": [
+          "demo-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {
+        "assessed_on": "not_supplied"
+      },
+      "limitations": [
+        "Authored synthetic condition scale and date; not an inspection or official PCI."
+      ]
+    },
+    {
+      "category": "good",
+      "rating": "8",
+      "rating_scale": "synthetic-1-10-higher-better",
+      "assessed_on": null,
+      "evidence_ids": [
+        "demo-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "id": "demo-r-014-assessment-m1",
+      "road_segment_id": "demo-r-014",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "assessment_method": "synthetic_fixture",
+      "notes": "Undated M1 authored condition, not an inspection.",
+      "created_at": "2026-11-07T00:00:00Z",
+      "field_evidence": {
+        "rating": [
+          "demo-assumptions-v1"
+        ],
+        "category": [
+          "demo-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {
+        "assessed_on": "not_supplied"
+      },
+      "limitations": [
+        "Authored synthetic condition scale and date; not an inspection or official PCI."
+      ]
+    },
+    {
+      "category": "fair",
+      "rating": "6",
+      "rating_scale": "synthetic-1-10-higher-better",
+      "assessed_on": null,
+      "evidence_ids": [
+        "demo-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "id": "demo-r-015-assessment-m1",
+      "road_segment_id": "demo-r-015",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "assessment_method": "synthetic_fixture",
+      "notes": "Undated M1 authored condition, not an inspection.",
+      "created_at": "2026-11-07T00:00:00Z",
+      "field_evidence": {
+        "rating": [
+          "demo-assumptions-v1"
+        ],
+        "category": [
+          "demo-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {
+        "assessed_on": "not_supplied"
+      },
+      "limitations": [
+        "Authored synthetic condition scale and date; not an inspection or official PCI."
+      ]
+    },
+    {
+      "category": "poor",
+      "rating": "3",
+      "rating_scale": "synthetic-1-10-higher-better",
+      "assessed_on": null,
+      "evidence_ids": [
+        "demo-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "id": "demo-r-017-assessment-m1",
+      "road_segment_id": "demo-r-017",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "assessment_method": "synthetic_fixture",
+      "notes": "Undated M1 authored condition, not an inspection.",
+      "created_at": "2026-11-07T00:00:00Z",
+      "field_evidence": {
+        "rating": [
+          "demo-assumptions-v1"
+        ],
+        "category": [
+          "demo-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {
+        "assessed_on": "not_supplied"
+      },
+      "limitations": [
+        "Authored synthetic condition scale and date; not an inspection or official PCI."
+      ]
+    },
+    {
+      "category": "good",
+      "rating": "8",
+      "rating_scale": "synthetic-1-10-higher-better",
+      "assessed_on": null,
+      "evidence_ids": [
+        "demo-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "id": "demo-r-018-assessment-m1",
+      "road_segment_id": "demo-r-018",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "assessment_method": "synthetic_fixture",
+      "notes": "Undated M1 authored condition, not an inspection.",
+      "created_at": "2026-11-07T00:00:00Z",
+      "field_evidence": {
+        "rating": [
+          "demo-assumptions-v1"
+        ],
+        "category": [
+          "demo-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {
+        "assessed_on": "not_supplied"
+      },
+      "limitations": [
+        "Authored synthetic condition scale and date; not an inspection or official PCI."
+      ]
+    },
+    {
+      "category": "fair",
+      "rating": "6",
+      "rating_scale": "synthetic-1-10-higher-better",
+      "assessed_on": null,
+      "evidence_ids": [
+        "demo-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "id": "demo-r-019-assessment-m1",
+      "road_segment_id": "demo-r-019",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "assessment_method": "synthetic_fixture",
+      "notes": "Undated M1 authored condition, not an inspection.",
+      "created_at": "2026-11-07T00:00:00Z",
+      "field_evidence": {
+        "rating": [
+          "demo-assumptions-v1"
+        ],
+        "category": [
+          "demo-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {
+        "assessed_on": "not_supplied"
+      },
+      "limitations": [
+        "Authored synthetic condition scale and date; not an inspection or official PCI."
+      ]
+    },
+    {
+      "category": "poor",
+      "rating": "3",
+      "rating_scale": "synthetic-1-10-higher-better",
+      "assessed_on": null,
+      "evidence_ids": [
+        "demo-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "id": "demo-r-021-assessment-m1",
+      "road_segment_id": "demo-r-021",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "assessment_method": "synthetic_fixture",
+      "notes": "Undated M1 authored condition, not an inspection.",
+      "created_at": "2026-11-07T00:00:00Z",
+      "field_evidence": {
+        "rating": [
+          "demo-assumptions-v1"
+        ],
+        "category": [
+          "demo-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {
+        "assessed_on": "not_supplied"
+      },
+      "limitations": [
+        "Authored synthetic condition scale and date; not an inspection or official PCI."
+      ]
+    },
+    {
+      "category": "good",
+      "rating": "8",
+      "rating_scale": "synthetic-1-10-higher-better",
+      "assessed_on": null,
+      "evidence_ids": [
+        "demo-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "id": "demo-r-022-assessment-m1",
+      "road_segment_id": "demo-r-022",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "assessment_method": "synthetic_fixture",
+      "notes": "Undated M1 authored condition, not an inspection.",
+      "created_at": "2026-11-07T00:00:00Z",
+      "field_evidence": {
+        "rating": [
+          "demo-assumptions-v1"
+        ],
+        "category": [
+          "demo-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {
+        "assessed_on": "not_supplied"
+      },
+      "limitations": [
+        "Authored synthetic condition scale and date; not an inspection or official PCI."
+      ]
+    },
+    {
+      "category": "fair",
+      "rating": "6",
+      "rating_scale": "synthetic-1-10-higher-better",
+      "assessed_on": null,
+      "evidence_ids": [
+        "demo-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "id": "demo-r-023-assessment-m1",
+      "road_segment_id": "demo-r-023",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "assessment_method": "synthetic_fixture",
+      "notes": "Undated M1 authored condition, not an inspection.",
+      "created_at": "2026-11-07T00:00:00Z",
+      "field_evidence": {
+        "rating": [
+          "demo-assumptions-v1"
+        ],
+        "category": [
+          "demo-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {
+        "assessed_on": "not_supplied"
+      },
+      "limitations": [
+        "Authored synthetic condition scale and date; not an inspection or official PCI."
+      ]
+    },
+    {
+      "id": "demo-r-001-assessment-2026-06-01",
+      "road_segment_id": "demo-r-001",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "category": "poor",
+      "rating": "3",
+      "rating_scale": "synthetic-1-10-higher-better",
+      "assessed_on": "2026-06-01",
+      "evidence_ids": [
+        "demo-maintenance-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "assessment_method": "synthetic_fixture",
+      "notes": "Invented demonstration date and condition; not a certified engineering inspection.",
+      "created_at": "2026-11-07T00:00:00Z",
+      "field_evidence": {
+        "rating": [
+          "demo-maintenance-assumptions-v1"
+        ],
+        "category": [
+          "demo-maintenance-assumptions-v1"
+        ],
+        "assessed_on": [
+          "demo-maintenance-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {},
+      "limitations": [
+        "Authored synthetic condition scale and date; not an inspection or official PCI."
+      ]
+    },
+    {
+      "id": "demo-r-001-assessment-2026-10-01",
+      "road_segment_id": "demo-r-001",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "category": "poor",
+      "rating": "3",
+      "rating_scale": "synthetic-1-10-higher-better",
+      "assessed_on": "2026-10-01",
+      "evidence_ids": [
+        "demo-maintenance-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "assessment_method": "synthetic_fixture",
+      "notes": "Invented demonstration date and condition; not a certified engineering inspection.",
+      "created_at": "2026-11-07T00:00:00Z",
+      "field_evidence": {
+        "rating": [
+          "demo-maintenance-assumptions-v1"
+        ],
+        "category": [
+          "demo-maintenance-assumptions-v1"
+        ],
+        "assessed_on": [
+          "demo-maintenance-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {},
+      "limitations": [
+        "Authored synthetic condition scale and date; not an inspection or official PCI."
+      ]
+    },
+    {
+      "id": "demo-r-002-assessment-2026-06-01",
+      "road_segment_id": "demo-r-002",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "category": "good",
+      "rating": "9",
+      "rating_scale": "synthetic-1-10-higher-better",
+      "assessed_on": "2026-06-01",
+      "evidence_ids": [
+        "demo-maintenance-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "assessment_method": "synthetic_fixture",
+      "notes": "Invented demonstration date and condition; not a certified engineering inspection.",
+      "created_at": "2026-11-07T00:00:00Z",
+      "field_evidence": {
+        "rating": [
+          "demo-maintenance-assumptions-v1"
+        ],
+        "category": [
+          "demo-maintenance-assumptions-v1"
+        ],
+        "assessed_on": [
+          "demo-maintenance-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {},
+      "limitations": [
+        "Authored synthetic condition scale and date; not an inspection or official PCI."
+      ]
+    },
+    {
+      "id": "demo-r-002-assessment-2026-10-01",
+      "road_segment_id": "demo-r-002",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "category": "good",
+      "rating": "9",
+      "rating_scale": "synthetic-1-10-higher-better",
+      "assessed_on": "2026-10-01",
+      "evidence_ids": [
+        "demo-maintenance-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "assessment_method": "synthetic_fixture",
+      "notes": "Invented demonstration date and condition; not a certified engineering inspection.",
+      "created_at": "2026-11-07T00:00:00Z",
+      "field_evidence": {
+        "rating": [
+          "demo-maintenance-assumptions-v1"
+        ],
+        "category": [
+          "demo-maintenance-assumptions-v1"
+        ],
+        "assessed_on": [
+          "demo-maintenance-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {},
+      "limitations": [
+        "Authored synthetic condition scale and date; not an inspection or official PCI."
+      ]
+    },
+    {
+      "id": "demo-r-003-assessment-2026-06-01",
+      "road_segment_id": "demo-r-003",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "category": "fair",
+      "rating": "6",
+      "rating_scale": "synthetic-1-10-higher-better",
+      "assessed_on": "2026-06-01",
+      "evidence_ids": [
+        "demo-maintenance-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "assessment_method": "synthetic_fixture",
+      "notes": "Invented demonstration date and condition; not a certified engineering inspection.",
+      "created_at": "2026-11-07T00:00:00Z",
+      "field_evidence": {
+        "rating": [
+          "demo-maintenance-assumptions-v1"
+        ],
+        "category": [
+          "demo-maintenance-assumptions-v1"
+        ],
+        "assessed_on": [
+          "demo-maintenance-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {},
+      "limitations": [
+        "Authored synthetic condition scale and date; not an inspection or official PCI."
+      ]
+    },
+    {
+      "id": "demo-r-003-assessment-2026-10-01",
+      "road_segment_id": "demo-r-003",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "category": "fair",
+      "rating": "6",
+      "rating_scale": "synthetic-1-10-higher-better",
+      "assessed_on": "2026-10-01",
+      "evidence_ids": [
+        "demo-maintenance-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "assessment_method": "synthetic_fixture",
+      "notes": "Invented demonstration date and condition; not a certified engineering inspection.",
+      "created_at": "2026-11-07T00:00:00Z",
+      "field_evidence": {
+        "rating": [
+          "demo-maintenance-assumptions-v1"
+        ],
+        "category": [
+          "demo-maintenance-assumptions-v1"
+        ],
+        "assessed_on": [
+          "demo-maintenance-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {},
+      "limitations": [
+        "Authored synthetic condition scale and date; not an inspection or official PCI."
+      ]
+    },
+    {
+      "id": "demo-r-005-assessment-2026-06-01",
+      "road_segment_id": "demo-r-005",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "category": "poor",
+      "rating": "3",
+      "rating_scale": "synthetic-1-10-higher-better",
+      "assessed_on": "2026-06-01",
+      "evidence_ids": [
+        "demo-maintenance-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "assessment_method": "synthetic_fixture",
+      "notes": "Invented demonstration date and condition; not a certified engineering inspection.",
+      "created_at": "2026-11-07T00:00:00Z",
+      "field_evidence": {
+        "rating": [
+          "demo-maintenance-assumptions-v1"
+        ],
+        "category": [
+          "demo-maintenance-assumptions-v1"
+        ],
+        "assessed_on": [
+          "demo-maintenance-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {},
+      "limitations": [
+        "Authored synthetic condition scale and date; not an inspection or official PCI."
+      ]
+    },
+    {
+      "id": "demo-r-005-assessment-2026-10-01",
+      "road_segment_id": "demo-r-005",
+      "dataset_snapshot_id": "demo-m1-v1",
+      "category": "poor",
+      "rating": "3",
+      "rating_scale": "synthetic-1-10-higher-better",
+      "assessed_on": "2026-10-01",
+      "evidence_ids": [
+        "demo-maintenance-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true,
+      "assessment_method": "synthetic_fixture",
+      "notes": "Invented demonstration date and condition; not a certified engineering inspection.",
+      "created_at": "2026-11-07T00:00:00Z",
+      "field_evidence": {
+        "rating": [
+          "demo-maintenance-assumptions-v1"
+        ],
+        "category": [
+          "demo-maintenance-assumptions-v1"
+        ],
+        "assessed_on": [
+          "demo-maintenance-assumptions-v1"
+        ]
+      },
+      "unknown_reasons": {},
+      "limitations": [
+        "Authored synthetic condition scale and date; not an inspection or official PCI."
+      ]
+    }
+  ],
+  "repair_options": [
+    {
+      "id": "demo-preventive",
+      "treatment": "preventive",
+      "label": "Preventive maintenance",
+      "description": "Surface preservation for the good-condition demonstration case.",
+      "scope_of_work": "Clean, seal and apply a thin surface treatment.",
+      "suitability_conditions": "Dated synthetic 1\u201310 scale: good >=8 screens preventive, fair >=5 screens resurface, poor <5 screens reconstruct; asphalt only. All require engineering review.",
+      "material_assumptions": "Demo asphalt-compatible seal treatment.",
+      "work_activities": [
+        "Surface cleaning",
+        "Crack sealing",
+        "Surface treatment"
+      ],
+      "quantity_unit": "m2",
+      "unit_rates_usd": {
+        "low": "4.80",
+        "base": "6.00",
+        "high": "7.80"
+      },
+      "rate_inclusions": "materials, labor and equipment bundled; do not add them again",
+      "mobilization_usd": "1500",
+      "traffic_management_usd": "500",
+      "contingency_fraction": ".20",
+      "productivity_per_day": "1200",
+      "productivity_unit": "m2/active_workday",
+      "setup_days": 1,
+      "curing_days": 0,
+      "price_basis_date": "2026-11-07",
+      "sensitivity_basis": "Synthetic rate sensitivity: low bundled rate = base \u221220%; high = base +30%. Quantity, allowances and productivity fixed. Scenarios are assumptions, not probabilities.",
+      "exclusions": [
+        "Utility relocation, drainage redesign, permits, taxes and design fees excluded."
+      ],
+      "limitations": [
+        "No verified subsurface, structural or drainage investigation.",
+        "Single assumed crew; no weather, weekends, traffic phasing or contractor schedule."
+      ],
+      "evidence_ids": [
+        "demo-maintenance-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true
+    },
+    {
+      "id": "demo-resurface",
+      "treatment": "resurface",
+      "label": "Resurfacing or rehabilitation",
+      "description": "Surface rehabilitation for the fair-condition demonstration case.",
+      "scope_of_work": "Mill and replace an assumed shallow asphalt surface layer.",
+      "suitability_conditions": "Dated synthetic 1\u201310 scale: good >=8 screens preventive, fair >=5 screens resurface, poor <5 screens reconstruct; asphalt only. All require engineering review.",
+      "material_assumptions": "Demo asphalt overlay; thickness included in bundled rate, not measured.",
+      "work_activities": [
+        "Milling",
+        "Surface preparation",
+        "Asphalt placement",
+        "Compaction"
+      ],
+      "quantity_unit": "m2",
+      "unit_rates_usd": {
+        "low": "36.00",
+        "base": "45.00",
+        "high": "58.50"
+      },
+      "rate_inclusions": "materials, labor and equipment bundled; do not add them again",
+      "mobilization_usd": "6000",
+      "traffic_management_usd": "2500",
+      "contingency_fraction": ".20",
+      "productivity_per_day": "600",
+      "productivity_unit": "m2/active_workday",
+      "setup_days": 2,
+      "curing_days": 1,
+      "price_basis_date": "2026-11-07",
+      "sensitivity_basis": "Synthetic rate sensitivity: low bundled rate = base \u221220%; high = base +30%. Quantity, allowances and productivity fixed. Scenarios are assumptions, not probabilities.",
+      "exclusions": [
+        "Utility relocation, drainage redesign, permits, taxes and design fees excluded."
+      ],
+      "limitations": [
+        "No verified subsurface, structural or drainage investigation.",
+        "Single assumed crew; no weather, weekends, traffic phasing or contractor schedule."
+      ],
+      "evidence_ids": [
+        "demo-maintenance-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true
+    },
+    {
+      "id": "demo-reconstruct",
+      "treatment": "reconstruct",
+      "label": "Full-depth reconstruction",
+      "description": "Potential structural replacement for the poor-condition demonstration case.",
+      "scope_of_work": "Remove pavement and replace an assumed pavement/base structure.",
+      "suitability_conditions": "Dated synthetic 1\u201310 scale: good >=8 screens preventive, fair >=5 screens resurface, poor <5 screens reconstruct; asphalt only. All require engineering review.",
+      "material_assumptions": "Demo asphalt and aggregate base; structure requires design review.",
+      "work_activities": [
+        "Pavement removal",
+        "Base preparation",
+        "Pavement replacement",
+        "Compaction"
+      ],
+      "quantity_unit": "m2",
+      "unit_rates_usd": {
+        "low": "112.00",
+        "base": "140.00",
+        "high": "182.00"
+      },
+      "rate_inclusions": "materials, labor and equipment bundled; do not add them again",
+      "mobilization_usd": "20000",
+      "traffic_management_usd": "6000",
+      "contingency_fraction": ".25",
+      "productivity_per_day": "200",
+      "productivity_unit": "m2/active_workday",
+      "setup_days": 3,
+      "curing_days": 3,
+      "price_basis_date": "2026-11-07",
+      "sensitivity_basis": "Synthetic rate sensitivity: low bundled rate = base \u221220%; high = base +30%. Quantity, allowances and productivity fixed. Scenarios are assumptions, not probabilities.",
+      "exclusions": [
+        "Utility relocation, drainage redesign, permits, taxes and design fees excluded."
+      ],
+      "limitations": [
+        "No verified subsurface, structural or drainage investigation.",
+        "Single assumed crew; no weather, weekends, traffic phasing or contractor schedule."
+      ],
+      "evidence_ids": [
+        "demo-maintenance-assumptions-v1"
+      ],
+      "data_kind": "synthetic",
+      "synthetic_input": true
+    }
+  ]
+}

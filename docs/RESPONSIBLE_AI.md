@@ -54,3 +54,9 @@ Audit imports, calculations, evaluations, explanations, and review notes using i
 | Inaccessible warnings | Keyboard/list access and text/icon indicators in addition to color |
 
 M6 records actual results and limitations. Automated checks cannot establish engineering safety, complete utility coverage, unbiased citywide allocation, or regulatory compliance. Real municipal adoption requires field and utility verification, qualified professional review, source/license agreements, security review, and the municipality's formal authorization processes outside CivicPlAIn.
+
+## Implemented M2 controls
+
+No LLM/provider integration or key is used. Deterministic condition-screening rationale accompanies every comparison; all alternatives require engineering review, including cheap options. A score only screens a demonstration treatment; it cannot certify pavement structure, safe deferral or excavation. Missing/undated assessment and unknown/non-asphalt surface return requires_review. Synthetic condition dates are not inspections.
+
+The UI labels synthetic costs on every option and estimate; shows assumptions, exclusions, source IDs, sensitivity basis, dimension provenance, currency rounding and active/setup/curing duration. Unknown dimensions remain null and block saved estimates unless the user explicitly supplies a positive metric planning assumption with a note. Those assumptions remain labeled in the immutable snapshot. Stored inputs/results preserve source contents, hashes and method version, independent of later catalog changes. Costs, schedules and suitability are not engineering certification, municipal observations, statistical confidence, approval or authorization. Utility coverage remains unknown throughout.

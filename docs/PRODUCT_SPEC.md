@@ -1,6 +1,6 @@
 # CivicPlAIn product specification
 
-Status: M1 implements local map/list selection, basic synthetic condition/provenance details and dataset summary counts. The full hackathon workflow below remains the product target; estimates, projects/conflicts, scenarios and explanations are not implemented.
+Status: M2 implements local map/list selection, synthetic maintenance attributes and assessment history, three repair categories, deterministic cost/preliminary-duration estimates, immutable snapshots and comparison/breakdown panels. Projects/conflicts, scenarios and generative explanations remain unimplemented.
 
 ## Users and problem
 
@@ -35,7 +35,7 @@ These may be panels on one page; separate routed pages are not required.
 ## Functional requirements
 
 - FR1: Display GeoJSON road features and linked infrastructure/condition/project records for the documented study area.
-- FR2: Compute repair costs and calendar-day durations from validated quantities and explicit assumptions; include maintenance lifespan assumptions when available.
+- FR2: Compute repair costs and preliminary active/setup/curing durations (calendar scheduling remains future work) from validated quantities and explicit assumptions; include maintenance lifespan assumptions when available.
 - FR3: Detect spatial proximity plus temporal overlap and near-term reopening risk using the versioned rules in ARCHITECTURE. Potential utility work is explicitly qualified.
 - FR4: Evaluate at least three manually defined scenarios using the same snapshot, roadwork cost scope, and planning horizon. Never call enumeration a global optimum.
 - FR5: Compare central and upper cost bounds with a nonnegative budget. Incomplete cost or safety inputs produce an indeterminate result rather than an affordable/safe badge.

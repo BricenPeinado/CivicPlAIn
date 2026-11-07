@@ -1,7 +1,7 @@
 """Validated M1 road transport and fixture contracts."""
 import math
 from datetime import date, datetime
-from decimal import Decimal
+from decimal import Decimal, DecimalException
 from typing import Generic, Literal, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -64,12 +64,35 @@ class Road(Schema):
     source_segment_key: str | None = None
     geometry: Geometry
     study_area_id: Literal["lower-manhattan-window-v1"]
-    length_m: Decimal | None = Field(default=None, gt=0)
-    width_m: Decimal | None = Field(default=None, gt=0)
+    length_m: Decimal | None = Field(default=None, gt=0, max_digits=12, decimal_places=3)
+    width_m: Decimal | None = Field(default=None, gt=0, max_digits=12, decimal_places=3)
     lane_count: int | None = Field(default=None, ge=1)
     utility_coverage: Literal["unknown"] = "unknown"
     coverage_as_of: date | None = None
     condition_summary: ConditionSummary
+    surface_material: Literal["asphalt", "concrete", "gravel", "unknown"] = "unknown"
+    functional_class: Literal["local", "collector", "arterial", "unknown"] = "unknown"
+    dimension_basis: dict[str, Literal["synthetic_planning_assumption", "legacy_synthetic_basis_unknown"]] = Field(default_factory=dict)
+    notes: str | None = None
+
+    repairable_area_m2: Decimal | None = Field(default=None, ge=0)
+
+    @model_validator(mode="before")
+    @classmethod
+    def legacy_dimensions(cls, value):
+        # M1 allowed sourced dimensions but had no area/basis fields. Preserve
+        # readable historical records without relabeling them as measurements.
+        if isinstance(value, dict) and "dimension_basis" not in value and "repairable_area_m2" not in value:
+            value = {**value, "dimension_basis": {}}
+            for field in ("length_m", "width_m"):
+                if value.get(field) is not None:
+                    value["dimension_basis"][field] = "legacy_synthetic_basis_unknown"
+            try:
+                if value.get("length_m") is not None and value.get("width_m") is not None:
+                    value["repairable_area_m2"] = Decimal(str(value["length_m"])) * Decimal(str(value["width_m"]))
+            except (DecimalException, ValueError, TypeError):
+                pass  # Field validation supplies the actual error.
+        return value
 
     @model_validator(mode="after")
     def provenance(self):
@@ -80,7 +103,16 @@ class Road(Schema):
         for path, refs in self.field_evidence.items():
             if not refs or not set(refs) <= set(self.evidence_ids):
                 raise ValueError(f"unresolved evidence for {path}")
+        expected_area = self.length_m * self.width_m if self.length_m is not None and self.width_m is not None else None
+        if self.repairable_area_m2 != expected_area:
+            raise ValueError("repairable_area_m2 must equal length_m * width_m or remain null when dimensions are unknown")
         required = ["geometry"]
+        for field in ("length_m", "width_m"):
+            if getattr(self, field) is not None and field not in self.dimension_basis:
+                raise ValueError(f"{field} requires an explicit dimension basis")
+        for field in ("surface_material", "functional_class"):
+            if getattr(self, field) != "unknown":
+                required.append(field)
         for field in ("length_m", "width_m", "lane_count"):
             if getattr(self, field) is not None:
                 required.append(field)
@@ -124,6 +156,7 @@ class Meta(Schema):
     dataset_snapshot_id: str | None
     warnings: list[str]
     next_cursor: str | None = None
+    latest_usable_id: str | None = None
 
 
 T = TypeVar("T")
