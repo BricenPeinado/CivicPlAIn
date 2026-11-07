@@ -19,6 +19,11 @@ class PlanningRepository:
             rows = conn.execute('SELECT payload FROM assessments WHERE road_id=?', (road_id,)).fetchall()
         return ordered_assessments([Assessment.model_validate_json(row[0]) for row in rows])
 
+    def assessment(self, assessment_id):
+        with connection(self.path) as conn:
+            row = conn.execute('SELECT payload FROM assessments WHERE id=?', (assessment_id,)).fetchone()
+        return Assessment.model_validate_json(row[0]) if row else None
+
     def latest(self, road_id):
         return next((a for a in self.assessments(road_id) if a.rating is not None), None)
 

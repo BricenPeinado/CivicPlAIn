@@ -1,3 +1,4 @@
+import { AIAdvisor } from '../ai/AIAdvisor';
 import type { ConflictAnalysis, ConflictFinding, InfrastructureCategory, WorkProject } from '../../types/api';
 import { infrastructureCategories } from '../../types/api';
 
@@ -40,7 +41,7 @@ export function ConflictReview(props: Props) {
           <span>{p.data_kind === 'synthetic' ? 'SYNTHETIC' : 'Source-reported'} · {label(p.location_status)} location{(!p.geometry || !p.start_date || !p.end_date) && ' · ⚠ Incomplete evidence'}</span>
         </button>)}</div>
         {!projects.length && <p>No project records loaded. Utility coverage remains unknown.</p>}
-        {project && <article className="project-detail" aria-label="Selected project details"><h3>{project.title}</h3><p>{project.description}</p><dl className="metadata">
+        {project && <article className="project-detail" aria-label="Selected project details"><h3>{project.title}</h3><p>{project.description}</p><AIAdvisor context={{ type: 'project', record_ids: [project.id] }} label="Explain this project"/><dl className="metadata">
           <div><dt>Organization</dt><dd>{project.responsible_organization || 'Unknown'}</dd></div>
           <div><dt>Schedule source</dt><dd>{label(project.schedule_basis)}</dd></div><div><dt>Actual dates</dt><dd>{project.actual_start_date || '?'} → {project.actual_end_date || '?'}</dd></div>
           <div><dt>Location</dt><dd>{label(project.location_status)}; no depth or measurement accuracy established</dd></div>
@@ -56,7 +57,7 @@ export function ConflictReview(props: Props) {
           <strong>⚑ {findingLabels[f.finding_type]}</strong><span>Coordination review · {f.synthetic_input ? 'Synthetic inputs' : 'Source inputs'}</span><span>{f.project_ids.map(name).join(' + ')}</span>
         </button>)}</div>
         {!findings.length && <p>No conflicts detected in the checked records for this selection; utility coverage may be incomplete.</p>}
-        {selected && <article className="finding-detail" aria-label="Selected conflict evidence"><h3>{findingLabels[selected.finding_type]}</h3><p>{selected.explanation}</p>
+        {selected && <article className="finding-detail" aria-label="Selected conflict evidence"><h3>{findingLabels[selected.finding_type]}</h3><AIAdvisor context={{ type: 'conflict', record_ids: [selected.id] }} label="Explain this conflict"/><p>{selected.explanation}</p>
           <p><strong>Priority:</strong> Coordination review; no validated safety assessment.</p><p><strong>Affected roads:</strong> {selected.affected_road_ids.join(', ') || 'Unresolved'}</p>
           <h4>Computed spatial evidence</h4><p>{selected.spatial_evidence.classifications.map(label).join(' · ')}</p><p>Footprint distance: {selected.spatial_evidence.distance_m === null ? 'Unknown' : `${selected.spatial_evidence.distance_m.toFixed(2)} m (computed; accuracy unverified)`}. Polygon area overlap: {selected.spatial_evidence.polygon_overlap ? 'Yes, in supplied geometry' : 'No'}.</p>
           <p>Shared roads: {selected.spatial_evidence.shared_road_ids.join(', ') || 'None declared'}. Screened corridors: {selected.spatial_evidence.shared_corridor_ids.join(', ') || 'None'}.</p><p>{selected.spatial_evidence.basis}</p>

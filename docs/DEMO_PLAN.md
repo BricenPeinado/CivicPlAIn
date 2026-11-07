@@ -1,6 +1,6 @@
 # Hackathon demo plan
 
-Status: M1–M4 map, estimates, fictional project/conflict review and hypothetical scenario planning/comparison are implemented. M3.5 provided the compatibility contracts. Generative explanations and review-note submission remain unimplemented. The current M4 walkthrough below supersedes the older proposed narrative/source gate. Current dataset snapshot is `demo-m1-v1`, with separate immutable M2/M3 import manifests. There is no imported `demo-v1` full-workflow dataset. Every current geometry, dimension, condition, schedule and price is synthetic, not a municipal observation.
+Status: M1–M4 map, estimates, fictional project/conflict review and hypothetical scenario planning/comparison are implemented. M3.5 provided the compatibility contracts. M5 evidence-based explanations and human review-note submission are implemented in the M5 walkthrough below. The current M4 walkthrough below supersedes the older proposed narrative/source gate. Current dataset snapshot is `demo-m1-v1`, with separate immutable M2/M3 import manifests. There is no imported `demo-v1` full-workflow dataset. Every current geometry, dimension, condition, schedule and price is synthetic, not a municipal observation.
 
 ## Implemented demonstration and authoritative arithmetic
 
@@ -93,3 +93,19 @@ Run the normal additive seed command and restart the updated API/web. `scripts/c
 9. Rehearse an unpriced patch or trench-restoration action with method null, unknown quantity/geometry and explicit reasons (API fixtures/tests cover this). Complete costs and budget feasibility must become unavailable/indeterminate; no delta is shown against a complete total. Shared mobilization and unsupported overrides are rejected, not silently discounted.
 
 The older restoration/patch narrative above is an optional future catalog extension, not one of the three new seeds. Its full prices remain unavailable. Calendar generation, automatic alternatives, work approval, observed municipal ingestion, monetary savings and generative AI remain outside this milestone. See M4_IMPLEMENTATION for actual backend/frontend/build/browser evidence and limitations.
+
+## Implemented M5 evidence-advisor walkthrough
+
+M5 supersedes earlier future-tense AI/review statements. No new prices, roads, utility observations or fake model responses are added. Use the existing reviewed M1–M4 fixtures and ordinary additive seed/start instructions. Offline operation after dependency installation needs no key, remote tiles or network data. `PYTHONPATH=apps/api .venv/bin/python scripts/verify_m5.py` runs a repeatable API walkthrough against a new temporary synthetic database, leaving existing local data untouched.
+
+1. Select **Demo segment R-001** using map or keyboard list. Inspect its synthetic poor condition, 3/10 rating and authored dimensions. **Explain this road** and a question such as “Why is this road flagged?” return only supplied condition/scope evidence.
+2. Open **Compare Repair Options**, then **Save & inspect Resurfacing or rehabilitation**. **Explain this estimate** reports saved base $53,400, low $44,760, high $66,360, itemized components and 5 preliminary days. Resurfacing is still not indicated by the demo poor-condition rule; no treatment/safety conclusion changes.
+3. Choose **Potential pavement rework** in Project coordination and **Explain this conflict**. Inspect the two-calendar-day gap, supplied spatial classifications/intervals and project/road references. The assistant requests review; no damage, restoration charge or loss is invented.
+4. Open **Scenario planner**, select the three demo alternatives and **Compare selected (3/3)**. **Explain tradeoffs** retrieves those saved evaluations, labels each scenario reference/revision and exposes identical costs/headroom alongside different potential finding categories and supplied schedules. All are synthetic and hypothetical; no universally best plan or fabricated saving appears.
+5. Follow **Inspect source** to reveal **Supporting evidence**. Compare record/source-content hashes, calculation versions, scalar fields/units and the evidence snapshot hash. The source views retain complete original snapshots; the advisor shows a bounded projection.
+6. Inspect **Missing information**: utility coverage/depth and scenario lifespan remain unknown. Ask “What happens if the city delays this repair?” to demonstrate explicit **insufficient evidence**, rather than a deterioration forecast.
+7. Check **Request configured AI emphasis**, then explain again with the default unconfigured server. Expect **DETERMINISTIC FALLBACK**, reason **not configured**, with the same authoritative values and caveats. This is a real API fallback, not hardcoded frontend output. Automated tests additionally simulate timeout/rate limit/outage/invalid provider output through mocks; no paid request is made.
+8. Expand **How AI works** and **Check provider status**. It explains deterministic calculations, source validation, synthetic data, offline templates and human responsibility. Status checks configuration only.
+9. Optionally open an individual evaluation and **Record a human review note**, use a nonpersonal alias, enter an actual review question and acknowledge the displayed limitations. The local audit event explicitly says no work authorized. The note is never sent to AI.
+
+M5 verifies this local workflow and provider mocks. M6 remains the separate fresh-environment, accessibility, performance, full-demo rehearsal and presentation gate; do not mark its unchecked checklist complete based on M5.

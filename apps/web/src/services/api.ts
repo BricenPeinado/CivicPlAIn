@@ -95,3 +95,14 @@ export const getScenarioEvaluations = (id: string, signal?: AbortSignal) => requ
 export const getScenarioEvaluation = (id: string, signal?: AbortSignal) => request<Envelope<ScenarioEvaluation>>(`/scenario-evaluations/${encodeURIComponent(id)}`, signal);
 export const compareScenarios = (evaluation_ids: string[], signal?: AbortSignal) => request<Envelope<ScenarioComparison>>('/scenario-comparisons', signal, { evaluation_ids });
 export const getRepairCatalog = (signal?: AbortSignal) => request<Envelope<import('../types/api').RepairOption[]>>('/repair-options', signal);
+
+import type { AIContext, AIExplanation, AIStatus } from '../types/ai';
+export function explainContext(context: AIContext, mode: 'deterministic' | 'ai', question?: string, signal?: AbortSignal) {
+  if (question !== undefined) return request<Envelope<AIExplanation>>('/ai/ask', signal, { context, mode, question });
+  if (context.type === 'estimate') return request<Envelope<AIExplanation>>('/ai/explain-estimate', signal, { estimate_id: context.record_ids[0], mode });
+  if (context.type === 'conflict') return request<Envelope<AIExplanation>>('/ai/explain-conflict', signal, { conflict_id: context.record_ids[0], mode });
+  if (context.type === 'comparison') return request<Envelope<AIExplanation>>('/ai/explain-scenario-comparison', signal, { evaluation_ids: context.record_ids, mode });
+  return request<Envelope<AIExplanation>>('/ai/ask', signal, { context, mode, question: 'Which assumptions should we verify before review?' });
+}
+export const getAIStatus = (signal?: AbortSignal) => request<Envelope<AIStatus>>('/ai/status', signal);
+export const saveReviewNote = (evaluationId: string, reviewer_label: string, note: string, signal?: AbortSignal) => request<Envelope<{ id: string; action: 'review_note'; authorizes_work: false }>>(`/scenario-evaluations/${encodeURIComponent(evaluationId)}/reviews`, signal, { reviewer_label, note, acknowledged_limitations: ['synthetic_inputs', 'unknown_utilities', 'human_review'] });

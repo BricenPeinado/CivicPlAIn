@@ -1,3 +1,5 @@
+import { ReviewNote } from '../ai/ReviewNote';
+import { AIAdvisor } from '../ai/AIAdvisor';
 import type { ScenarioEvaluation, ScenarioComparison } from '../../types/scenarios';
 export const usd = (value: string | null | undefined) => value == null ? 'Unknown' : new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(value));
 const val = (value: number | null) => value == null ? 'Unknown' : value;
@@ -11,7 +13,7 @@ export function ScenarioResults({ evaluation: e }: { evaluation: ScenarioEvaluat
     {!e.cost_total_usd && <p className="coverage-note">Complete total unavailable. Known components: {usd(e.known_subtotal_usd.base)}. Missing costs are not zero.</p>}
     <p>Low / high headroom: {usd(e.budget_headroom_usd?.low)} / {usd(e.budget_headroom_usd?.high)}. Sensitivity ranges are assumptions, not probabilities.</p>
     <dl className="scenario-facts"><div><dt>Preliminary days, summed allowances</dt><dd>{val(e.preliminary_days_sum)}</dd></div><div><dt>Supplied calendar span (days)</dt><dd>{val(e.elapsed_days)}</dd></div><div><dt>Scheduled road-workdays, action envelopes</dt><dd>{val(e.scheduled_road_workdays)}</dd></div><div><dt>Lane-closure-days, declared intervals</dt><dd>{val(e.lane_closure_days)}</dd></div><div><dt>Overlapping closure interval pairs</dt><dd>{val(e.overlapping_closure_pairs)}</dd></div><div><dt>Affected roads</dt><dd>{e.affected_road_ids.join(', ') || 'None'}</dd></div><div><dt>Utility coverage / lifespan</dt><dd>Unknown / Unknown</dd></div></dl>
-    <h4>Action estimates and sources</h4>{e.action_costs.map(c => <details key={c.action_id}><summary>{c.action_id} · {c.quantity_m2 ?? 'Unknown'} m² · {usd(c.costs?.base?.total_usd)}</summary>
+    <AIAdvisor context={{ type: 'evaluation', record_ids: [e.id] }} label="Explain this evaluation"/><ReviewNote evaluationId={e.id}/><h4>Action estimates and sources</h4>{e.action_costs.map(c => <details key={c.action_id}><summary>{c.action_id} · {c.quantity_m2 ?? 'Unknown'} m² · {usd(c.costs?.base?.total_usd)}</summary>
       {c.suitability && <p>{c.suitability.status.replaceAll('_',' ')}: {c.suitability.rationale}</p>}<ul>{c.warnings.map(w=><li key={w}>{w}</li>)}</ul>{c.unavailable_reason && <p role="note">{c.unavailable_reason}</p>}{c.duration && <p>{c.duration.active_workdays} active + {c.duration.setup_days} setup + {c.duration.curing_days} curing = {c.duration.total_preliminary_days} preliminary days. No calendar dates inferred.</p>}
       {c.costs && <div className="table-scroll"><table><thead><tr><th>Component</th><th>Low</th><th>Base</th><th>High</th></tr></thead><tbody>{c.costs.base.line_items.map((item,i) => <tr key={item.label}><th>{item.label}</th>{['low','base','high'].map(k => <td key={k}>{usd(c.costs![k].line_items[i].amount_usd)}</td>)}</tr>)}<tr><th>Contingency</th>{['low','base','high'].map(k=><td key={k}>{usd(c.costs![k].contingency_usd)}</td>)}</tr></tbody></table></div>}
       <pre>{JSON.stringify({ quantity: c.quantity_provenance, inputs: c.input_snapshot, input_hash: c.input_hash },null,2)}</pre></details>)}
@@ -25,7 +27,7 @@ export function ScenarioResults({ evaluation: e }: { evaluation: ScenarioEvaluat
   </section>;
 }
 export function ScenarioComparisonView({ comparison: c }: { comparison: ScenarioComparison }) {
-  return <section className="scenario-result" aria-label="Scenario comparison"><p className="eyebrow">DETERMINISTIC TRADEOFFS</p><h3>Compare hypothetical plans</h3><div className="table-scroll"><table><thead><tr><th>Metric</th>{c.rows.map(r=><th key={r.evaluation_id}>{r.name}<small>Revision {r.revision}</small></th>)}</tr></thead><tbody>
+  return <section className="scenario-result" aria-label="Scenario comparison"><p className="eyebrow">DETERMINISTIC TRADEOFFS</p><h3>Compare hypothetical plans</h3><AIAdvisor context={{ type: 'comparison', record_ids: c.evaluation_ids }} label="Explain tradeoffs"/><div className="table-scroll"><table><thead><tr><th>Metric</th>{c.rows.map(r=><th key={r.evaluation_id}>{r.name}<small>Revision {r.revision}</small></th>)}</tr></thead><tbody>
     {(['base','low','high'] as const).map(k=><tr key={k}><th>{k} estimate</th>{c.rows.map(r=><td key={r.evaluation_id}>{usd(r.cost_total_usd?.[k])}</td>)}</tr>)}
     <tr><th>Base budget headroom</th>{c.rows.map(r=><td key={r.evaluation_id}>{usd(r.budget_headroom_usd?.base)}</td>)}</tr>
     <tr><th>Budget feasibility</th>{c.rows.map(r=><td key={r.evaluation_id}>{r.budget_status.replaceAll('_',' ')}<small>High sensitivity: {r.upper_bound_within_budget==null?'Unknown':r.upper_bound_within_budget?'Within budget':'Over budget'}</small></td>)}</tr>

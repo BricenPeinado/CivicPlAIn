@@ -1,3 +1,4 @@
+import { AIAdvisor } from '../ai/AIAdvisor';
 import { useEffect, useRef, useState } from 'react';
 import { createEstimate, getAssessments, getEstimate, getRepairOptions } from '../../services/api';
 import type { Assessment, Estimate, EstimateRequest, OptionComparison, Road } from '../../types/api';
@@ -78,7 +79,7 @@ export function EstimateDetail({ estimate: e }: { estimate: Estimate }) {
   const [scenario, setScenario] = useState<'low' | 'base' | 'high'>('base');
   const cost = e.scenarios[scenario];
   return <section className="estimate-detail" aria-label="Estimate breakdown">
-    <p className="eyebrow">SAVED SYNTHETIC DEMONSTRATION ESTIMATE</p><h2>Cost and duration breakdown</h2><p>{e.repair_category} · {quantity(e.quantity)} m² · USD · {e.method_version}</p>
+    <p className="eyebrow">SAVED SYNTHETIC DEMONSTRATION ESTIMATE</p><h2>Cost and duration breakdown</h2><AIAdvisor context={{ type: 'estimate', record_ids: [e.id] }} label="Explain this estimate"/><p>{e.repair_category} · {quantity(e.quantity)} m² · USD · {e.method_version}</p>
     <label>Cost sensitivity scenario <select value={scenario} onChange={event => setScenario(event.target.value as typeof scenario)}><option value="low">Low</option><option value="base">Base</option><option value="high">High</option></select></label>
     <div className="table-scroll" tabIndex={0} role="region" aria-label="Scrollable cost breakdown"><table><caption>{scenario} cost components — synthetic assumptions</caption><thead><tr><th scope="col">Component</th><th scope="col">Quantity</th><th scope="col">Unit</th><th scope="col">Unit rate</th><th scope="col">Subtotal</th></tr></thead><tbody>{cost.line_items.map(item => <tr key={item.label}><th scope="row">{item.label}<small>Sources: {item.evidence_ids.join(', ')}</small></th><td>{quantity(item.quantity)}</td><td>{item.unit}</td><td>{usd(item.unit_rate_usd)}</td><td>{usd(item.amount_usd)}</td></tr>)}</tbody></table></div>
     <dl className="metadata"><div><dt>Subtotal</dt><dd>{usd(cost.subtotal_usd)}</dd></div><div><dt>Contingency ({quantity(String(Number(cost.contingency_fraction) * 100))}%)</dt><dd>{usd(cost.contingency_usd)}</dd></div><div><dt>Estimated total</dt><dd>{usd(cost.total_usd)}</dd></div><div><dt>Active workdays</dt><dd>{e.duration.active_workdays}</dd></div><div><dt>Setup / mobilization days</dt><dd>{e.duration.setup_days}</dd></div><div><dt>Curing allowance days</dt><dd>{e.duration.curing_days}</dd></div><div><dt>Total preliminary days</dt><dd>{e.duration.total_preliminary_days}</dd></div><div><dt>Productivity</dt><dd>{quantity(e.duration.productivity_per_day)} {e.duration.productivity_unit}</dd></div></dl>
