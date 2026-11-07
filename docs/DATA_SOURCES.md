@@ -1,6 +1,6 @@
 # Data sources and study area
 
-Status: source planning, reviewed 2026-11-07. No source payload has been downloaded, imported, joined, or validated in M0. No fixtures exist yet.
+Status: source planning, reviewed 2026-11-07. No municipal source payload has been imported. M1 now includes 24 reviewed synthetic schematic roads and a checksum manifest in data/demo; source-register candidate status remains unchanged.
 
 ## Study area: lower-manhattan-window-v1
 
@@ -14,7 +14,7 @@ If a usable public geometry extract cannot be prepared, author simplified synthe
 
 - **Verified and accessible**: the stated resource was actually readable during review; the verification level is explicitly limited to that resource. A readable index is not a verified data payload.
 - **Candidate, not yet verified**: proposed input requiring payload retrieval, schema/coverage/license review and validation before use. A search result or catalog shell is insufficient for ingestion readiness.
-- **Synthetic/demo**: intentionally authored assumptions for demonstration; no real-world observation is asserted. Planned fixtures remain uncreated until later milestones.
+- **Synthetic/demo**: intentionally authored assumptions for demonstration; no real-world observation is asserted. M1 road fixtures exist; later domain fixtures remain planned.
 
 ## Source register
 
@@ -25,7 +25,7 @@ If a usable public geometry extract cannot be prepared, author simplified synthe
 | DOT Street Assessment / Pavement Ratings | **Candidate, not yet verified**. The readable [DOT index](https://www.nyc.gov/html/dot/html/about/datafeeds.shtml) links ratings resources; linked GeoJSON retrieval failed in this review. | Candidate condition observations. Validate actual scale semantics, assessment dates, geography and join keys from payload/metadata before use; do not assume every selected segment has a recent rating. No direct payload URL is promised here. |
 | DOT Street Construction Permits (2022–Present) | **Candidate, not yet verified** for import. [Official catalog](https://data.cityofnewyork.us/Transportation/Street-Construction-Permits-2022-Present-/tqtj-sjs8/about_data) was located through official search metadata; live extraction returned a shell. | Candidate street-work and possible utility-work indicators. Inspect permit categories, location/schedule fields, statuses and revisions; permit windows are not confirmed construction schedules. No utility network or exhaustive future-work coverage is implied. |
 | Utility-owner planned-work / subsurface information | **Candidate, not yet verified**; no public authoritative geometry/schedule dataset has been established for this MVP. No invented URL. | Use synthetic UtilityWork unless suitable public inputs are verified. Real integration requires owner coordination, permissions, sensitivity review, and coverage evidence. |
-| CivicPlAIn fixture manifest, geometry and assumptions | **Synthetic/demo**, planned files under data/demo/; not yet created | Bounded map fallback, demo condition, utility project, repair options, cost/duration/lifespan assumptions, scenarios, and expected rule results. DEMO_PLAN defines proposed arithmetic. Not a municipal dataset. |
+| CivicPlAIn fixture manifest, geometry and assumptions | **Synthetic/demo**, M1 roads.geojson and manifest.json under data/demo/ now implemented; later domain fixtures remain planned | M1 includes bounded schematic geometry and synthetic condition labels/ratings. Utility projects, repair options, cost/duration/lifespan assumptions, scenarios and expected rule results remain future fixtures. DEMO_PLAN defines proposed arithmetic. Not a municipal dataset. |
 
 Publication/update cadence, field names, spatial completeness, and price accuracy are deliberately unasserted for unvalidated payloads. Capture the actual source version and retrieval date at import rather than promising freshness from a catalog title. Other DOT construction layers may be investigated later, but no source beyond this register is needed for MVP acceptance.
 
@@ -45,3 +45,7 @@ Use null plus field-specific unknown reasons. Distinguish no assessment, undated
 Map and asset panels show unknown coverage at all times. A conflict response with no positive findings still reports which projects and scope were checked and what is missing. No public source here can establish safe excavation, complete underground coverage, or permission to work.
 
 TBD: actual source release, verified payload schemas and terms, join strategy, and usable count. Recommendation: ship the complete synthetic demonstrator first, then replace only validated fields with a small attributed public geometry/condition extract. Preserve synthetic utility work unless a defensible public schedule source is established.
+
+## M1 fixture coverage
+
+`demo-m1-v1` contains 24 stable `demo-r-001`…`demo-r-024` records: a 4×3 schematic lattice of 12 horizontal and 12 vertical segments, all inside the specified window. It meets the 20–30 target with no rejected records or manual exclusions. It is unrelated to actual street centerlines, does not imply full-area coverage, and redistributes no third-party geographic data. All condition assessment dates, dimensions and lane counts remain null with reasons. Six records per category exercise good/fair/poor/unknown styling. The manifest contains the synthetic rating thresholds, per-file checksum, source record, field assumptions and generator version. `scripts/create_demo_fixture.py` reproduces exact fixture bytes; it does not download data.

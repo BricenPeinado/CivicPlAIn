@@ -1,6 +1,6 @@
 # AI explanation system
 
-Status: proposed M5 design. There is no provider integration, prompt, or model call in M0. Deterministic summaries are a required product capability; a key is optional.
+Status: proposed M5 design. There is no provider integration, prompt, or model call in M1. No AI integration was added to the application foundation. Deterministic summaries are a required product capability; a key is optional.
 
 ## Allowed and prohibited behavior
 

@@ -1,18 +1,20 @@
-# Proposed REST API
+# REST API contract
 
-**Every endpoint below is proposed and unimplemented.** Base path: `/api/v1`. No supported server URL or API client exists in M0. Shared entities and validation are defined in DATA_MODEL; routes must not return database-only representations.
+**M1 implemented subset:** GET `/api/v1/health`, `/api/v1/road-segments`, `/api/v1/road-segments/geojson`, `/api/v1/road-segments/{id}`, `/api/v1/evidence-sources/{id}`. All other routes below remain proposed and return no implemented domain functionality. Base path: `/api/v1`; local server: `http://127.0.0.1:8000`. Shared entities and validation are defined in DATA_MODEL; database-only representations are not exposed. There are no `/api/roads` or root `/health` aliases.
 
 ## Transport conventions
 
-JSON except road feature collection responses, which use `application/geo+json`. Required request fields are listed with `!`; other fields are optional. IDs reference the same snapshot. Unknown fields are rejected in mutation/calculation inputs. Money is a two-decimal USD string; dates and geometry follow DATA_MODEL. Lists use `limit` 1–100 (default 30), opaque `cursor`, and stable ID ordering. Proposed deterministic routes never invoke an LLM.
+JSON except road feature collection responses, which use `application/geo+json`. Required request fields are listed with `!`; other fields are optional. IDs reference the same snapshot. Unknown fields are rejected in mutation/calculation inputs. Money is a two-decimal USD string; dates and geometry follow DATA_MODEL. Lists use `limit` 1–100 (default 30), opaque `cursor`, and stable ID ordering. M1 cursors encode the last ID, snapshot and bbox and reject mismatched filters/snapshots; clients must treat them as opaque. Bbox is an exact geometry intersection filter, including boundary contact. Proposed deterministic routes never invoke an LLM.
 
-Ordinary success: `{ "data": <entity or list>, "meta": { "request_id": "...", "dataset_snapshot_id": "...", "warnings": [], "next_cursor": null } }`. For health, dataset_snapshot_id is null before seed. For GeoJSON, the top-level object is a FeatureCollection with `features` plus foreign member `meta` using the same metadata. Each feature ID is the RoadSegment ID and properties contain RecordMeta and non-geometry RoadSegment fields. Record detail includes nullable fields and unknown reasons, not fabricated defaults.
+Ordinary success: `{ "data": <entity or list>, "meta": { "request_id": "...", "dataset_snapshot_id": "...", "warnings": [], "next_cursor": null } }`. For health, dataset_snapshot_id is null before seed. For GeoJSON, the top-level object is a FeatureCollection with `features` plus foreign member `meta` using the same metadata. Each feature ID is the RoadSegment ID and properties contain RecordMeta and non-geometry RoadSegment fields. M1 also includes the documented synthetic `condition_summary` projection (category, nullable decimal rating/scale/date, evidence_ids, data_kind and synthetic_input); it is not a municipal assessment or a separate mutable entity. Record detail includes nullable fields and unknown reasons, not fabricated defaults.
 
 Errors: `{ "error": { "code": "VALIDATION_ERROR", "message": "...", "field_errors": [{"path":"...","reason":"..."}], "request_id": "..." } }`. No stack trace or secrets. Common errors: 422 malformed fields/geometry/unknown query value; 404 unknown referenced record; 409 incompatible snapshot or comparison basis; 503 persistence unavailable; 500 unexpected server fault. Unsupported methods use 405. List endpoints return empty lists for valid filters with no matches, never 404 for an empty collection. Demo imports reject geometry wholly outside the study window; intersecting source segments remain unclipped per DATA_SOURCES. No arbitrary client-supplied URL fetching.
 
 The local MVP has no authentication and must not be publicly exposed. There are no project approval, spending, arbitrary SQL, ingestion-by-URL, or model tool-execution endpoints. `POST` below persists results when specified; it does not perform municipal actions.
 
 ## Endpoint contracts
+
+Only the five GET paths identified above are implemented in M1. Conditions, assets, projects, repair options and every calculation/mutation route remain future work.
 
 | Method and path | Input | Output / success | Validation and specific errors | Computation |
 | --- | --- | --- | --- | --- |
@@ -75,3 +77,9 @@ Road conditions are read-only assessments in the MVP. Project and asset creation
 ```
 
 This synthetic example asserts no real road dimensions, prices, schedule, or municipal budget. No update or approval is implied. Pagination and endpoint compatibility need contract tests as each milestone implements them; document the implemented subset explicitly.
+
+## M1 validation evidence
+
+Health is read-only and checks SQLite availability; it returns data_ready=false and a null snapshot for a newly initialized, unseeded database. The absence of an AI key is never checked or required. An unseeded roads query is a successful empty collection. Seed import is an explicit local CLI, not an HTTP endpoint. Every current dataset is labeled synthetic; meta warnings retain unknown utility coverage.
+
+Backend tests cover the five route contracts, geometry/provenance validation, stable pagination, bbox errors, 404/405 envelopes, request IDs, CORS, storage 503, immutable fixture checks and persistence/repeated seed. Browser checks exercise GeoJSON loading, separate road/evidence reads and unavailable-API retry. See M1_IMPLEMENTATION.md for commands and actual outcomes.

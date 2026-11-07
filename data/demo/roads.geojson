@@ -1,0 +1,1781 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "demo-r-001",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0108,
+            40.7115
+          ],
+          [
+            -74.00935,
+            40.71168
+          ],
+          [
+            -74.0079,
+            40.7115
+          ]
+        ]
+      },
+      "properties": {
+        "id": "demo-r-001",
+        "dataset_snapshot_id": "demo-m1-v1",
+        "evidence_ids": [
+          "demo-assumptions-v1"
+        ],
+        "data_kind": "synthetic",
+        "synthetic_input": true,
+        "field_evidence": {
+          "geometry": [
+            "demo-assumptions-v1"
+          ],
+          "name": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.rating": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.category": [
+            "demo-assumptions-v1"
+          ]
+        },
+        "unknown_reasons": {
+          "source_segment_key": "not_supplied",
+          "length_m": "not_supplied",
+          "width_m": "not_supplied",
+          "lane_count": "not_supplied",
+          "coverage_as_of": "not_supplied",
+          "condition_summary.assessed_on": "not_supplied"
+        },
+        "limitations": [
+          "Schematic demonstration geometry; does not trace actual streets.",
+          "Conditions are authored assumptions, not NYC observations.",
+          "Utility locations and schedules are unknown; no excavation clearance."
+        ],
+        "created_at": "2026-11-07T00:00:00Z",
+        "name": "Demo segment R-001",
+        "source_segment_key": null,
+        "study_area_id": "lower-manhattan-window-v1",
+        "length_m": null,
+        "width_m": null,
+        "lane_count": null,
+        "utility_coverage": "unknown",
+        "coverage_as_of": null,
+        "condition_summary": {
+          "category": "poor",
+          "rating": "3",
+          "rating_scale": "synthetic-1-10-higher-better",
+          "assessed_on": null,
+          "evidence_ids": [
+            "demo-assumptions-v1"
+          ],
+          "data_kind": "synthetic",
+          "synthetic_input": true
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "demo-r-002",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0079,
+            40.7115
+          ],
+          [
+            -74.00645,
+            40.71168
+          ],
+          [
+            -74.005,
+            40.7115
+          ]
+        ]
+      },
+      "properties": {
+        "id": "demo-r-002",
+        "dataset_snapshot_id": "demo-m1-v1",
+        "evidence_ids": [
+          "demo-assumptions-v1"
+        ],
+        "data_kind": "synthetic",
+        "synthetic_input": true,
+        "field_evidence": {
+          "geometry": [
+            "demo-assumptions-v1"
+          ],
+          "name": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.rating": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.category": [
+            "demo-assumptions-v1"
+          ]
+        },
+        "unknown_reasons": {
+          "source_segment_key": "not_supplied",
+          "length_m": "not_supplied",
+          "width_m": "not_supplied",
+          "lane_count": "not_supplied",
+          "coverage_as_of": "not_supplied",
+          "condition_summary.assessed_on": "not_supplied"
+        },
+        "limitations": [
+          "Schematic demonstration geometry; does not trace actual streets.",
+          "Conditions are authored assumptions, not NYC observations.",
+          "Utility locations and schedules are unknown; no excavation clearance."
+        ],
+        "created_at": "2026-11-07T00:00:00Z",
+        "name": "Demo segment R-002",
+        "source_segment_key": null,
+        "study_area_id": "lower-manhattan-window-v1",
+        "length_m": null,
+        "width_m": null,
+        "lane_count": null,
+        "utility_coverage": "unknown",
+        "coverage_as_of": null,
+        "condition_summary": {
+          "category": "good",
+          "rating": "8",
+          "rating_scale": "synthetic-1-10-higher-better",
+          "assessed_on": null,
+          "evidence_ids": [
+            "demo-assumptions-v1"
+          ],
+          "data_kind": "synthetic",
+          "synthetic_input": true
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "demo-r-003",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.005,
+            40.7115
+          ],
+          [
+            -74.00355,
+            40.71168
+          ],
+          [
+            -74.0021,
+            40.7115
+          ]
+        ]
+      },
+      "properties": {
+        "id": "demo-r-003",
+        "dataset_snapshot_id": "demo-m1-v1",
+        "evidence_ids": [
+          "demo-assumptions-v1"
+        ],
+        "data_kind": "synthetic",
+        "synthetic_input": true,
+        "field_evidence": {
+          "geometry": [
+            "demo-assumptions-v1"
+          ],
+          "name": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.rating": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.category": [
+            "demo-assumptions-v1"
+          ]
+        },
+        "unknown_reasons": {
+          "source_segment_key": "not_supplied",
+          "length_m": "not_supplied",
+          "width_m": "not_supplied",
+          "lane_count": "not_supplied",
+          "coverage_as_of": "not_supplied",
+          "condition_summary.assessed_on": "not_supplied"
+        },
+        "limitations": [
+          "Schematic demonstration geometry; does not trace actual streets.",
+          "Conditions are authored assumptions, not NYC observations.",
+          "Utility locations and schedules are unknown; no excavation clearance."
+        ],
+        "created_at": "2026-11-07T00:00:00Z",
+        "name": "Demo segment R-003",
+        "source_segment_key": null,
+        "study_area_id": "lower-manhattan-window-v1",
+        "length_m": null,
+        "width_m": null,
+        "lane_count": null,
+        "utility_coverage": "unknown",
+        "coverage_as_of": null,
+        "condition_summary": {
+          "category": "fair",
+          "rating": "6",
+          "rating_scale": "synthetic-1-10-higher-better",
+          "assessed_on": null,
+          "evidence_ids": [
+            "demo-assumptions-v1"
+          ],
+          "data_kind": "synthetic",
+          "synthetic_input": true
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "demo-r-004",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0108,
+            40.7137
+          ],
+          [
+            -74.00935,
+            40.71388
+          ],
+          [
+            -74.0079,
+            40.7137
+          ]
+        ]
+      },
+      "properties": {
+        "id": "demo-r-004",
+        "dataset_snapshot_id": "demo-m1-v1",
+        "evidence_ids": [
+          "demo-assumptions-v1"
+        ],
+        "data_kind": "synthetic",
+        "synthetic_input": true,
+        "field_evidence": {
+          "geometry": [
+            "demo-assumptions-v1"
+          ],
+          "name": [
+            "demo-assumptions-v1"
+          ]
+        },
+        "unknown_reasons": {
+          "source_segment_key": "not_supplied",
+          "length_m": "not_supplied",
+          "width_m": "not_supplied",
+          "lane_count": "not_supplied",
+          "coverage_as_of": "not_supplied",
+          "condition_summary.assessed_on": "not_supplied",
+          "condition_summary.rating": "no_demo_assessment",
+          "condition_summary.rating_scale": "no_demo_assessment"
+        },
+        "limitations": [
+          "Schematic demonstration geometry; does not trace actual streets.",
+          "Conditions are authored assumptions, not NYC observations.",
+          "Utility locations and schedules are unknown; no excavation clearance."
+        ],
+        "created_at": "2026-11-07T00:00:00Z",
+        "name": "Demo segment R-004",
+        "source_segment_key": null,
+        "study_area_id": "lower-manhattan-window-v1",
+        "length_m": null,
+        "width_m": null,
+        "lane_count": null,
+        "utility_coverage": "unknown",
+        "coverage_as_of": null,
+        "condition_summary": {
+          "category": "unknown",
+          "rating": null,
+          "rating_scale": null,
+          "assessed_on": null,
+          "evidence_ids": [
+            "demo-assumptions-v1"
+          ],
+          "data_kind": "synthetic",
+          "synthetic_input": true
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "demo-r-005",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0079,
+            40.7137
+          ],
+          [
+            -74.00645,
+            40.71388
+          ],
+          [
+            -74.005,
+            40.7137
+          ]
+        ]
+      },
+      "properties": {
+        "id": "demo-r-005",
+        "dataset_snapshot_id": "demo-m1-v1",
+        "evidence_ids": [
+          "demo-assumptions-v1"
+        ],
+        "data_kind": "synthetic",
+        "synthetic_input": true,
+        "field_evidence": {
+          "geometry": [
+            "demo-assumptions-v1"
+          ],
+          "name": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.rating": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.category": [
+            "demo-assumptions-v1"
+          ]
+        },
+        "unknown_reasons": {
+          "source_segment_key": "not_supplied",
+          "length_m": "not_supplied",
+          "width_m": "not_supplied",
+          "lane_count": "not_supplied",
+          "coverage_as_of": "not_supplied",
+          "condition_summary.assessed_on": "not_supplied"
+        },
+        "limitations": [
+          "Schematic demonstration geometry; does not trace actual streets.",
+          "Conditions are authored assumptions, not NYC observations.",
+          "Utility locations and schedules are unknown; no excavation clearance."
+        ],
+        "created_at": "2026-11-07T00:00:00Z",
+        "name": "Demo segment R-005",
+        "source_segment_key": null,
+        "study_area_id": "lower-manhattan-window-v1",
+        "length_m": null,
+        "width_m": null,
+        "lane_count": null,
+        "utility_coverage": "unknown",
+        "coverage_as_of": null,
+        "condition_summary": {
+          "category": "poor",
+          "rating": "3",
+          "rating_scale": "synthetic-1-10-higher-better",
+          "assessed_on": null,
+          "evidence_ids": [
+            "demo-assumptions-v1"
+          ],
+          "data_kind": "synthetic",
+          "synthetic_input": true
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "demo-r-006",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.005,
+            40.7137
+          ],
+          [
+            -74.00355,
+            40.71388
+          ],
+          [
+            -74.0021,
+            40.7137
+          ]
+        ]
+      },
+      "properties": {
+        "id": "demo-r-006",
+        "dataset_snapshot_id": "demo-m1-v1",
+        "evidence_ids": [
+          "demo-assumptions-v1"
+        ],
+        "data_kind": "synthetic",
+        "synthetic_input": true,
+        "field_evidence": {
+          "geometry": [
+            "demo-assumptions-v1"
+          ],
+          "name": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.rating": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.category": [
+            "demo-assumptions-v1"
+          ]
+        },
+        "unknown_reasons": {
+          "source_segment_key": "not_supplied",
+          "length_m": "not_supplied",
+          "width_m": "not_supplied",
+          "lane_count": "not_supplied",
+          "coverage_as_of": "not_supplied",
+          "condition_summary.assessed_on": "not_supplied"
+        },
+        "limitations": [
+          "Schematic demonstration geometry; does not trace actual streets.",
+          "Conditions are authored assumptions, not NYC observations.",
+          "Utility locations and schedules are unknown; no excavation clearance."
+        ],
+        "created_at": "2026-11-07T00:00:00Z",
+        "name": "Demo segment R-006",
+        "source_segment_key": null,
+        "study_area_id": "lower-manhattan-window-v1",
+        "length_m": null,
+        "width_m": null,
+        "lane_count": null,
+        "utility_coverage": "unknown",
+        "coverage_as_of": null,
+        "condition_summary": {
+          "category": "good",
+          "rating": "8",
+          "rating_scale": "synthetic-1-10-higher-better",
+          "assessed_on": null,
+          "evidence_ids": [
+            "demo-assumptions-v1"
+          ],
+          "data_kind": "synthetic",
+          "synthetic_input": true
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "demo-r-007",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0108,
+            40.7159
+          ],
+          [
+            -74.00935,
+            40.71608
+          ],
+          [
+            -74.0079,
+            40.7159
+          ]
+        ]
+      },
+      "properties": {
+        "id": "demo-r-007",
+        "dataset_snapshot_id": "demo-m1-v1",
+        "evidence_ids": [
+          "demo-assumptions-v1"
+        ],
+        "data_kind": "synthetic",
+        "synthetic_input": true,
+        "field_evidence": {
+          "geometry": [
+            "demo-assumptions-v1"
+          ],
+          "name": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.rating": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.category": [
+            "demo-assumptions-v1"
+          ]
+        },
+        "unknown_reasons": {
+          "source_segment_key": "not_supplied",
+          "length_m": "not_supplied",
+          "width_m": "not_supplied",
+          "lane_count": "not_supplied",
+          "coverage_as_of": "not_supplied",
+          "condition_summary.assessed_on": "not_supplied"
+        },
+        "limitations": [
+          "Schematic demonstration geometry; does not trace actual streets.",
+          "Conditions are authored assumptions, not NYC observations.",
+          "Utility locations and schedules are unknown; no excavation clearance."
+        ],
+        "created_at": "2026-11-07T00:00:00Z",
+        "name": "Demo segment R-007",
+        "source_segment_key": null,
+        "study_area_id": "lower-manhattan-window-v1",
+        "length_m": null,
+        "width_m": null,
+        "lane_count": null,
+        "utility_coverage": "unknown",
+        "coverage_as_of": null,
+        "condition_summary": {
+          "category": "fair",
+          "rating": "6",
+          "rating_scale": "synthetic-1-10-higher-better",
+          "assessed_on": null,
+          "evidence_ids": [
+            "demo-assumptions-v1"
+          ],
+          "data_kind": "synthetic",
+          "synthetic_input": true
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "demo-r-008",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0079,
+            40.7159
+          ],
+          [
+            -74.00645,
+            40.71608
+          ],
+          [
+            -74.005,
+            40.7159
+          ]
+        ]
+      },
+      "properties": {
+        "id": "demo-r-008",
+        "dataset_snapshot_id": "demo-m1-v1",
+        "evidence_ids": [
+          "demo-assumptions-v1"
+        ],
+        "data_kind": "synthetic",
+        "synthetic_input": true,
+        "field_evidence": {
+          "geometry": [
+            "demo-assumptions-v1"
+          ],
+          "name": [
+            "demo-assumptions-v1"
+          ]
+        },
+        "unknown_reasons": {
+          "source_segment_key": "not_supplied",
+          "length_m": "not_supplied",
+          "width_m": "not_supplied",
+          "lane_count": "not_supplied",
+          "coverage_as_of": "not_supplied",
+          "condition_summary.assessed_on": "not_supplied",
+          "condition_summary.rating": "no_demo_assessment",
+          "condition_summary.rating_scale": "no_demo_assessment"
+        },
+        "limitations": [
+          "Schematic demonstration geometry; does not trace actual streets.",
+          "Conditions are authored assumptions, not NYC observations.",
+          "Utility locations and schedules are unknown; no excavation clearance."
+        ],
+        "created_at": "2026-11-07T00:00:00Z",
+        "name": "Demo segment R-008",
+        "source_segment_key": null,
+        "study_area_id": "lower-manhattan-window-v1",
+        "length_m": null,
+        "width_m": null,
+        "lane_count": null,
+        "utility_coverage": "unknown",
+        "coverage_as_of": null,
+        "condition_summary": {
+          "category": "unknown",
+          "rating": null,
+          "rating_scale": null,
+          "assessed_on": null,
+          "evidence_ids": [
+            "demo-assumptions-v1"
+          ],
+          "data_kind": "synthetic",
+          "synthetic_input": true
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "demo-r-009",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.005,
+            40.7159
+          ],
+          [
+            -74.00355,
+            40.71608
+          ],
+          [
+            -74.0021,
+            40.7159
+          ]
+        ]
+      },
+      "properties": {
+        "id": "demo-r-009",
+        "dataset_snapshot_id": "demo-m1-v1",
+        "evidence_ids": [
+          "demo-assumptions-v1"
+        ],
+        "data_kind": "synthetic",
+        "synthetic_input": true,
+        "field_evidence": {
+          "geometry": [
+            "demo-assumptions-v1"
+          ],
+          "name": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.rating": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.category": [
+            "demo-assumptions-v1"
+          ]
+        },
+        "unknown_reasons": {
+          "source_segment_key": "not_supplied",
+          "length_m": "not_supplied",
+          "width_m": "not_supplied",
+          "lane_count": "not_supplied",
+          "coverage_as_of": "not_supplied",
+          "condition_summary.assessed_on": "not_supplied"
+        },
+        "limitations": [
+          "Schematic demonstration geometry; does not trace actual streets.",
+          "Conditions are authored assumptions, not NYC observations.",
+          "Utility locations and schedules are unknown; no excavation clearance."
+        ],
+        "created_at": "2026-11-07T00:00:00Z",
+        "name": "Demo segment R-009",
+        "source_segment_key": null,
+        "study_area_id": "lower-manhattan-window-v1",
+        "length_m": null,
+        "width_m": null,
+        "lane_count": null,
+        "utility_coverage": "unknown",
+        "coverage_as_of": null,
+        "condition_summary": {
+          "category": "poor",
+          "rating": "3",
+          "rating_scale": "synthetic-1-10-higher-better",
+          "assessed_on": null,
+          "evidence_ids": [
+            "demo-assumptions-v1"
+          ],
+          "data_kind": "synthetic",
+          "synthetic_input": true
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "demo-r-010",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0108,
+            40.7181
+          ],
+          [
+            -74.00935,
+            40.71828
+          ],
+          [
+            -74.0079,
+            40.7181
+          ]
+        ]
+      },
+      "properties": {
+        "id": "demo-r-010",
+        "dataset_snapshot_id": "demo-m1-v1",
+        "evidence_ids": [
+          "demo-assumptions-v1"
+        ],
+        "data_kind": "synthetic",
+        "synthetic_input": true,
+        "field_evidence": {
+          "geometry": [
+            "demo-assumptions-v1"
+          ],
+          "name": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.rating": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.category": [
+            "demo-assumptions-v1"
+          ]
+        },
+        "unknown_reasons": {
+          "source_segment_key": "not_supplied",
+          "length_m": "not_supplied",
+          "width_m": "not_supplied",
+          "lane_count": "not_supplied",
+          "coverage_as_of": "not_supplied",
+          "condition_summary.assessed_on": "not_supplied"
+        },
+        "limitations": [
+          "Schematic demonstration geometry; does not trace actual streets.",
+          "Conditions are authored assumptions, not NYC observations.",
+          "Utility locations and schedules are unknown; no excavation clearance."
+        ],
+        "created_at": "2026-11-07T00:00:00Z",
+        "name": "Demo segment R-010",
+        "source_segment_key": null,
+        "study_area_id": "lower-manhattan-window-v1",
+        "length_m": null,
+        "width_m": null,
+        "lane_count": null,
+        "utility_coverage": "unknown",
+        "coverage_as_of": null,
+        "condition_summary": {
+          "category": "good",
+          "rating": "8",
+          "rating_scale": "synthetic-1-10-higher-better",
+          "assessed_on": null,
+          "evidence_ids": [
+            "demo-assumptions-v1"
+          ],
+          "data_kind": "synthetic",
+          "synthetic_input": true
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "demo-r-011",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0079,
+            40.7181
+          ],
+          [
+            -74.00645,
+            40.71828
+          ],
+          [
+            -74.005,
+            40.7181
+          ]
+        ]
+      },
+      "properties": {
+        "id": "demo-r-011",
+        "dataset_snapshot_id": "demo-m1-v1",
+        "evidence_ids": [
+          "demo-assumptions-v1"
+        ],
+        "data_kind": "synthetic",
+        "synthetic_input": true,
+        "field_evidence": {
+          "geometry": [
+            "demo-assumptions-v1"
+          ],
+          "name": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.rating": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.category": [
+            "demo-assumptions-v1"
+          ]
+        },
+        "unknown_reasons": {
+          "source_segment_key": "not_supplied",
+          "length_m": "not_supplied",
+          "width_m": "not_supplied",
+          "lane_count": "not_supplied",
+          "coverage_as_of": "not_supplied",
+          "condition_summary.assessed_on": "not_supplied"
+        },
+        "limitations": [
+          "Schematic demonstration geometry; does not trace actual streets.",
+          "Conditions are authored assumptions, not NYC observations.",
+          "Utility locations and schedules are unknown; no excavation clearance."
+        ],
+        "created_at": "2026-11-07T00:00:00Z",
+        "name": "Demo segment R-011",
+        "source_segment_key": null,
+        "study_area_id": "lower-manhattan-window-v1",
+        "length_m": null,
+        "width_m": null,
+        "lane_count": null,
+        "utility_coverage": "unknown",
+        "coverage_as_of": null,
+        "condition_summary": {
+          "category": "fair",
+          "rating": "6",
+          "rating_scale": "synthetic-1-10-higher-better",
+          "assessed_on": null,
+          "evidence_ids": [
+            "demo-assumptions-v1"
+          ],
+          "data_kind": "synthetic",
+          "synthetic_input": true
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "demo-r-012",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.005,
+            40.7181
+          ],
+          [
+            -74.00355,
+            40.71828
+          ],
+          [
+            -74.0021,
+            40.7181
+          ]
+        ]
+      },
+      "properties": {
+        "id": "demo-r-012",
+        "dataset_snapshot_id": "demo-m1-v1",
+        "evidence_ids": [
+          "demo-assumptions-v1"
+        ],
+        "data_kind": "synthetic",
+        "synthetic_input": true,
+        "field_evidence": {
+          "geometry": [
+            "demo-assumptions-v1"
+          ],
+          "name": [
+            "demo-assumptions-v1"
+          ]
+        },
+        "unknown_reasons": {
+          "source_segment_key": "not_supplied",
+          "length_m": "not_supplied",
+          "width_m": "not_supplied",
+          "lane_count": "not_supplied",
+          "coverage_as_of": "not_supplied",
+          "condition_summary.assessed_on": "not_supplied",
+          "condition_summary.rating": "no_demo_assessment",
+          "condition_summary.rating_scale": "no_demo_assessment"
+        },
+        "limitations": [
+          "Schematic demonstration geometry; does not trace actual streets.",
+          "Conditions are authored assumptions, not NYC observations.",
+          "Utility locations and schedules are unknown; no excavation clearance."
+        ],
+        "created_at": "2026-11-07T00:00:00Z",
+        "name": "Demo segment R-012",
+        "source_segment_key": null,
+        "study_area_id": "lower-manhattan-window-v1",
+        "length_m": null,
+        "width_m": null,
+        "lane_count": null,
+        "utility_coverage": "unknown",
+        "coverage_as_of": null,
+        "condition_summary": {
+          "category": "unknown",
+          "rating": null,
+          "rating_scale": null,
+          "assessed_on": null,
+          "evidence_ids": [
+            "demo-assumptions-v1"
+          ],
+          "data_kind": "synthetic",
+          "synthetic_input": true
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "demo-r-013",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0108,
+            40.7115
+          ],
+          [
+            -74.0108,
+            40.7137
+          ]
+        ]
+      },
+      "properties": {
+        "id": "demo-r-013",
+        "dataset_snapshot_id": "demo-m1-v1",
+        "evidence_ids": [
+          "demo-assumptions-v1"
+        ],
+        "data_kind": "synthetic",
+        "synthetic_input": true,
+        "field_evidence": {
+          "geometry": [
+            "demo-assumptions-v1"
+          ],
+          "name": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.rating": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.category": [
+            "demo-assumptions-v1"
+          ]
+        },
+        "unknown_reasons": {
+          "source_segment_key": "not_supplied",
+          "length_m": "not_supplied",
+          "width_m": "not_supplied",
+          "lane_count": "not_supplied",
+          "coverage_as_of": "not_supplied",
+          "condition_summary.assessed_on": "not_supplied"
+        },
+        "limitations": [
+          "Schematic demonstration geometry; does not trace actual streets.",
+          "Conditions are authored assumptions, not NYC observations.",
+          "Utility locations and schedules are unknown; no excavation clearance."
+        ],
+        "created_at": "2026-11-07T00:00:00Z",
+        "name": "Demo segment R-013",
+        "source_segment_key": null,
+        "study_area_id": "lower-manhattan-window-v1",
+        "length_m": null,
+        "width_m": null,
+        "lane_count": null,
+        "utility_coverage": "unknown",
+        "coverage_as_of": null,
+        "condition_summary": {
+          "category": "poor",
+          "rating": "3",
+          "rating_scale": "synthetic-1-10-higher-better",
+          "assessed_on": null,
+          "evidence_ids": [
+            "demo-assumptions-v1"
+          ],
+          "data_kind": "synthetic",
+          "synthetic_input": true
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "demo-r-014",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0079,
+            40.7115
+          ],
+          [
+            -74.0079,
+            40.7137
+          ]
+        ]
+      },
+      "properties": {
+        "id": "demo-r-014",
+        "dataset_snapshot_id": "demo-m1-v1",
+        "evidence_ids": [
+          "demo-assumptions-v1"
+        ],
+        "data_kind": "synthetic",
+        "synthetic_input": true,
+        "field_evidence": {
+          "geometry": [
+            "demo-assumptions-v1"
+          ],
+          "name": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.rating": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.category": [
+            "demo-assumptions-v1"
+          ]
+        },
+        "unknown_reasons": {
+          "source_segment_key": "not_supplied",
+          "length_m": "not_supplied",
+          "width_m": "not_supplied",
+          "lane_count": "not_supplied",
+          "coverage_as_of": "not_supplied",
+          "condition_summary.assessed_on": "not_supplied"
+        },
+        "limitations": [
+          "Schematic demonstration geometry; does not trace actual streets.",
+          "Conditions are authored assumptions, not NYC observations.",
+          "Utility locations and schedules are unknown; no excavation clearance."
+        ],
+        "created_at": "2026-11-07T00:00:00Z",
+        "name": "Demo segment R-014",
+        "source_segment_key": null,
+        "study_area_id": "lower-manhattan-window-v1",
+        "length_m": null,
+        "width_m": null,
+        "lane_count": null,
+        "utility_coverage": "unknown",
+        "coverage_as_of": null,
+        "condition_summary": {
+          "category": "good",
+          "rating": "8",
+          "rating_scale": "synthetic-1-10-higher-better",
+          "assessed_on": null,
+          "evidence_ids": [
+            "demo-assumptions-v1"
+          ],
+          "data_kind": "synthetic",
+          "synthetic_input": true
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "demo-r-015",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.005,
+            40.7115
+          ],
+          [
+            -74.005,
+            40.7137
+          ]
+        ]
+      },
+      "properties": {
+        "id": "demo-r-015",
+        "dataset_snapshot_id": "demo-m1-v1",
+        "evidence_ids": [
+          "demo-assumptions-v1"
+        ],
+        "data_kind": "synthetic",
+        "synthetic_input": true,
+        "field_evidence": {
+          "geometry": [
+            "demo-assumptions-v1"
+          ],
+          "name": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.rating": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.category": [
+            "demo-assumptions-v1"
+          ]
+        },
+        "unknown_reasons": {
+          "source_segment_key": "not_supplied",
+          "length_m": "not_supplied",
+          "width_m": "not_supplied",
+          "lane_count": "not_supplied",
+          "coverage_as_of": "not_supplied",
+          "condition_summary.assessed_on": "not_supplied"
+        },
+        "limitations": [
+          "Schematic demonstration geometry; does not trace actual streets.",
+          "Conditions are authored assumptions, not NYC observations.",
+          "Utility locations and schedules are unknown; no excavation clearance."
+        ],
+        "created_at": "2026-11-07T00:00:00Z",
+        "name": "Demo segment R-015",
+        "source_segment_key": null,
+        "study_area_id": "lower-manhattan-window-v1",
+        "length_m": null,
+        "width_m": null,
+        "lane_count": null,
+        "utility_coverage": "unknown",
+        "coverage_as_of": null,
+        "condition_summary": {
+          "category": "fair",
+          "rating": "6",
+          "rating_scale": "synthetic-1-10-higher-better",
+          "assessed_on": null,
+          "evidence_ids": [
+            "demo-assumptions-v1"
+          ],
+          "data_kind": "synthetic",
+          "synthetic_input": true
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "demo-r-016",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0021,
+            40.7115
+          ],
+          [
+            -74.0021,
+            40.7137
+          ]
+        ]
+      },
+      "properties": {
+        "id": "demo-r-016",
+        "dataset_snapshot_id": "demo-m1-v1",
+        "evidence_ids": [
+          "demo-assumptions-v1"
+        ],
+        "data_kind": "synthetic",
+        "synthetic_input": true,
+        "field_evidence": {
+          "geometry": [
+            "demo-assumptions-v1"
+          ],
+          "name": [
+            "demo-assumptions-v1"
+          ]
+        },
+        "unknown_reasons": {
+          "source_segment_key": "not_supplied",
+          "length_m": "not_supplied",
+          "width_m": "not_supplied",
+          "lane_count": "not_supplied",
+          "coverage_as_of": "not_supplied",
+          "condition_summary.assessed_on": "not_supplied",
+          "condition_summary.rating": "no_demo_assessment",
+          "condition_summary.rating_scale": "no_demo_assessment"
+        },
+        "limitations": [
+          "Schematic demonstration geometry; does not trace actual streets.",
+          "Conditions are authored assumptions, not NYC observations.",
+          "Utility locations and schedules are unknown; no excavation clearance."
+        ],
+        "created_at": "2026-11-07T00:00:00Z",
+        "name": "Demo segment R-016",
+        "source_segment_key": null,
+        "study_area_id": "lower-manhattan-window-v1",
+        "length_m": null,
+        "width_m": null,
+        "lane_count": null,
+        "utility_coverage": "unknown",
+        "coverage_as_of": null,
+        "condition_summary": {
+          "category": "unknown",
+          "rating": null,
+          "rating_scale": null,
+          "assessed_on": null,
+          "evidence_ids": [
+            "demo-assumptions-v1"
+          ],
+          "data_kind": "synthetic",
+          "synthetic_input": true
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "demo-r-017",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0108,
+            40.7137
+          ],
+          [
+            -74.0108,
+            40.7159
+          ]
+        ]
+      },
+      "properties": {
+        "id": "demo-r-017",
+        "dataset_snapshot_id": "demo-m1-v1",
+        "evidence_ids": [
+          "demo-assumptions-v1"
+        ],
+        "data_kind": "synthetic",
+        "synthetic_input": true,
+        "field_evidence": {
+          "geometry": [
+            "demo-assumptions-v1"
+          ],
+          "name": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.rating": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.category": [
+            "demo-assumptions-v1"
+          ]
+        },
+        "unknown_reasons": {
+          "source_segment_key": "not_supplied",
+          "length_m": "not_supplied",
+          "width_m": "not_supplied",
+          "lane_count": "not_supplied",
+          "coverage_as_of": "not_supplied",
+          "condition_summary.assessed_on": "not_supplied"
+        },
+        "limitations": [
+          "Schematic demonstration geometry; does not trace actual streets.",
+          "Conditions are authored assumptions, not NYC observations.",
+          "Utility locations and schedules are unknown; no excavation clearance."
+        ],
+        "created_at": "2026-11-07T00:00:00Z",
+        "name": "Demo segment R-017",
+        "source_segment_key": null,
+        "study_area_id": "lower-manhattan-window-v1",
+        "length_m": null,
+        "width_m": null,
+        "lane_count": null,
+        "utility_coverage": "unknown",
+        "coverage_as_of": null,
+        "condition_summary": {
+          "category": "poor",
+          "rating": "3",
+          "rating_scale": "synthetic-1-10-higher-better",
+          "assessed_on": null,
+          "evidence_ids": [
+            "demo-assumptions-v1"
+          ],
+          "data_kind": "synthetic",
+          "synthetic_input": true
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "demo-r-018",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0079,
+            40.7137
+          ],
+          [
+            -74.0079,
+            40.7159
+          ]
+        ]
+      },
+      "properties": {
+        "id": "demo-r-018",
+        "dataset_snapshot_id": "demo-m1-v1",
+        "evidence_ids": [
+          "demo-assumptions-v1"
+        ],
+        "data_kind": "synthetic",
+        "synthetic_input": true,
+        "field_evidence": {
+          "geometry": [
+            "demo-assumptions-v1"
+          ],
+          "name": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.rating": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.category": [
+            "demo-assumptions-v1"
+          ]
+        },
+        "unknown_reasons": {
+          "source_segment_key": "not_supplied",
+          "length_m": "not_supplied",
+          "width_m": "not_supplied",
+          "lane_count": "not_supplied",
+          "coverage_as_of": "not_supplied",
+          "condition_summary.assessed_on": "not_supplied"
+        },
+        "limitations": [
+          "Schematic demonstration geometry; does not trace actual streets.",
+          "Conditions are authored assumptions, not NYC observations.",
+          "Utility locations and schedules are unknown; no excavation clearance."
+        ],
+        "created_at": "2026-11-07T00:00:00Z",
+        "name": "Demo segment R-018",
+        "source_segment_key": null,
+        "study_area_id": "lower-manhattan-window-v1",
+        "length_m": null,
+        "width_m": null,
+        "lane_count": null,
+        "utility_coverage": "unknown",
+        "coverage_as_of": null,
+        "condition_summary": {
+          "category": "good",
+          "rating": "8",
+          "rating_scale": "synthetic-1-10-higher-better",
+          "assessed_on": null,
+          "evidence_ids": [
+            "demo-assumptions-v1"
+          ],
+          "data_kind": "synthetic",
+          "synthetic_input": true
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "demo-r-019",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.005,
+            40.7137
+          ],
+          [
+            -74.005,
+            40.7159
+          ]
+        ]
+      },
+      "properties": {
+        "id": "demo-r-019",
+        "dataset_snapshot_id": "demo-m1-v1",
+        "evidence_ids": [
+          "demo-assumptions-v1"
+        ],
+        "data_kind": "synthetic",
+        "synthetic_input": true,
+        "field_evidence": {
+          "geometry": [
+            "demo-assumptions-v1"
+          ],
+          "name": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.rating": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.category": [
+            "demo-assumptions-v1"
+          ]
+        },
+        "unknown_reasons": {
+          "source_segment_key": "not_supplied",
+          "length_m": "not_supplied",
+          "width_m": "not_supplied",
+          "lane_count": "not_supplied",
+          "coverage_as_of": "not_supplied",
+          "condition_summary.assessed_on": "not_supplied"
+        },
+        "limitations": [
+          "Schematic demonstration geometry; does not trace actual streets.",
+          "Conditions are authored assumptions, not NYC observations.",
+          "Utility locations and schedules are unknown; no excavation clearance."
+        ],
+        "created_at": "2026-11-07T00:00:00Z",
+        "name": "Demo segment R-019",
+        "source_segment_key": null,
+        "study_area_id": "lower-manhattan-window-v1",
+        "length_m": null,
+        "width_m": null,
+        "lane_count": null,
+        "utility_coverage": "unknown",
+        "coverage_as_of": null,
+        "condition_summary": {
+          "category": "fair",
+          "rating": "6",
+          "rating_scale": "synthetic-1-10-higher-better",
+          "assessed_on": null,
+          "evidence_ids": [
+            "demo-assumptions-v1"
+          ],
+          "data_kind": "synthetic",
+          "synthetic_input": true
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "demo-r-020",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0021,
+            40.7137
+          ],
+          [
+            -74.0021,
+            40.7159
+          ]
+        ]
+      },
+      "properties": {
+        "id": "demo-r-020",
+        "dataset_snapshot_id": "demo-m1-v1",
+        "evidence_ids": [
+          "demo-assumptions-v1"
+        ],
+        "data_kind": "synthetic",
+        "synthetic_input": true,
+        "field_evidence": {
+          "geometry": [
+            "demo-assumptions-v1"
+          ],
+          "name": [
+            "demo-assumptions-v1"
+          ]
+        },
+        "unknown_reasons": {
+          "source_segment_key": "not_supplied",
+          "length_m": "not_supplied",
+          "width_m": "not_supplied",
+          "lane_count": "not_supplied",
+          "coverage_as_of": "not_supplied",
+          "condition_summary.assessed_on": "not_supplied",
+          "condition_summary.rating": "no_demo_assessment",
+          "condition_summary.rating_scale": "no_demo_assessment"
+        },
+        "limitations": [
+          "Schematic demonstration geometry; does not trace actual streets.",
+          "Conditions are authored assumptions, not NYC observations.",
+          "Utility locations and schedules are unknown; no excavation clearance."
+        ],
+        "created_at": "2026-11-07T00:00:00Z",
+        "name": "Demo segment R-020",
+        "source_segment_key": null,
+        "study_area_id": "lower-manhattan-window-v1",
+        "length_m": null,
+        "width_m": null,
+        "lane_count": null,
+        "utility_coverage": "unknown",
+        "coverage_as_of": null,
+        "condition_summary": {
+          "category": "unknown",
+          "rating": null,
+          "rating_scale": null,
+          "assessed_on": null,
+          "evidence_ids": [
+            "demo-assumptions-v1"
+          ],
+          "data_kind": "synthetic",
+          "synthetic_input": true
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "demo-r-021",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0108,
+            40.7159
+          ],
+          [
+            -74.0108,
+            40.7181
+          ]
+        ]
+      },
+      "properties": {
+        "id": "demo-r-021",
+        "dataset_snapshot_id": "demo-m1-v1",
+        "evidence_ids": [
+          "demo-assumptions-v1"
+        ],
+        "data_kind": "synthetic",
+        "synthetic_input": true,
+        "field_evidence": {
+          "geometry": [
+            "demo-assumptions-v1"
+          ],
+          "name": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.rating": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.category": [
+            "demo-assumptions-v1"
+          ]
+        },
+        "unknown_reasons": {
+          "source_segment_key": "not_supplied",
+          "length_m": "not_supplied",
+          "width_m": "not_supplied",
+          "lane_count": "not_supplied",
+          "coverage_as_of": "not_supplied",
+          "condition_summary.assessed_on": "not_supplied"
+        },
+        "limitations": [
+          "Schematic demonstration geometry; does not trace actual streets.",
+          "Conditions are authored assumptions, not NYC observations.",
+          "Utility locations and schedules are unknown; no excavation clearance."
+        ],
+        "created_at": "2026-11-07T00:00:00Z",
+        "name": "Demo segment R-021",
+        "source_segment_key": null,
+        "study_area_id": "lower-manhattan-window-v1",
+        "length_m": null,
+        "width_m": null,
+        "lane_count": null,
+        "utility_coverage": "unknown",
+        "coverage_as_of": null,
+        "condition_summary": {
+          "category": "poor",
+          "rating": "3",
+          "rating_scale": "synthetic-1-10-higher-better",
+          "assessed_on": null,
+          "evidence_ids": [
+            "demo-assumptions-v1"
+          ],
+          "data_kind": "synthetic",
+          "synthetic_input": true
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "demo-r-022",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0079,
+            40.7159
+          ],
+          [
+            -74.0079,
+            40.7181
+          ]
+        ]
+      },
+      "properties": {
+        "id": "demo-r-022",
+        "dataset_snapshot_id": "demo-m1-v1",
+        "evidence_ids": [
+          "demo-assumptions-v1"
+        ],
+        "data_kind": "synthetic",
+        "synthetic_input": true,
+        "field_evidence": {
+          "geometry": [
+            "demo-assumptions-v1"
+          ],
+          "name": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.rating": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.category": [
+            "demo-assumptions-v1"
+          ]
+        },
+        "unknown_reasons": {
+          "source_segment_key": "not_supplied",
+          "length_m": "not_supplied",
+          "width_m": "not_supplied",
+          "lane_count": "not_supplied",
+          "coverage_as_of": "not_supplied",
+          "condition_summary.assessed_on": "not_supplied"
+        },
+        "limitations": [
+          "Schematic demonstration geometry; does not trace actual streets.",
+          "Conditions are authored assumptions, not NYC observations.",
+          "Utility locations and schedules are unknown; no excavation clearance."
+        ],
+        "created_at": "2026-11-07T00:00:00Z",
+        "name": "Demo segment R-022",
+        "source_segment_key": null,
+        "study_area_id": "lower-manhattan-window-v1",
+        "length_m": null,
+        "width_m": null,
+        "lane_count": null,
+        "utility_coverage": "unknown",
+        "coverage_as_of": null,
+        "condition_summary": {
+          "category": "good",
+          "rating": "8",
+          "rating_scale": "synthetic-1-10-higher-better",
+          "assessed_on": null,
+          "evidence_ids": [
+            "demo-assumptions-v1"
+          ],
+          "data_kind": "synthetic",
+          "synthetic_input": true
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "demo-r-023",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.005,
+            40.7159
+          ],
+          [
+            -74.005,
+            40.7181
+          ]
+        ]
+      },
+      "properties": {
+        "id": "demo-r-023",
+        "dataset_snapshot_id": "demo-m1-v1",
+        "evidence_ids": [
+          "demo-assumptions-v1"
+        ],
+        "data_kind": "synthetic",
+        "synthetic_input": true,
+        "field_evidence": {
+          "geometry": [
+            "demo-assumptions-v1"
+          ],
+          "name": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.rating": [
+            "demo-assumptions-v1"
+          ],
+          "condition_summary.category": [
+            "demo-assumptions-v1"
+          ]
+        },
+        "unknown_reasons": {
+          "source_segment_key": "not_supplied",
+          "length_m": "not_supplied",
+          "width_m": "not_supplied",
+          "lane_count": "not_supplied",
+          "coverage_as_of": "not_supplied",
+          "condition_summary.assessed_on": "not_supplied"
+        },
+        "limitations": [
+          "Schematic demonstration geometry; does not trace actual streets.",
+          "Conditions are authored assumptions, not NYC observations.",
+          "Utility locations and schedules are unknown; no excavation clearance."
+        ],
+        "created_at": "2026-11-07T00:00:00Z",
+        "name": "Demo segment R-023",
+        "source_segment_key": null,
+        "study_area_id": "lower-manhattan-window-v1",
+        "length_m": null,
+        "width_m": null,
+        "lane_count": null,
+        "utility_coverage": "unknown",
+        "coverage_as_of": null,
+        "condition_summary": {
+          "category": "fair",
+          "rating": "6",
+          "rating_scale": "synthetic-1-10-higher-better",
+          "assessed_on": null,
+          "evidence_ids": [
+            "demo-assumptions-v1"
+          ],
+          "data_kind": "synthetic",
+          "synthetic_input": true
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "demo-r-024",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0021,
+            40.7159
+          ],
+          [
+            -74.0021,
+            40.7181
+          ]
+        ]
+      },
+      "properties": {
+        "id": "demo-r-024",
+        "dataset_snapshot_id": "demo-m1-v1",
+        "evidence_ids": [
+          "demo-assumptions-v1"
+        ],
+        "data_kind": "synthetic",
+        "synthetic_input": true,
+        "field_evidence": {
+          "geometry": [
+            "demo-assumptions-v1"
+          ],
+          "name": [
+            "demo-assumptions-v1"
+          ]
+        },
+        "unknown_reasons": {
+          "source_segment_key": "not_supplied",
+          "length_m": "not_supplied",
+          "width_m": "not_supplied",
+          "lane_count": "not_supplied",
+          "coverage_as_of": "not_supplied",
+          "condition_summary.assessed_on": "not_supplied",
+          "condition_summary.rating": "no_demo_assessment",
+          "condition_summary.rating_scale": "no_demo_assessment"
+        },
+        "limitations": [
+          "Schematic demonstration geometry; does not trace actual streets.",
+          "Conditions are authored assumptions, not NYC observations.",
+          "Utility locations and schedules are unknown; no excavation clearance."
+        ],
+        "created_at": "2026-11-07T00:00:00Z",
+        "name": "Demo segment R-024",
+        "source_segment_key": null,
+        "study_area_id": "lower-manhattan-window-v1",
+        "length_m": null,
+        "width_m": null,
+        "lane_count": null,
+        "utility_coverage": "unknown",
+        "coverage_as_of": null,
+        "condition_summary": {
+          "category": "unknown",
+          "rating": null,
+          "rating_scale": null,
+          "assessed_on": null,
+          "evidence_ids": [
+            "demo-assumptions-v1"
+          ],
+          "data_kind": "synthetic",
+          "synthetic_input": true
+        }
+      }
+    }
+  ]
+}
