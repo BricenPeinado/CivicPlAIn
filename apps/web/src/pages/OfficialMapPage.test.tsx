@@ -1,3 +1,4 @@
+vi.mock('../features/standardized/StreetEvidence',()=>({StreetEvidence:()=>null}));
 vi.mock('../features/decisions/DecisionContext',()=>({DecisionContext:()=>null}));
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -24,7 +25,7 @@ it('loads real-mode records, independent layers and a keyboard street list', asy
   await user.keyboard('{Escape}'); expect(screen.queryByRole('region', { name: 'Keyboard accessible road list' })).not.toBeInTheDocument(); expect(screen.getByRole('textbox', { name: 'Find road segments' })).toHaveFocus();
 });
 it('does not present ambiguous ratings or unlocated permits as road evidence', async () => {
-  render(<OfficialMapPage snapshot={snapshot} selected={road.id} onSelect={vi.fn()} onProjects={vi.fn()}/>); expect(await screen.findByText('No accepted road assessment')).toBeVisible(); expect(screen.queryByText('3.38')).not.toBeInTheDocument();
+  render(<OfficialMapPage snapshot={snapshot} selected={road.id} onSelect={vi.fn()} onProjects={vi.fn()}/>); fireEvent.click(await screen.findByText('Verified segment evidence and engineering review')); expect(await screen.findByText('No accepted road assessment')).toBeVisible(); expect(screen.queryByText('3.38')).not.toBeInTheDocument();
   const related = screen.getByText(/Related permit records/); fireEvent.click(related); expect(await screen.findByText(/No accepted or candidate permit links/)).toBeVisible(); expect(getMunicipalPage).toHaveBeenCalledWith('permits', snapshot.id, { road_id: road.id, evidence:'true', include_candidates:'true',permit_release_id:undefined }, expect.any(AbortSignal));
   fireEvent.click(screen.getByText('Provenance and limitations')); expect(await screen.findByText('Test provenance')).toBeVisible(); expect(screen.getByText('2026-11-01')).toBeVisible();
 });
@@ -52,9 +53,9 @@ it('ignores a stale selected-road response after switching selection', async () 
 });
 it('shows an accepted assessment only with its official date and suppresses conflicting latest ratings', async () => {
   vi.mocked(getConditionSummary).mockResolvedValue({...conditionSummary, latest_usable_id: condition.id, rating: '3.38', inspection_at: condition.values.inspection_at, source_revision_id: condition.source_revision_id});
-  vi.mocked(getRoadConditions).mockResolvedValue({ data: [{ ...condition, match: { ...condition.match!, status: 'matched', target_road_id: road.id } }], meta: { ...meta, latest_usable_id: condition.id } }); const props = { snapshot, selected: road.id, onSelect: vi.fn(), onProjects: vi.fn() }; const view = render(<OfficialMapPage {...props}/>); expect(await screen.findByText('3.38')).toBeVisible(); expect(screen.getByText(/Inspected 2025-08-03/)).toBeVisible(); view.unmount();
+  vi.mocked(getRoadConditions).mockResolvedValue({ data: [{ ...condition, match: { ...condition.match!, status: 'matched', target_road_id: road.id } }], meta: { ...meta, latest_usable_id: condition.id } }); const props = { snapshot, selected: road.id, onSelect: vi.fn(), onProjects: vi.fn() }; const view = render(<OfficialMapPage {...props}/>); fireEvent.click(await screen.findByText('Verified segment evidence and engineering review')); expect(await screen.findByText('3.38')).toBeVisible(); expect(screen.getByText(/Inspected 2025-08-03/)).toBeVisible(); view.unmount();
   vi.mocked(getConditionSummary).mockResolvedValue({...conditionSummary, reason: 'CONFLICTING_LATEST_RATINGS'});
-  vi.mocked(getRoadConditions).mockResolvedValue({ data: [{ ...condition, match: { ...condition.match!, status: 'matched', target_road_id: road.id } }], meta: { ...meta, latest_usable_id: null, conflicting_latest_ratings: true } }); render(<OfficialMapPage {...props}/>); expect(await screen.findByText(/Latest inspection records disagree/)).toBeVisible(); expect(screen.queryByText('3.38')).not.toBeInTheDocument();
+  vi.mocked(getRoadConditions).mockResolvedValue({ data: [{ ...condition, match: { ...condition.match!, status: 'matched', target_road_id: road.id } }], meta: { ...meta, latest_usable_id: null, conflicting_latest_ratings: true } }); render(<OfficialMapPage {...props}/>); fireEvent.click(await screen.findByText('Verified segment evidence and engineering review')); expect(await screen.findByText(/Latest inspection records disagree/)).toBeVisible(); expect(screen.queryByText('3.38')).not.toBeInTheDocument();
 });
 it('cancels stale viewport reads after pan and keeps the newer geometry', async () => {
   let resolve!: (r: typeof road[]) => void;
@@ -71,7 +72,7 @@ it('requires explicit release selection and exposes exact rating, history, cover
   vi.mocked(getConditionSummary).mockImplementation(async (_s,_r,asOf,_days,_signal,releaseId) => releaseId ? {...conditionSummary,intelligence_release_id:id,as_of_date:asOf,rating:'7.52',inspection_at:'2026-01-01',age_days:304,stale:true,latest_usable_id:condition.id,source_revision_id:'test-source',history:[{id:condition.id,rating:'7.52',inspection_at:'2026-01-01',eligible:true,reason:null,direction:'East',road_type:'Main',source_revision_id:'test-source',association_id:'test-association',record_hash:'record-hash',association_hash:'association-hash'}]} : conditionSummary);
   const user=userEvent.setup();render(<OfficialMapPage snapshot={snapshot} selected={road.id} onSelect={vi.fn()} onProjects={vi.fn()}/>);
   await screen.findByRole('heading',{name:'Test Street'});
-  const select=screen.getByRole('combobox',{name:'Reviewed intelligence release'});
+  await user.click(screen.getByText('Verified segment evidence and engineering review')); const select=screen.getByRole('combobox',{name:'Reviewed intelligence release'});
   await waitFor(()=>expect(within(select).getByRole('option',{name:id})).toBeInTheDocument());
   expect(select).toHaveValue('');expect(screen.queryByText('Supported road rating: 7.52')).not.toBeInTheDocument();
   await user.selectOptions(select,id);
@@ -84,7 +85,7 @@ it('requires explicit release selection and exposes exact rating, history, cover
 it('keeps a failed summary unavailable instead of asserting that no accepted evidence exists', async () => {
   vi.mocked(getConditionSummary).mockRejectedValue(new Error('Projection unavailable'));
   render(<OfficialMapPage snapshot={snapshot} selected={road.id} onSelect={vi.fn()} onProjects={vi.fn()}/>);
-  expect(await screen.findByText('Condition summary unavailable: Projection unavailable')).toBeVisible();
+  fireEvent.click(await screen.findByText('Verified segment evidence and engineering review')); expect(await screen.findByText('Condition summary unavailable: Projection unavailable')).toBeVisible();
   expect(screen.queryByText('No accepted road assessment')).not.toBeInTheDocument();
   expect(screen.getByRole('button',{name:'Retry condition summary'})).toBeVisible();
 });
@@ -96,7 +97,7 @@ it.each([{raw:'7.72',rounded:8,grade:'good',nonRating:null},{raw:'0.0',rounded:n
   vi.mocked(getConditionSummary).mockImplementation(async (_s,_r,asOf,_days,_signal,releaseId,policyId)=>({...conditionSummary,snapshot_id:sid,as_of_date:asOf,intelligence_release_id:releaseId||null,method_version:policyId?'road-condition-v2-pilot':'road-condition-v1',policy:policyId?policy:null,history:releaseId?[{id:condition.id,rating:raw,non_rating_reason:nonRating,multipass:'1',inspection_at:'2024-08-31',direction:null,road_type:null,eligible:false,reason:'PARTIAL_OR_UNREVIEWED_SCOPE',source_revision_id:'test-source',record_hash:'source-hash',association_id:'approved-association',association_hash:'review-hash',grading:{rounded_rating:rounded,category:grade,reason:nonRating?'NON_RATING_REASON':null,policy_id:policy.id},association_review:{reviewer:'Project owner; pilot only',reason:'Owner approval',scope:'partial',scope_reason:'Whole-road scope unverified',candidate_set_hash:'competitors-hash',evidence_refs:['owner-approval']}}]:[]}));
   const onRoute=vi.fn(),user=userEvent.setup();
   render(<OfficialMapPage snapshot={pilot} selected={road.id} onSelect={vi.fn()} onProjects={vi.fn()} onRoute={onRoute} route={{view:'map',road:road.id,intelligence:id,asof:'2026-11-08'}}/>);
-  expect(await screen.findByText('Accepted road reference; condition Unknown')).toBeVisible();
+  await user.click(await screen.findByText('Verified segment evidence and engineering review')); expect(await screen.findByText('Accepted road reference; condition Unknown')).toBeVisible();
   expect(screen.getByText(/5 \/ 8726 observations accepted/)).toBeVisible();
   expect(screen.getByText(/Derived using CivicPlAIn Pilot Policy v1.0/)).toHaveTextContent('not official NYC DOT classification');
   await user.click(screen.getByText('Accepted assessment history and lineage'));

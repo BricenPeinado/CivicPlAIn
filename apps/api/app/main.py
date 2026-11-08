@@ -31,6 +31,8 @@ from app.services.ai.providers import AISettings, OpenAIProvider
 from app.services.ai.explanations import AIExplanationService
 from app.core.municipal_repository import MunicipalRepository
 from app.routes.municipal import router as municipal_router
+from app.core.standardized_repository import StandardizedRepository
+from app.routes.standardized import router as standardized_router
 
 
 def error(request, status, code, message, fields=None):
@@ -54,6 +56,7 @@ def create_app(settings: Settings | None = None, ai_settings=None, ai_provider=N
     app = FastAPI(title="CivicPlAIn local API", version="0.1.0", lifespan=lifespan)
     app.state.repository = RoadRepository(settings.database_path)
     app.state.settings = settings
+    app.state.standardized = StandardizedRepository(settings.standardized_database_path)
     app.state.municipal = MunicipalRepository(settings.database_path)
     app.state.planning = PlanningRepository(settings.database_path)
     app.state.conflicts = ConflictRepository(settings.database_path)
@@ -89,7 +92,7 @@ def create_app(settings: Settings | None = None, ai_settings=None, ai_provider=N
     @app.exception_handler(HTTPException)
     async def http_error(request, exc):
         codes = {404: "NOT_FOUND", 405: "METHOD_NOT_ALLOWED"}
-        for code in ['MIGRATION_REQUIRED','VIEWPORT_TOO_BROAD','SOURCE_LAYER_UNAVAILABLE','MISSING_PLANNING_INPUTS']:
+        for code in ['MIGRATION_REQUIRED','VIEWPORT_TOO_BROAD','SOURCE_LAYER_UNAVAILABLE','MISSING_PLANNING_INPUTS','STANDARDIZED_DATABASE_MISSING','STANDARDIZED_DATABASE_INCOMPATIBLE','STANDARDIZED_SNAPSHOT_MISMATCH']:
             if str(exc.detail).startswith(code+':'):
                 codes[exc.status_code]=code
         return error(request, exc.status_code, codes.get(exc.status_code, "HTTP_ERROR"), str(exc.detail))
@@ -109,6 +112,7 @@ def create_app(settings: Settings | None = None, ai_settings=None, ai_provider=N
     app.include_router(ai_router)
     app.include_router(review_router)
     app.include_router(municipal_router)
+    app.include_router(standardized_router)
     app.include_router(municipal_planning_router)
     app.include_router(priority_router)
     app.include_router(official_screening_router)

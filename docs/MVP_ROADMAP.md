@@ -140,3 +140,7 @@ M7 is complete locally; see [M7_FINAL_QA](M7_FINAL_QA.md) for final evidence and
 
 
 M8.7 release verification: **BLOCKED — Milestone 8 is not complete**. Current regressions pass; runtime mismatch, source/review gates and incomplete release checks remain. See [final QA](M8_FINAL_QA.md).
+
+## Focused standardized NYC dataset integration — owner-authorized 2026-11-08
+
+This single integration milestone supersedes prior sequencing only for the explicitly supplied standardized read-model presentation. It does not close or weaken M8's source/engineering gates. Acceptance: read-only configurable artifact; exact road/snapshot identity; bounded profiles/observations/on-street permits; primary indicative Map condition; White Street 4.91/Fair/53/33; four contrasting coverage cases; cancellation, selection/navigation, no-data and pagination; preserved synthetic/official planning; tests/typecheck/build plus a matched actual-browser run; database preservation. No downloads/rebuild/matching/migration/deployment. [Delivery evidence](STANDARDIZED_INTEGRATION.md).
