@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import type { GeoJSONSource, Map as MapInstance, MapLayerMouseEvent } from 'maplibre-gl';
+import {drawingFeatures,validPoint,type DrawingSession,type Coordinate} from '../screening/planningDraft';
 import type { FeatureCollection } from 'geojson';
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
 import type { RoadsCollection, WorkProject, InfrastructureCategory } from '../../types/api';
@@ -14,7 +15,7 @@ maplibregl.setWorkerUrl(workerUrl);
 export { colors } from './colors';
 interface Props {
   roads?: RoadsCollection; ratings?: FeatureCollection; features?: FeatureCollection; observations?: FeatureCollection; permits?: FeatureCollection; shoreline?: FeatureCollection;
-  screeningFeatures?: FeatureCollection; priorityFeatures?: FeatureCollection; candidateFeatures?: FeatureCollection; selectedGeometry?: FeatureCollection; focusPadding?: number; focusBounds?: Bbox | null; official?: boolean; layers?: LayerState;
+  drawing?:DrawingSession|null; workZones?:FeatureCollection; screeningFeatures?: FeatureCollection; priorityFeatures?: FeatureCollection; candidateFeatures?: FeatureCollection; selectedGeometry?: FeatureCollection; focusPadding?: number; focusBounds?: Bbox | null; official?: boolean; layers?: LayerState;
   selectedId: string | null; onSelect: (id: string) => void; onViewport?: (bbox: Bbox) => void;
   onObservation?: (id: string) => void; onPermit?: (id: string) => void;
   projects?: WorkProject[]; highlightedProjects?: string[]; highlightedRoads?: string[];
@@ -22,12 +23,12 @@ interface Props {
 }
 const EMPTY: never[] = [];
 const EMPTY_COLLECTION=emptyCollection();
-export function RoadMap({ screeningFeatures, priorityFeatures, candidateFeatures, roads, ratings, features, observations, permits, shoreline, selectedGeometry, focusBounds, focusPadding = 55, official = false, layers,
+export function RoadMap({ drawing, workZones, screeningFeatures, priorityFeatures, candidateFeatures, roads, ratings, features, observations, permits, shoreline, selectedGeometry, focusBounds, focusPadding = 55, official = false, layers,
   selectedId, onSelect, onViewport, onObservation, onPermit, projects = EMPTY, highlightedProjects = EMPTY, highlightedRoads = EMPTY,
   onSelectProject, showProjects = true, visibleCategories = EMPTY }: Props) {
   const container = useRef<HTMLDivElement>(null), map = useRef<MapInstance | null>(null);
-  const callbacks = useRef({ onSelect, onViewport, onObservation, onPermit, onSelectProject });
-  callbacks.current = { onSelect, onViewport, onObservation, onPermit, onSelectProject };
+  const callbacks = useRef({ drawing, onSelect, onViewport, onObservation, onPermit, onSelectProject });
+  callbacks.current = { drawing, onSelect, onViewport, onObservation, onPermit, onSelectProject };
   const [ready, setReady] = useState(false), [failure, setFailure] = useState(false), [tileFailure, setTileFailure] = useState(false);
   const [hover, setHover] = useState<string | null>(null), [retry, setRetry] = useState(0);
   const published=useRef(new Map<string,{data:FeatureCollection;signature:string}>());
@@ -37,6 +38,7 @@ export function RoadMap({ screeningFeatures, priorityFeatures, candidateFeatures
     const started=performance.now(); published.current.clear();
     let active = true, loaded = false; setReady(false); setFailure(false); setTileFailure(false); setLayerError(false);
     let instance: MapInstance | undefined, observer: ResizeObserver | undefined;
+    const drawingKey=(e:KeyboardEvent)=>{const d=callbacks.current.drawing;if(!d)return;if(['Enter','Escape','Backspace','Delete'].includes(e.key)){e.preventDefault();e.stopPropagation();if(e.key==='Enter')d.onFinish();else if(e.key==='Escape')d.onCancel();else d.onUndo();}};
     const deadline = window.setTimeout(() => { if (active && !loaded) setFailure(true); }, 12000);
     try {
       instance = new maplibregl.Map({ container: container.current!, center: [-74.007, 40.7125], zoom: 15.8,
@@ -45,6 +47,7 @@ export function RoadMap({ screeningFeatures, priorityFeatures, candidateFeatures
       });
       map.current = instance;
       instance.getCanvas().setAttribute('aria-label', official ? 'Lower Manhattan map. Arrow keys pan; plus and minus zoom. Use the street list to select records.' : 'Synthetic map. Use the street list to select records.');
+      instance.getCanvas().addEventListener('keydown',drawingKey);
       instance.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-left');
       instance.addControl(new maplibregl.AttributionControl({ compact: false, customAttribution: official
         ? 'NYC DCP LION · NYC DOT observations · NYC DOITT shoreline'
@@ -52,7 +55,7 @@ export function RoadMap({ screeningFeatures, priorityFeatures, candidateFeatures
       instance.on('load', () => {
         if (!instance || !active) return;
         loaded = true; clearTimeout(deadline);
-        for (const id of ['shoreline', 'roads', 'ratings', 'observations', 'permits', 'selection', 'projects', 'screening', 'priorities', 'candidates']) instance.addSource(id, { type: 'geojson', data: emptyCollection() });
+        for (const id of ['shoreline', 'roads', 'ratings', 'observations', 'permits', 'selection', 'projects', 'screening', 'work-zones', 'drawing', 'priorities', 'candidates']) instance.addSource(id, { type: 'geojson', data: emptyCollection() });
         instance.addLayer({ id: 'shoreline', type: 'line', source: 'shoreline', paint: { 'line-color': '#9ab5c5', 'line-width': 2 } });
         instance.addLayer({ id: 'road-casing', type: 'line', source: 'roads', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#fff', 'line-width': official ? 3.5 : 13 } });
         instance.addLayer({ id: 'road-color', type: 'line', source: 'roads', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: {
@@ -72,6 +75,9 @@ export function RoadMap({ screeningFeatures, priorityFeatures, candidateFeatures
         instance.addLayer({id:'permit-candidates',type:'line',source:'candidates',paint:{'line-color':'#8c6a2d','line-width':6,'line-dasharray':[1,2]}});
         instance.addLayer({id:'priorities',type:'line',source:'priorities',paint:{'line-color':['match',['get','priority_status'],'ranked','#7951a6','#667385'],'line-width':5,'line-dasharray':[3,2]}});
         instance.addLayer({ id: 'selection', type: 'line', source: 'selection', paint: { 'line-color': '#0069c7', 'line-width': 6 } });
+        instance.addLayer({id:'work-zones',type:'line',source:'work-zones',paint:{'line-color':['get','color'],'line-width':7,'line-opacity':.85}});
+        instance.addLayer({id:'drawing-line',type:'line',source:'drawing',filter:['==',['geometry-type'],'LineString'],paint:{'line-color':'#243c53','line-width':4,'line-dasharray':[1,1]}});
+        instance.addLayer({id:'drawing-points',type:'circle',source:'drawing',filter:['==',['geometry-type'],'Point'],paint:{'circle-color':'#fff','circle-radius':5,'circle-stroke-color':'#243c53','circle-stroke-width':2}});
         instance.addLayer({id:'screening-fill',type:'fill',source:'screening',filter:['==',['geometry-type'],'Polygon'],paint:{'fill-color':'#c65e05','fill-opacity':.16}});
         instance.addLayer({id:'screening-lines',type:'line',source:'screening',paint:{'line-color':'#c65e05','line-width':5,'line-dasharray':[2,1]}});
         if (official) instance.addLayer({ id: 'road-labels', type: 'symbol', source: 'roads', minzoom: 13,
@@ -80,25 +86,29 @@ export function RoadMap({ screeningFeatures, priorityFeatures, candidateFeatures
         instance.addLayer({ id: 'project-fill', type: 'fill', source: 'projects', filter: ['==', ['geometry-type'], 'Polygon'], paint: { 'fill-color': ['get', 'color'], 'fill-opacity': .15 } });
         instance.addLayer({ id: 'project-lines', type: 'line', source: 'projects', paint: { 'line-color': ['get', 'color'], 'line-width': 3, 'line-dasharray': [2, 1] } });
         instance.addLayer({ id: 'project-selected', type: 'line', source: 'projects', filter: ['in', ['get', 'project_id'], ['literal', []]], paint: { 'line-color': '#0069c7', 'line-width': 7 } });
-        instance.on('click', 'road-hit', (e: MapLayerMouseEvent) => { if (official && instance!.queryRenderedFeatures(e.point, { layers: ['observations', 'permit-lines', 'permit-points'] }).length) return; const id = e.features?.[0]?.properties?.road_id; if (id) callbacks.current.onSelect(String(id)); });
+        instance.on('click', 'road-hit', (e: MapLayerMouseEvent) => { if(callbacks.current.drawing)return; if (official && instance!.queryRenderedFeatures(e.point, { layers: ['observations', 'permit-lines', 'permit-points'] }).length) return; const id = e.features?.[0]?.properties?.road_id; if (id) callbacks.current.onSelect(String(id)); });
         instance.on('mousemove', 'road-hit', (e: MapLayerMouseEvent) => {
-          if (!active) return;
+          if (!active || callbacks.current.drawing) return;
           const id = String(e.features?.[0]?.properties?.road_id || '');
           instance!.getCanvas().style.cursor = 'pointer'; instance!.setFilter('road-hover', ['==', ['get', 'road_id'], id]); setHover(e.features?.[0]?.properties?.name || id);
         });
         instance.on('mouseleave', 'road-hit', () => { if (active) { instance!.getCanvas().style.cursor = ''; instance!.setFilter('road-hover', ['==', ['get', 'road_id'], '']); setHover(null); } });
         instance.on('click','rating-hit',(e:MapLayerMouseEvent)=>{
+          if(callbacks.current.drawing)return;
           if(instance!.queryRenderedFeatures(e.point,{layers:['observations','permit-lines','permit-points','road-hit']}).length)return;
           const id=e.features?.[0]?.properties?.road_id;if(id)callbacks.current.onSelect(String(id));
         });
-        instance.on('mousemove','rating-hit',(e:MapLayerMouseEvent)=>{if(active){instance!.getCanvas().style.cursor='pointer';setHover(e.features?.[0]?.properties?.name||null);}});
+        instance.on('mousemove','rating-hit',(e:MapLayerMouseEvent)=>{if(active&&!callbacks.current.drawing){instance!.getCanvas().style.cursor='pointer';setHover(e.features?.[0]?.properties?.name||null);}});
         instance.on('mouseleave','rating-hit',()=>{if(active){instance!.getCanvas().style.cursor='';setHover(null);}});
-        for (const layer of ['project-fill', 'project-lines']) instance.on('click', layer, (e: MapLayerMouseEvent) => { const id = e.features?.[0]?.properties?.project_id; if (id) callbacks.current.onSelectProject?.(String(id)); });
+        for (const layer of ['project-fill', 'project-lines']) instance.on('click', layer, (e: MapLayerMouseEvent) => { if(callbacks.current.drawing)return; const id = e.features?.[0]?.properties?.project_id; if (id) callbacks.current.onSelectProject?.(String(id)); });
         for (const layer of ['observations', 'permit-lines', 'permit-points']) instance.on('click', layer, (e: MapLayerMouseEvent) => {
+          if(callbacks.current.drawing)return;
           if (layer === 'observations' && instance!.queryRenderedFeatures(e.point, { layers: ['permit-lines', 'permit-points'] }).length) return;
           const id = e.features?.[0]?.properties?.record_id; if (id) (layer === 'observations' ? callbacks.current.onObservation : callbacks.current.onPermit)?.(String(id));
         });
-        instance.fitBounds(official ? FOCUS : [-74.012, 40.710, -74.000, 40.720], { padding: 40, duration: 0 });
+        instance.on('click',e=>{if(callbacks.current.drawing){const p:Coordinate=[e.lngLat.lng,e.lngLat.lat];callbacks.current.drawing.onPoint(p);}});
+        instance.on('mousemove',e=>{const session=callbacks.current.drawing;if(!session)return;instance!.getCanvas().style.cursor='crosshair';const p:Coordinate=[e.lngLat.lng,e.lngLat.lat];if(validPoint(p))(instance!.getSource('drawing') as GeoJSONSource)?.setData(drawingFeatures(session.points,p));});
+        instance.fitBounds(focusBounds || (official ? FOCUS : [-74.012, 40.710, -74.000, 40.720]), { padding: focusBounds ? focusPadding : 40, duration: 0 });
         setReady(true);timeMap('map.ready',started);
         // Local readiness is independent of remote raster availability/load events.
         if(official && onlineBasemap){
@@ -121,11 +131,11 @@ export function RoadMap({ screeningFeatures, priorityFeatures, candidateFeatures
       instance.getCanvas().addEventListener('webglcontextlost', () => { if (active) setFailure(true); });
       observer = new ResizeObserver(() => instance?.resize()); observer.observe(container.current!);
     } catch { setFailure(true); }
-    return () => { active = false; clearTimeout(deadline); observer?.disconnect(); instance?.remove(); map.current = null; };
+    return () => { active = false; clearTimeout(deadline); observer?.disconnect(); instance?.getCanvas().removeEventListener('keydown',drawingKey); instance?.remove(); map.current = null; };
   }, [official, retry]);
   useEffect(() => {
     if (!ready || !map.current) return;
-    for (const [id, input] of Object.entries({ roads: features || synthetic, ratings, observations, permits, shoreline, screening:screeningFeatures, priorities:priorityFeatures, candidates:candidateFeatures, selection: selectedGeometry })) {
+    for (const [id, input] of Object.entries({ roads: features || synthetic, ratings, observations, permits, shoreline, screening:screeningFeatures, 'work-zones':workZones, priorities:priorityFeatures, candidates:candidateFeatures, selection: selectedGeometry })) {
       const data=input || EMPTY_COLLECTION;
       const previous=published.current.get(id);
       if(previous?.data===data)continue;
@@ -133,7 +143,8 @@ export function RoadMap({ screeningFeatures, priorityFeatures, candidateFeatures
       if(previous?.signature!==signature && (previous || data.features.length>0)){(map.current.getSource(id) as GeoJSONSource)?.setData(data);countMap(`geojson.${id}`);}
       published.current.set(id,{data,signature});
     }
-  }, [synthetic, features, ratings, observations, permits, shoreline, screeningFeatures, priorityFeatures, candidateFeatures, selectedGeometry, ready]);
+  }, [synthetic, features, ratings, observations, permits, shoreline, screeningFeatures, workZones, priorityFeatures, candidateFeatures, selectedGeometry, ready]);
+  useEffect(()=>{if(!ready||!map.current)return;(map.current.getSource('drawing') as GeoJSONSource)?.setData(drawingFeatures(drawing?.points||[]));map.current.getCanvas().style.cursor=drawing?'crosshair':'';if(drawing){setHover(null);map.current.setFilter('road-hover',['==',['get','road_id'],'']);}},[drawing,ready]);
   useEffect(() => { if (ready) map.current?.setFilter('road-selected', ['==', ['get', 'road_id'], selectedId || '']); }, [selectedId, ready]);
   useEffect(() => {
     if (!ready || !map.current || !layers) return;
@@ -156,7 +167,7 @@ export function RoadMap({ screeningFeatures, priorityFeatures, candidateFeatures
     <div ref={container} className="map-canvas" />
     {failure ? <div className="map-message" role="alert"><strong>Map rendering unavailable</strong><p>Search and the street list still provide access to records.</p><button onClick={() => setRetry(v => v + 1)}>Retry map</button></div> : !ready && <div className="map-message" role="status">Preparing map…</div>}
     {(tileFailure || layerError) && !failure && <div className="tile-notice" role="status">{tileFailure ? 'Background tiles unavailable. Official layers remain available.' : 'A map layer could not render. Use the street list to inspect records.'}<button onClick={() => setRetry(v => v + 1)}>Retry map</button></div>}
-    {hover && !failure && <div className="map-tooltip">{hover}{!official && ' · Synthetic fixture'}</div>}
+    {hover && !drawing && !failure && <div className="map-tooltip">{hover}{!official && ' · Synthetic fixture'}</div>}
     <button className="map-reset" onClick={() => map.current?.fitBounds(official ? FOCUS : [-74.012, 40.710, -74.000, 40.720], { padding: 40, duration: 0 })} disabled={!ready || failure} aria-label="Return to study focus">⌖</button>
   </section>;
 }
