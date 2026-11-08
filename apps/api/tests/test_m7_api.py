@@ -140,3 +140,20 @@ def test_viewport_cap_reports_error_without_truncation(client,monkeypatch):
     monkeypatch.setattr(c.app.state.municipal,'records',dense)
     r=c.get('/api/v2/road-segments/geojson',params={'snapshot_id':s['snapshot_id'],'bbox':'-74.02,40.7,-73.99,40.72'})
     assert r.status_code==422 and r.json()['error']['code']=='VIEWPORT_TOO_BROAD'
+
+
+def test_dashboard_activity_and_freshness_preserve_source_meaning(client):
+    c,s=client
+    data=c.get('/api/v2/dashboard',params={'snapshot_id':s['snapshot_id']}).json()['data']
+    assert data['method_version']=='municipal-summary-2'
+    assert data['permit_status_counts']==[{'status':'ISSUED','count':1}]
+    # Missing issue date cannot be replaced by the permit's known validity start.
+    assert data['permit_issue_date_range'] is None
+    assert len(data['source_freshness'])==4
+    assert {r['id'] for r in data['source_freshness']}==set(data['source_revision_ids'])
+    for item in data['source_freshness']:
+        source=c.get('/api/v2/source-revisions/'+item['id'],params={'snapshot_id':s['snapshot_id']}).json()['data']
+        assert item=={key:source[key] for key in ['id','source_id','retrieved_at','source_updated_at','cadence','release_note']}
+    # Administrative status remains an exact source filter, never a construction-state inference.
+    assert c.get('/api/v2/permits',params={'snapshot_id':s['snapshot_id'],'status':'ISSUED','location':'unlocated'}).json()['meta']['total_matching']==1
+    assert c.get('/api/v2/permits',params={'snapshot_id':s['snapshot_id'],'status':'issued'}).json()['data']==[]

@@ -1,8 +1,15 @@
 import { afterEach, expect, it, vi } from 'vitest';
-import { getMunicipalViewport, getMunicipalRoad, getRoadConditions, getSource, getSnapshots, getWorkspace } from './municipal';
+import { getMunicipalViewport, getMunicipalRoad, getMunicipalPermit, getRoadConditions, getSource, getSnapshots, getWorkspace } from './municipal';
 import { readJSON } from './http';
-import { sid, meta, road, snapshot } from '../test-municipal';
+import { sid, meta, road, permit, snapshot } from '../test-municipal';
 const reply = (data: unknown) => ({ ok: true, json: async () => data }) as Response;
+it('validates independently linked permit identity, snapshot and synthetic boundary', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce(reply({data:permit,meta})).mockResolvedValueOnce(reply({data:{...permit,id:'wrong'},meta})).mockResolvedValueOnce(reply({data:permit,meta:{...meta,snapshot_id:'wrong'}})).mockResolvedValueOnce(reply({data:{...permit,contains_synthetic:true},meta})));
+  expect((await getMunicipalPermit(sid,permit.id)).id).toBe(permit.id);
+  await expect(getMunicipalPermit(sid,permit.id)).rejects.toThrow('identity');
+  await expect(getMunicipalPermit(sid,permit.id)).rejects.toThrow('snapshot');
+  await expect(getMunicipalPermit(sid,permit.id)).rejects.toThrow('Synthetic');
+});
 afterEach(() => vi.unstubAllGlobals());
 it('reads all snapshot-bound pages with exact geographic coordinates', async () => {
   const fetch = vi.fn().mockResolvedValueOnce(reply({ data: [road], meta: { ...meta, next_cursor: 'page2', total_matching: 2 } })).mockResolvedValueOnce(reply({ data: [{ ...road, id: 'road-test-b' }], meta: { ...meta, total_matching: 2 } })); vi.stubGlobal('fetch', fetch);

@@ -1,6 +1,6 @@
 # M7 implementation plan and architecture audit
 
-**M7.0 audit/specification retained; M7.1 backend and M7.2 map-first interface implemented locally. M7.3–M7.4 remain planned.** See [M7.1 evidence](M7_1_IMPLEMENTATION.md) and [M7.2 evidence](M7_2_IMPLEMENTATION.md). The inspected-baseline table below describes the original M6 checkout; the stage plans describe intended work and must be read with the concrete delivery notes. No historical milestone report is rewritten.
+**M7.0 audit/specification retained; M7.1–M7.3 implemented locally. M7.4 remains planned.** See [M7.3 delivered files and verification](M7_3_IMPLEMENTATION.md). See [M7.1 evidence](M7_1_IMPLEMENTATION.md) and [M7.2 evidence](M7_2_IMPLEMENTATION.md). The inspected-baseline table below describes the original M6 checkout; the stage plans describe intended work and must be read with the concrete delivery notes. No historical milestone report is rewritten.
 
 ## Scope and release gates
 
@@ -52,7 +52,7 @@ ARCHITECTURE records ADR-M7-01…07 with rationale/tradeoffs. Implementation fol
 
 ## File-by-file execution plan
 
-Paths are relative to repository root. The 7.1 table records the original coding plan; actual implemented files/combined adapter module and departures are enumerated in M7_1_IMPLEMENTATION. The original 7.2 table is reconciled by the delivered file map at the end; 7.3–7.4 paths remain proposed. Create a module only when its stage implements/uses it. Shared semantics belong in existing docs, not competing specification copies.
+Paths are relative to repository root. The 7.1 table records the original coding plan; actual implemented files/combined adapter module and departures are enumerated in M7_1_IMPLEMENTATION. The original 7.2 table is reconciled by the delivered file map at the end; the original 7.3 table is reconciled by M7_3_IMPLEMENTATION; 7.4 paths remain proposed. Create a module only when its stage implements/uses it. Shared semantics belong in existing docs, not competing specification copies.
 
 ### 7.1 Official NYC ingestion and read boundary (implemented; original work plan below)
 
@@ -93,9 +93,9 @@ Dependencies: 7.1 accepted geometry/context snapshot and v2 contracts, verified 
 | `apps/web/public/` approved local font/glyph/attribution assets (if needed) | Only license-reviewed map-label resources. No downloaded secrets or blanket remote glyph URLs. Exact contents determined by label rendering approach and measured offline test. |
 | `RoadMap.test.tsx`, `services/api.test.ts`, new `municipal.test.ts`, `MapPage.test.tsx` | Preserve legacy selection/error tests; add official lineage/mode/cursor/race/limits and real-vs-synthetic display tests. Browser checks required in addition to mocks. |
 
-### 7.3 Dashboard, Projects, Scenarios and navigation
+### 7.3 Dashboard, Projects, Scenarios and navigation (delivered; original work plan below)
 
-Dependencies: working source-aware Map page/state. Route split changes composition, not saved calculation contracts.
+Dependencies: working source-aware Map page/state. Route split changes composition, not saved calculation contracts. Actual implementation reuses App/routing, OfficialRecordsPage, OfficialMapPage and SyntheticWorkspace rather than adding unused shell/hooks/pages. One views.css scopes the page additions. No new dependency, migration or calculation service; file-by-file delivery and actual gates are in M7_3_IMPLEMENTATION.
 
 | File | Planned change / review focus |
 | --- | --- |
@@ -119,7 +119,7 @@ Update README, roadmap, architecture/API/data/source/limitation and AI/responsib
 
 ## Acceptance and testing matrix
 
-All tests below are **required future checks, not passing M7 results**. Existing test names/oracles stay. Real-source smoke verification is a separately recorded network exercise; normal suites use deterministic fixtures/mocks and must pass offline without a provider key.
+The matrix below is the original **acceptance plan**. Actual 7.1/7.2/7.3 results are recorded in their implementation reports; unrun 7.4 gates remain future checks. Existing test names/oracles stay. Real-source smoke verification is a separately recorded network exercise; normal suites use deterministic fixtures/mocks and must pass offline without a provider key.
 
 | ID / stage | Test / concrete expected result |
 | --- | --- |
@@ -133,7 +133,7 @@ All tests below are **required future checks, not passing M7 results**. Existing
 | U1 / 7.2 map | Actual source street alignments/names and verified shoreline match frozen source sample. Local worker/labels/attribution function with external requests blocked. Official/synthetic context is unmistakable, no synthetic project/condition/rate leaks. Map occupies specified desktop space; one inspector only. |
 | U2 / 7.2 failure | API timeout, partial optional source, broad bbox, empty viewport, glyph/context failure and WebGL loss retain usable named list/retry/source status. Abort old request on route/snapshot/filter change; late old result cannot replace current selection. |
 | U3 / 7.3 navigation | Four distinct deep links; Back/Forward/refresh restore mode/snapshot/selection/filter/camera. Dashboard loads no WebGL and no domain mutation; Projects includes unlocated; route/map load writes no analysis/audit. Unsaved synthetic draft survives ordinary navigation; context-switch choices preserve or deliberately discard, pending write reconciled, stale revision shows conflict with input retained. |
-| U4 / 7.3 preserved planning | Existing synthetic map→road/history→preview→save/retrieve estimate→explicit conflict review→draft/evaluate/history→2–3 comparison→sources/advisor/fallback/review works with same authoritative values/hashes. Old DBs/IDs remain usable and no synthetic plan becomes an official one. Guide actions remain existing synthetic navigation only. |
+| U4 / 7.3 preserved planning | Existing synthetic map→road/history→preview→save/retrieve estimate→explicit conflict review→draft/evaluate/history→2–3 comparison→sources/advisor/fallback/review works with same authoritative values/hashes. Old DBs/IDs remain usable and no synthetic plan becomes an official one. The old guide is removed by M7.2; existing tools remain directly navigable. |
 | A1 / 7.4 access | Keyboard-only four views, list selection, layers, inspector close/focus return, tables, forms, disclosure/advisor/review. Screen-reader smoke with named tool/version; focus/contrast/non-color status; 200% zoom and reduced motion; 390×844, 768×1024, 1280×720, 1440×900 without page-level horizontal overflow. No certification claim. |
 | I1 / 7.4 integration | Full offline suites/typecheck/build plus actual dev and production browser workflows against isolated migrated/imported copies; old estimates/analyses/evaluations replay from frozen inputs with original result hashes/runtime; all prior table contents/fixtures preserved; AI key absent/provider mocks/failure/injection boundaries retain safeguards. No raw permit narrative/contact/geometry enters AI. |
 | P1 / 7.4 performance | Measure warm/cold map-ready (street labels + selectable record + attribution) target ≤3s, viewport/summary reads target p95 ≤500ms warm loopback, on recorded hardware/browser/record counts. Record ≥20 read samples and 5 cold starts; report failures, not tuned-away limits. Inspect 2,000-feature viewport, long lists and lazy bundles; no citywide/mobile guarantee. |
@@ -208,4 +208,4 @@ Final document checks: local Markdown link targets resolve; git diff --check pas
 | App/map/routing/municipal service/presentation/page tests; `test-municipal.ts` | Route-aware retained regression assertions plus authored source-shaped unit fixtures; no real downloaded extract shipped in tests |
 | README, AGENTS, shared design/product/architecture/API/source/limitation docs, this plan, `M7_2_IMPLEMENTATION.md`, `.env.example` | Concrete current behavior/configuration, actual results, explicit remaining work |
 
-No backend/schema/domain-engine/dependency/fixture change belongs to 7.2. Basic four-view routing/browsing is brought forward only to remove the original crowded main screen while preserving access to tools. Rich dashboard grouping, permit status/location filters, additional record/camera/filter deep links and full navigation/accessibility acceptance remain 7.3–7.4. System-font label rendering replaces packaged glyph assets; native disclosures replace inspector tabs; retained mounted editors replace a global draft reducer/Save-Discard dialog. V1 transport stays unchanged to reduce regression risk. Each decision is reflected in ARCHITECTURE and M7_DESIGN_SYSTEM.
+No backend/schema/domain-engine/dependency/fixture change belongs to 7.2. Basic four-view routing/browsing is brought forward only to remove the original crowded main screen while preserving access to tools. M7.3 now delivers richer dashboard grouping, permit status/location filters and record/camera/filter links as documented in M7_3_IMPLEMENTATION; comprehensive accessibility remains 7.4. System-font label rendering replaces packaged glyph assets; native disclosures replace inspector tabs; retained mounted editors replace a global draft reducer/Save-Discard dialog. V1 transport stays unchanged to reduce regression risk. Each decision is reflected in ARCHITECTURE and M7_DESIGN_SYSTEM.

@@ -19,7 +19,7 @@ beforeEach(() => {
   vi.mocked(getEvidence).mockResolvedValue({ data: manifest.evidence_source as never, meta: collection.meta });
 });
 async function openList(user: ReturnType<typeof userEvent.setup>) { await user.click(await screen.findByRole('button', { name: 'Open street list' })); return screen.getByRole('region', { name: 'Keyboard accessible road list' }); }
-async function nav(user: ReturnType<typeof userEvent.setup>, name: string) { await user.click(screen.getByRole('link', { name })); }
+async function nav(user: ReturnType<typeof userEvent.setup>, name: string) { await user.click(screen.getByRole('link', { name: ({Map:'Infrastructure map',Dashboard:'Overview',Projects:'Projects & coordination',Scenarios:'Scenario planner'} as Record<string,string>)[name] || name })); }
 describe('map-first workspace', () => {
   it('opens on the map with concise synthetic disclosure and focused navigation', async () => {
     render(<App/>); await screen.findByRole('button', { name: 'Select map segment' });

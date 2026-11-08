@@ -113,11 +113,19 @@ class MunicipalRepository:
             'counts':totals,'capabilities':manifest['capabilities'],
             'observation_date_range':[min(dates),max(dates)] if dates else None,
             'latest_retrieved_at':max(r['retrieved_at'] for r in revisions),
-            'method_version':'municipal-summary-1',
+            'method_version':'municipal-summary-2',
+            'permit_status_counts':[{'status':status,'count':sum(r['values'].get('permit_status')==status for r in records['permit'])} for status in sorted({r['values'].get('permit_status') for r in records['permit']},key=lambda value: value or '')],
+            'permit_issue_date_range':self.date_range([r['values'].get('issued_at') for r in records['permit']]),
+            'source_freshness':[{key:r[key] for key in ['id','source_id','retrieved_at','source_updated_at','cadence','release_note']} for r in revisions],
             'classification':'derived_calculation','source_revision_ids':manifest['source_revision_ids'],
             'dated_road_coverage':{'value':len({m['target_road_id'] for m in matches.values() if m['source_kind']=='condition' and m['status']=='matched' and m['source_record_id'] in usable}),
                 'denominator':len(records['road']),'classification':'derived_calculation'},
             'limitations':manifest['warnings']}
+
+    @staticmethod
+    def date_range(values):
+        known=[v for v in values if v is not None]
+        return [min(known),max(known)] if known else None
 
 
 def paginate(values,limit,cursor,binding,key=lambda r:r['id']):
