@@ -31,10 +31,10 @@ export async function getMunicipalPage(kind: 'road-segments' | 'conditions' | 'p
   if (!Array.isArray(result.data) || result.data.some(r => !r.id || !r.source_revision_id || r.contains_synthetic || r.classification === 'synthetic_fixture' || r.contract_version !== 'municipal-record-v2' || r.kind !== (kind === 'road-segments' ? 'road' : kind === 'conditions' ? 'condition' : 'permit'))) throw new Error('Unsupported official records. Synthetic records cannot enter this workspace.');
   return result;
 }
-export async function getMunicipalViewport(kind: 'roads' | 'conditions' | 'permits', snapshot: string, bbox: Bbox, signal?: AbortSignal): Promise<MunicipalRecord[]> {
+export async function getMunicipalViewport(kind: 'roads' | 'conditions' | 'permits', snapshot: string, bbox: Bbox, signal?: AbortSignal, filters: Record<string,string> = {}): Promise<MunicipalRecord[]> {
   const records: MunicipalRecord[] = []; const seen = new Set<string>(); let cursor: string | undefined;
   do {
-    const result = await getMunicipalPage(kind === 'roads' ? 'road-segments' : kind, snapshot, { bbox: bbox.join(','), cursor }, signal);
+    const result = await getMunicipalPage(kind === 'roads' ? 'road-segments' : kind, snapshot, { ...filters, bbox: bbox.join(','), cursor }, signal);
     records.push(...result.data); cursor = result.meta.next_cursor || undefined;
     if ((result.meta.total_matching ?? 0) > 2000 || records.length > 2000) throw new APIError('Zoom in to load this layer. More than 2,000 records intersect the viewport.', 'VIEWPORT_TOO_BROAD', 422);
     if (cursor && seen.has(cursor)) throw new Error('Repeated viewport cursor.');
@@ -68,4 +68,11 @@ export async function getSource(snapshot: string, id: string, signal?: AbortSign
 }
 export async function getDashboard(snapshot: string, signal?: AbortSignal) {
   const result = await readMunicipal<MunicipalEnvelope<Dashboard>>(`/dashboard?${query({ snapshot_id: snapshot })}`, signal); verifyMeta(result.meta, snapshot); return result.data;
+}
+
+export async function getMunicipalPermit(snapshot: string, id: string, signal?: AbortSignal) {
+  const result = await readMunicipal<MunicipalEnvelope<MunicipalRecord>>(`/permits/${encodeURIComponent(id)}?${query({ snapshot_id: snapshot })}`, signal); verifyMeta(result.meta, snapshot);
+  if (result.data.contains_synthetic) throw new Error('Synthetic records cannot enter the official workspace.');
+  if (result.data.id !== id || result.data.kind !== 'permit' || result.data.contract_version !== 'municipal-record-v2') throw new Error('Permit identity differs from selection.');
+  return result.data;
 }

@@ -91,7 +91,7 @@ export const getScenario = (id: string, signal?: AbortSignal) => request<Envelop
 export const createScenario = (body: ScenarioDraft, signal?: AbortSignal) => request<Envelope<Scenario>>('/scenarios', signal, body);
 export const updateScenario = (id: string, expected_revision: number, draft: ScenarioDraft, signal?: AbortSignal) => request<Envelope<Scenario>>(`/scenarios/${encodeURIComponent(id)}`, signal, { expected_revision, draft }, 'PATCH');
 export const evaluateScenario = (id: string, expected_revision: number, signal?: AbortSignal) => request<Envelope<ScenarioEvaluation>>(`/scenarios/${encodeURIComponent(id)}/evaluate`, signal, { expected_revision });
-export const getScenarioEvaluations = (id: string, signal?: AbortSignal) => request<Envelope<ScenarioEvaluation[]>>(`/scenarios/${encodeURIComponent(id)}/evaluations`, signal);
+export const getScenarioEvaluations = (id: string, signal?: AbortSignal, offset = 0) => request<Envelope<ScenarioEvaluation[]>>(`/scenarios/${encodeURIComponent(id)}/evaluations?limit=30&offset=${offset}`, signal);
 export const getScenarioEvaluation = (id: string, signal?: AbortSignal) => request<Envelope<ScenarioEvaluation>>(`/scenario-evaluations/${encodeURIComponent(id)}`, signal);
 export const compareScenarios = (evaluation_ids: string[], signal?: AbortSignal) => request<Envelope<ScenarioComparison>>('/scenario-comparisons', signal, { evaluation_ids });
 export const getRepairCatalog = (signal?: AbortSignal) => request<Envelope<import('../types/api').RepairOption[]>>('/repair-options', signal);

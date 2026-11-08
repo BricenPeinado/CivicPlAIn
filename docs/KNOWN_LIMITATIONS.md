@@ -4,7 +4,7 @@ Reviewed for M6 on 2026-11-07. No critical or high-severity application crash wa
 
 ## M7.1 official-data integration limits
 
-M7.1 backend ingestion/read API and explicit migration are implemented and tested; M7.2 now implements the map shell and official inspection; 7.3–7.4 retain richer navigation and broader verification. See [M7.1 sources, tests and evidence](M7_1_IMPLEMENTATION.md). Historical M6 limitations below apply to the retained synthetic workspace.
+M7.1 backend ingestion/read API and explicit migration are implemented and tested; M7.2 implements the map shell and official inspection; M7.3 implements purposeful views/navigation. M7.4 retains comprehensive polish/accessibility verification. See [M7.3 evidence](M7_3_IMPLEMENTATION.md). See [M7.1 sources, tests and evidence](M7_1_IMPLEMENTATION.md). Historical M6 limitations below apply to the retained synthetic workspace.
 
 | Boundary | Current limitation |
 | --- | --- |
@@ -13,7 +13,7 @@ M7.1 backend ingestion/read API and explicit migration are implemented and teste
 | Rating categories | Decimal ratings and official inspection datetimes are present, but current dictionary category ranges leave decimal gaps and a local-street exception unsupported by available class fields. Categories remain unknown; zero classified poor/good/fair roads does not mean zero poor/good/fair streets. |
 | Source/version freshness | LION ArcGIS edit marker is not asserted equal to ZIP catalog release 26c. Mutable APIs lack transactional export guarantees; count/update checks detect observed changes, not all possible concurrent changes. Archived checksums freeze this import; no automatic/live refresh or accuracy guarantee. |
 | Terms and distribution | Catalog licenseId is null; no CC/public-domain inference. Portal terms/dictionaries are hashed, city/DOT pages were browser-reviewed but automated download returned 403. M7.2 displays the mandatory NYC DOT application disclaimer in Sources & terms and links source-specific terms in provenance. Extracts remain ignored/local; no blanket redistribution/deployment clearance. |
-| Interface | M7.2 reads pinned v2 official snapshots, with independent overlays, source labels, inspector and keyboard fallback. The initial snapshot has no accepted condition/permit road links; overlays never invent them. Basic four-view relocation is implemented; complete 7.3 navigation/filter acceptance and 7.4 accessibility/cross-browser certification remain open. |
+| Interface | M7.2 reads pinned v2 official snapshots, with independent overlays, source labels, inspector and keyboard fallback. The initial snapshot has no accepted condition/permit road links; overlays never invent them. M7.3 adds overview coverage/activity/freshness, permit filters/details, context/camera/layer/record links and focused preserved scenario tools. M7.4 accessibility/cross-browser certification remains open. |
 | Scope/performance | 10,000-road/20,000-permit pilot limits; 2,000-feature viewport cap, explicit refinement error. Full pilot may exceed viewport cap. Some bounded read filters/summaries materialize records in Python; this is not a citywide/tile/query platform. No citywide benchmark. |
 | Storage/recovery | Explicit schema-7 migration preserves rows and verifies a private SQLite backup including committed WAL. Writers must be quiesced. Busy/injected failure/backup comparisons are tested; real disk exhaustion/power interruption and production disaster recovery are unrun. Local files/hashes are not tamper-proof or encrypted. Current import_runs stores successful publication audits; failed/acquired reports remain local disk evidence. |
 | Engineering/AI | Real costing, actual schedules, traffic/budget, conflict/scenario/AI execution unavailable. No synthetic assumptions/rates fill official gaps. Utilities/location/depth/coverage and excavation safety remain unknown. |
@@ -23,10 +23,18 @@ M7.1 backend ingestion/read API and explicit migration are implemented and teste
 - Basemap tiles are optional OSM standard interactive tiles, best-effort/no SLA. Browser cache and visible attribution are retained; no bulk/prefetch/offline tile download. Automated browser checks used `VITE_BASEMAP=local`; actual hosted-tile availability was not certified. Local API geometry/source-name labels/shoreline remain available. This is not an offline tile package.
 - The 2,000-record viewport guard applies to each layer. Full pilot or historical inspection views can exceed it; zoom/refine rather than silently truncating. The client currently paginates full record payloads; large views can require many local API reads. No citywide latency guarantee or spatial-server rewrite.
 - All imported inspection dates are overlaid together. Overlapping lines do not show a time trend, a current rating or an accepted road link. Initial permits are unlocated and therefore have no map markers. An accepted road reference is not a work footprint.
-- Only view, mode, snapshot and road selection are URL state in 7.2. Camera/search/layer filters and selected permit/scenario/evaluation links remain 7.3 work. Official Map remounts when leaving it; the selected road restores focus on return. Native beforeunload warnings depend on browser support/user interaction; drafts are in-memory, not recovery storage.
+- M7.3 extends URL state to official bounds/layers/search, permit filters and record/analysis/scenario/evaluation links. Official Map remounts on leaving it and restores the saved geographic extent (floating-point/aspect-ratio adjustments can occur). Synthetic camera/project-layer visibility and transient observation/list/disclosure/comparison state remain in memory rather than deep links. Native beforeunload warnings depend on browser support/user interaction; drafts are in-memory, not crash recovery storage. No auto-save or navigation-triggered calculation.
 - Browser checks cover the host's Chromium/WebGL at 320/390/768/1280 widths, source/inspection selection and navigation. Unit tests simulate source/tile/WebGL failure. Full cross-browser/screen-reader/contrast/200% zoom and sustained-performance certification remain 7.4. Large MapLibre bundle advisory remains; no new dependency was added.
 
-## Implemented M6 limitations
+## M7.3 navigation and workflow limits
+
+- Summary v2 status counts describe exact source strings, not active work. Source cadence/retrieval is not a freshness guarantee; categories/accepted road links remain unsupported in the initial import. Official conflict/scenario/AI execution remains unavailable.
+- Scenario list still uses the existing bounded v1 list contract. Evaluation history now loads on demand and supports older pages; comparisons select 2–3 loaded latest evaluations. Older evaluations can be inspected individually, but arbitrary older-version comparison selection is not added.
+- Editors/pending requests are retained for the current app lifetime only; another tab has independent state. Unknown linked IDs and stale snapshot responses are errors, not new calculations. Full URL length can grow with retained cross-view IDs; no URL shortener or persistent workspace service is introduced.
+- Actual browser checks covered local Chromium/WebGL desktop 1280×720 and mobile 390×844. Date fill through browser automation did not reliably commit React date changes; explicit new-draft creation/evaluation is covered by integration tests, while actual-browser revision saving used a preexisting plan with supplied dates. No new-draft browser success is claimed.
+- Build still reports the MapLibre chunk advisory; backend tests retain Starlette/httpx and Shapely deprecation warnings. No dependency upgrade was made. Wider browser/screen-reader/contrast/zoom/performance verification is M7.4.
+
+## Historical M6 limitations (synthetic workspace; M7 changes above supersede interface/history details)
 
 | Priority / scope | Limitation and practical effect |
 | --- | --- |
@@ -46,3 +54,5 @@ M7.1 backend ingestion/read API and explicit migration are implemented and teste
 | Low, setup scope | Initial registry access is needed for pinned dependencies. Tests verified macOS 14.5 arm64, Python 3.12.5 and Node 24.5.0; other operating systems were not tested. The startup helper uses POSIX process groups. It creates a fresh retained DB per run rather than deleting/resetting existing data. |
 
 There is no remaining M6 feature backlog required for the local judging workflow. Production readiness and any post-hackathon capabilities require separately scoped work. Do not infer a production release from completion of the hackathon acceptance checklist.
+
+M7.4 polish/verification is in progress; see [current QA evidence and open gates](M7_FINAL_QA.md). Completion is not claimed.

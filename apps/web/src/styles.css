@@ -1,5 +1,6 @@
 @import "./styles/tokens.css";
 @import "./styles/map.css";
+@import "./styles/views.css";
 
 .repair-planner { margin: 24px 0; }
 .repair-workspace { margin-top: 18px; padding: 24px; border: 1px solid #dbe3e5; border-radius: 12px; background: #fff; }

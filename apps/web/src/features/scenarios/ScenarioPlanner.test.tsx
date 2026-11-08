@@ -7,20 +7,8 @@ import { ScenarioResults, ScenarioComparisonView } from './ScenarioResults';
 import * as api from '../../services/api';
 import type { RepairOption, RoadsCollection } from '../../types/api';
 import type { Scenario, ScenarioEvaluation, ScenarioDraft, ScenarioComparison } from '../../types/scenarios';
-vi.mock('../../services/api',()=>({ getScenarios:vi.fn(), getRepairCatalog:vi.fn(),getScenarioEvaluations:vi.fn(),createScenario:vi.fn(),updateScenario:vi.fn(),evaluateScenario:vi.fn(),compareScenarios:vi.fn() }));
-const fixtures=JSON.parse(readFileSync('../../data/demo/scenarios.json','utf8'));
-const catalog=JSON.parse(readFileSync('../../data/demo/maintenance.json','utf8')).repair_options as RepairOption[];
-const roads=JSON.parse(readFileSync('../../data/demo/roads.geojson','utf8')) as RoadsCollection;
-roads.meta={request_id:'test',dataset_snapshot_id:'demo-m1-v1',warnings:[],next_cursor:null};
-const meta=roads.meta;
-function scenario(index=0):Scenario {
-  const d={...fixtures[index].draft,contract_version:'scenario-v1',currency:'USD',cost_scope:'roadwork_only',mobilization_groups:[],planning_objective:'Compare alternatives',status:'draft'} as ScenarioDraft;
-  return {...d,actions:d.actions.map(a=>({...a,constraints:{must_follow_action_ids:[],human_review_required:true}})),id:`scenario-${index}`,revision:1,revision_hash:'revision',created_at:'2026-11-07T12:00:00Z',updated_at:'2026-11-07T12:00:00Z',method_version:'scenario-v1',data_kind:'derived',synthetic_input:true,hypothetical:true};
-}
-function evaluation(index=0):ScenarioEvaluation {
-  const s=scenario(index);
-  return {id:`evaluation-${index}`,scenario_id:s.id,scenario_revision:1,scenario_revision_hash:'revision',evaluated_at:s.created_at,baseline_source_hash:'baseline',input_snapshot:{scenario:s,context:{sources:[]}},input_hash:'input',result_hash:'result',method_version:'scenario-evaluation-v1',analysis_versions:{cost:'scenario-cost-v1'},action_costs:[],known_subtotal_usd:{low:'44760.00',base:'53400.00',high:'66360.00'},cost_total_usd:{low:'44760.00',base:'53400.00',high:'66360.00'},budget_usd:'60000.00',budget_headroom_usd:{low:'15240.00',base:'6600.00',high:'-6360.00'},budget_status:'within_budget',upper_bound_within_budget:false,preliminary_days_sum:5,elapsed_days:7,scheduled_road_workdays:7,lane_closure_days:7,overlapping_closure_pairs:0,affected_road_ids:['demo-r-001'],action_lifespan_years:{'road-repair':null},conflict_screen:{analysis:null,finding_contexts:{},adapter_version:'adapter',not_run_reason:'Scope not run',project_origins:{},original_projects:[],overrides:[],assumption_sources:[],input_hash:'ci',result_hash:'cr'},indeterminate_checks:['Unknown utility coverage'],warnings:['SYNTHETIC HYPOTHETICAL planning estimate; human review required.'],utility_coverage:'unknown',review_required:true,hypothetical:true,synthetic_input:true};
-}
+vi.mock('../../services/api',()=>({ getScenarios:vi.fn(), getRepairCatalog:vi.fn(),getScenarioEvaluations:vi.fn(),getScenarioEvaluation:vi.fn(),createScenario:vi.fn(),updateScenario:vi.fn(),evaluateScenario:vi.fn(),compareScenarios:vi.fn() }));
+import { scenario, evaluation, roads, catalog, meta } from './testData';
 beforeEach(()=>{
   vi.mocked(api.getScenarios).mockResolvedValue({data:[],meta});
   vi.mocked(api.getRepairCatalog).mockResolvedValue({data:catalog,meta});
@@ -87,10 +75,11 @@ it('edits with revision protection and retains saved evaluation history',async()
   vi.mocked(api.getScenarios).mockResolvedValue({data:[scenario()],meta});
   vi.mocked(api.getScenarioEvaluations).mockResolvedValue({data:[evaluation()],meta});
   const user=userEvent.setup();show();await user.click(await screen.findByRole('button',{name:/Edit A/}));
-  expect(screen.getByLabelText('Saved evaluation history')).toHaveValue('evaluation-0');
+  expect(await screen.findByLabelText('Saved evaluation history')).toHaveValue('evaluation-0');
   await user.clear(screen.getByLabelText('Name'));await user.type(screen.getByLabelText('Name'),'Revised plan');
   await user.click(screen.getByRole('button',{name:'Save draft'}));
   expect(api.updateScenario).toHaveBeenCalledWith('scenario-0',1,expect.objectContaining({name:'Revised plan'}),expect.any(AbortSignal));
+  await user.click(screen.getByRole('button',{name:'Review saved evaluation'}));
   expect(screen.getByRole('region',{name:'Scenario evaluation'})).toHaveTextContent('REVISION 1');
 });
 it('surfaces backend validation and stale revision failures',async()=>{
@@ -104,7 +93,7 @@ it('compares two saved evaluation snapshots with transparent tradeoffs',async()=
   vi.mocked(api.getScenarioEvaluations).mockImplementation(async id=>({data:[evaluation(id==='scenario-0'?0:1)],meta}));
   const c:ScenarioComparison={id:'comparison',evaluation_ids:['evaluation-0','evaluation-1'],common_basis:{currency:'USD'},rows:[],deltas:[],dominance:[],tradeoffs:['No dominance established. Review tradeoffs.'],warnings:['Human review required'],input_hash:'c',method_version:'comparison'};
   vi.mocked(api.compareScenarios).mockResolvedValue({data:c,meta});
-  const user=userEvent.setup();show();await user.click(await screen.findByLabelText(/Compare A/));await user.click(screen.getByLabelText(/Compare B/));await user.click(screen.getByRole('button',{name:'Compare selected (2/3)'}));
+  const user=userEvent.setup();show();await user.click(await screen.findByRole('button',{name:/Load evaluations for A/})); await user.click(screen.getByRole('button',{name:/Load evaluations for B/})); await user.click(await screen.findByLabelText(/Compare A/));await user.click(screen.getByLabelText(/Compare B/));await user.click(screen.getByRole('button',{name:'Compare selected (2/3)'}));
   expect(await screen.findByRole('region',{name:'Scenario comparison'})).toHaveTextContent('No dominance established');
   expect(api.compareScenarios).toHaveBeenCalledWith(['evaluation-0','evaluation-1'],expect.any(AbortSignal));
 });
@@ -121,4 +110,38 @@ it('renders comparison columns including unknown cost, conflict types and assump
   const row={evaluation_id:e.id,scenario_id:e.scenario_id,name:'Plan A',revision:1,cost_total_usd:null,known_subtotal_usd:e.known_subtotal_usd,budget_usd:e.budget_usd,budget_headroom_usd:null,budget_status:'indeterminate',upper_bound_within_budget:null,preliminary_days_sum:null,elapsed_days:null,scheduled_completion:null,lane_closure_days:null,scheduled_road_workdays:null,conflict_count:1,conflict_types:{reopening_risk:1},incomplete_checks:2,affected_road_ids:e.affected_road_ids,priced_actions:0,total_actions:1,assumptions:e.input_snapshot.scenario.assumptions,action_lifespan_years:e.action_lifespan_years};
   render(<ScenarioComparisonView comparison={{id:'c',evaluation_ids:[e.id],common_basis:{},rows:[row],deltas:[],dominance:[],tradeoffs:['Cost unavailable'],warnings:['SYNTHETIC'],input_hash:'c',method_version:'comparison'}}/>);
   expect(screen.getByRole('table')).toHaveTextContent('0 / 1 actions priced');expect(screen.getByRole('table')).toHaveTextContent('reopening risk: 1');
+});
+it('loads history on deliberate action and protects an unsaved editor from replacement',async()=>{
+  vi.mocked(api.getScenarios).mockResolvedValue({data:[scenario(),scenario(1)],meta});
+  const user=userEvent.setup();show();await newPlan(user);expect(api.getScenarioEvaluations).not.toHaveBeenCalled();
+  await user.click(screen.getByRole('button',{name:'Create scenario'})); expect(screen.getByRole('alert')).toHaveTextContent('Keep your unsaved scenario?');
+  await user.click(screen.getByRole('button',{name:'Keep editing'})); expect(screen.getByLabelText('Name')).toHaveValue('Hypothetical road plan');
+  await user.click(screen.getByRole('button',{name:'Create scenario'})); await user.click(screen.getByRole('button',{name:'Discard editor changes and continue'})); expect(screen.getByLabelText('Name')).toHaveValue(''); expect(api.createScenario).not.toHaveBeenCalled();
+});
+it('loads an explicit saved evaluation link without evaluating or changing the draft',async()=>{
+  vi.mocked(api.getScenarios).mockResolvedValue({data:[scenario()],meta}); vi.mocked(api.getScenarioEvaluations).mockResolvedValue({data:[evaluation()],meta}); vi.mocked(api.getScenarioEvaluation).mockResolvedValue({data:evaluation(),meta});
+  render(<ScenarioPlanner roads={roads} selectedRoad={null} projects={[]} scenarioId="scenario-0" evaluationId="evaluation-0"/>);
+  expect(await screen.findByRole('region',{name:'Scenario evaluation'})).toHaveTextContent('$53,400.00'); expect(api.evaluateScenario).not.toHaveBeenCalled(); expect(api.updateScenario).not.toHaveBeenCalled();
+});
+it('rejects a saved evaluation for a different scenario while retaining the editor',async()=>{
+  vi.mocked(api.getScenarios).mockResolvedValue({data:[scenario()],meta});vi.mocked(api.getScenarioEvaluations).mockResolvedValue({data:[],meta});vi.mocked(api.getScenarioEvaluation).mockResolvedValue({data:evaluation(1),meta});
+  render(<ScenarioPlanner roads={roads} selectedRoad={null} projects={[]} scenarioId="scenario-0" evaluationId="evaluation-1"/>);
+  expect(await screen.findByRole('alert')).toHaveTextContent('Linked evaluation differs from the scenario/source context.');expect(screen.queryByRole('region',{name:'Scenario evaluation'})).not.toBeInTheDocument();expect(screen.getByLabelText('Name')).toHaveValue(scenario().name);expect(api.evaluateScenario).not.toHaveBeenCalled();
+});
+it('pages older immutable evaluations on demand without replacing the draft',async()=>{
+  vi.mocked(api.getScenarios).mockResolvedValue({data:[scenario()],meta}); vi.mocked(api.getScenarioEvaluations).mockResolvedValueOnce({data:[evaluation()],meta:{...meta,next_cursor:'30'}}).mockResolvedValueOnce({data:[{...evaluation(),id:'older',scenario_revision:0}],meta});
+  const user=userEvent.setup();show();await user.click(await screen.findByRole('button',{name:/Edit A/})); await user.click(await screen.findByRole('button',{name:'Load older evaluations'}));
+  expect(await screen.findByRole('option',{name:/Revision 0/})).toBeInTheDocument(); expect(api.getScenarioEvaluations).toHaveBeenLastCalledWith('scenario-0',expect.any(AbortSignal),30); expect(screen.getByLabelText('Name')).toHaveValue(scenario().name);
+});
+it('defers a different saved-plan link until the unsaved editor is explicitly replaced',async()=>{
+  vi.mocked(api.getScenarios).mockResolvedValue({data:[scenario(),scenario(1)],meta});
+  vi.mocked(api.getScenarioEvaluations).mockResolvedValue({data:[],meta});
+  vi.mocked(api.getScenarioEvaluation).mockResolvedValue({data:evaluation(1),meta});
+  const user=userEvent.setup();const props={roads,selectedRoad:null,projects:[]};const view=render(<ScenarioPlanner {...props} scenarioId="scenario-0"/>);
+  await user.type(await screen.findByLabelText('Name'),' unsaved');
+  view.rerender(<ScenarioPlanner {...props} scenarioId="scenario-1" evaluationId="evaluation-1"/>);
+  expect(await screen.findByRole('alert')).toHaveTextContent('Keep your unsaved scenario?');expect(api.getScenarioEvaluation).not.toHaveBeenCalled();
+  expect(screen.getByLabelText('Name')).toHaveValue(scenario().name+' unsaved');
+  await user.click(screen.getByRole('button',{name:'Discard editor changes and continue'}));
+  expect(await screen.findByRole('region',{name:'Scenario evaluation'})).toHaveTextContent('REVISION 1');expect(api.getScenarioEvaluation).toHaveBeenCalledWith('evaluation-1',expect.any(AbortSignal));expect(api.updateScenario).not.toHaveBeenCalled();
 });

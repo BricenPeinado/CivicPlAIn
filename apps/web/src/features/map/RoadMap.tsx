@@ -13,14 +13,14 @@ maplibregl.setWorkerUrl(workerUrl);
 export { colors } from './colors';
 interface Props {
   roads?: RoadsCollection; features?: FeatureCollection; observations?: FeatureCollection; permits?: FeatureCollection; shoreline?: FeatureCollection;
-  selectedGeometry?: FeatureCollection; focusBounds?: Bbox | null; official?: boolean; layers?: LayerState;
+  selectedGeometry?: FeatureCollection; focusPadding?: number; focusBounds?: Bbox | null; official?: boolean; layers?: LayerState;
   selectedId: string | null; onSelect: (id: string) => void; onViewport?: (bbox: Bbox) => void;
   onObservation?: (id: string) => void; onPermit?: (id: string) => void;
   projects?: WorkProject[]; highlightedProjects?: string[]; highlightedRoads?: string[];
   onSelectProject?: (id: string) => void; showProjects?: boolean; visibleCategories?: InfrastructureCategory[];
 }
 const EMPTY: never[] = [];
-export function RoadMap({ roads, features, observations, permits, shoreline, selectedGeometry, focusBounds, official = false, layers,
+export function RoadMap({ roads, features, observations, permits, shoreline, selectedGeometry, focusBounds, focusPadding = 55, official = false, layers,
   selectedId, onSelect, onViewport, onObservation, onPermit, projects = EMPTY, highlightedProjects = EMPTY, highlightedRoads = EMPTY,
   onSelectProject, showProjects = true, visibleCategories = EMPTY }: Props) {
   const container = useRef<HTMLDivElement>(null), map = useRef<MapInstance | null>(null);
@@ -122,7 +122,7 @@ export function RoadMap({ roads, features, observations, permits, shoreline, sel
     map.current.setFilter('project-selected', ['in', ['get', 'project_id'], ['literal', highlightedProjects]]);
     map.current.setFilter('road-conflict', ['in', ['get', 'road_id'], ['literal', highlightedRoads]]);
   }, [highlightedProjects, highlightedRoads, ready]);
-  useEffect(() => { if (ready && focusBounds) map.current?.fitBounds(focusBounds, { padding: 55, maxZoom: 18, duration: 0 }); }, [ready, focusBounds]);
+  useEffect(() => { if (ready && focusBounds) map.current?.fitBounds(focusBounds, { padding: focusPadding, maxZoom: focusPadding === 0 ? 20 : 18, duration: 0 }); }, [ready, focusBounds, focusPadding]);
   return <section className="map-stage" aria-label={official ? 'Interactive Lower Manhattan map' : 'Interactive synthetic infrastructure map'}>
     <div ref={container} className="map-canvas" />
     {failure ? <div className="map-message" role="alert"><strong>Map rendering unavailable</strong><p>Search and the street list still provide access to records.</p><button onClick={() => setRetry(v => v + 1)}>Retry map</button></div> : !ready && <div className="map-message" role="status">Preparing map…</div>}
