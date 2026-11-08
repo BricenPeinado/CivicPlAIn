@@ -310,3 +310,9 @@ M8.6 integrates supported official planning results without activating sources, 
 
 
 M8.7 release verification: **BLOCKED — Milestone 8 is not complete**. Current regressions pass; runtime mismatch, source/review gates and incomplete release checks remain. See [final QA](docs/M8_FINAL_QA.md).
+
+## Supplied standardized NYC Map lookup
+
+The primary selected-street inspector now reads the supplied standardized artifact separately from the official/planning database. **White Street: indicative Fair, 4.91/10, 53 observations, 33 on-street permits.** These are named-street evidence, not verified segment condition or actual construction schedules. Existing verification and planning tools remain available through disclosures.
+
+Use the matched local startup commands in [STANDARDIZED_INTEGRATION](docs/STANDARDIZED_INTEGRATION.md). The artifact defaults to `data/processed/CivicPlAIn_standardized.sqlite3`; override with backend `CIVICPLAIN_STANDARDIZED_DATABASE_PATH`. It must match official snapshot `nyc-4620b9e30c1c0bd5be4252fe27999c80`. No import/rebuild/migration is needed. Missing/incompatible artifacts or a different selected source snapshot produce explicit errors without synthetic substitution.

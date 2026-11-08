@@ -132,3 +132,7 @@ Map offers explicit official-context construction screening: choose administrati
 ## M8.6 owner-authorized product integration
 
 The latest M8.6 scope integrates existing M8.1–M8.5 contracts in the four M7 destinations, adds pinned saved planning context and evidence-grounded explanations, and retains the map as primary surface. Official Scenarios presents within-result treatment, policy and schedule alternatives only where the existing saved contract supports them. No new general municipal scenario CRUD/evaluation, cross-scope budget model or real-work source claim is introduced. This supersedes earlier planned stage numbering, without passing earlier positive source/review gates. Existing synthetic scenarios remain separate and intact. Acceptance evidence and deferred capabilities: [M8_6_IMPLEMENTATION](M8_6_IMPLEMENTATION.md).
+
+## Focused standardized NYC Map integration
+
+Owner-authorized 2026-11-08 scope: use the supplied derived standardized SQLite read model for **primary selected-street information** in official Map. Show indicative pavement rating/band/date/count, expandable observations, on-street permit count/details and then repair planning. Clearly label street-level evidence shared among LION segments and administrative permit dates. Keep whole-road condition verification and all existing planning systems independent. No full redesign, additional NYC fetch, database rebuild, new matching pipeline, automatic planning, deployment or broadened safety claim is included. [Integration evidence and startup](STANDARDIZED_INTEGRATION.md).

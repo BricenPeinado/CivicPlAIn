@@ -1,3 +1,4 @@
+vi.mock('./features/standardized/StreetEvidence',()=>({StreetEvidence:()=>null}));
 vi.mock('./features/decisions/DecisionContext',()=>({DecisionContext:()=>null}));
 import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -39,7 +40,7 @@ it('links whole-snapshot overview → filtered unlocated permit → unconfirmed 
   await screen.findByRole('heading',{name:'Infrastructure overview'}); await screen.findByText(/No supported category mapping/); expect(screen.queryByRole('region',{name:'Test map'})).not.toBeInTheDocument();
   await user.click(screen.getByRole('link',{name:'Inspect unlocated permits →'})); await screen.findByRole('heading',{name:'Projects & coordination'}); expect(screen.getByRole('combobox',{name:'Location evidence'})).toHaveValue('unlocated');
   await user.click(await screen.findByRole('button',{name:/Test Street.*TEST-P-001/})); const detail=screen.getByRole('complementary',{name:'Permit details'});await within(detail).findByRole('heading',{name:'TEST-P-001'});expect(detail).toHaveTextContent('Map location unavailable'); expect(screen.queryByRole('link',{name:'Inspect location on map →'})).not.toBeInTheDocument();
-  await user.click(within(detail).getByText('Unconfirmed spatial associations (1)')); await user.click(within(detail).getByRole('link',{name:`Investigate road ${road.id} →`})); await screen.findByRole('heading',{name:'Test Street'}); expect(window.location.hash).toContain(`road=${road.id}`); expect(screen.getByText('No accepted road assessment')).toBeVisible();
+  await user.click(within(detail).getByText('Unconfirmed spatial associations (1)')); await user.click(within(detail).getByRole('link',{name:`Investigate road ${road.id} →`})); await screen.findByRole('heading',{name:'Test Street'}); expect(window.location.hash).toContain(`road=${road.id}`); await user.click(screen.getByText('Verified segment evidence and engineering review')); expect(screen.getByText('No accepted road assessment')).toBeVisible();
   await nav(user,'Projects & coordination'); await within(screen.getByRole('complementary',{name:'Permit details'})).findByRole('heading',{name:'TEST-P-001'});expect(screen.getByRole('combobox',{name:'Location evidence'})).toHaveValue('unlocated');
   expect(api.analyzeConflicts).not.toHaveBeenCalled();expect(api.createScenario).not.toHaveBeenCalled();expect(api.explainContext).not.toHaveBeenCalled();
 });

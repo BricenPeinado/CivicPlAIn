@@ -10,6 +10,8 @@ ROOT = Path(__file__).resolve().parents[4]
 
 @dataclass(frozen=True)
 class Settings:
+    standardized_database_path: Path = field(default_factory=lambda: Path(os.getenv(
+        'CIVICPLAIN_STANDARDIZED_DATABASE_PATH') or str(ROOT / 'data/processed/CivicPlAIn_standardized.sqlite3')))
     database_path: Path = field(default_factory=lambda: Path(os.getenv(
         "CIVICPLAIN_DATABASE_PATH") or str(ROOT / "data/tmp/civicplain.sqlite3")))
     allowed_origins: tuple[str, ...] = field(default_factory=lambda: tuple(
