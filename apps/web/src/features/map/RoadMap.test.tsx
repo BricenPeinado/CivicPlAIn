@@ -149,3 +149,20 @@ it('allows clicking the rating line independently of official street visibility'
  const select=vi.fn();render(<RoadMap official selectedId={null} onSelect={select}/>);const map=state.maps[0];act(()=>map.handlers.get('load')());
  act(()=>map.handlers.get('click:rating-hit')({features:[{properties:{road_id:'road-standardized'}}]}));expect(select).toHaveBeenCalledWith('road-standardized');
 });
+
+it('routes drawing clicks as longitude/latitude, suppresses all feature selection and restores it on exit',()=>{
+ const drawing={points:[[-74.01,40.712]] as [number,number][],onPoint:vi.fn(),onUndo:vi.fn(),onCancel:vi.fn(),onFinish:vi.fn()},select=vi.fn(),permit=vi.fn(),observation=vi.fn(),project=vi.fn();
+ const props={official:true,selectedId:'selected-road',onSelect:select,onPermit:permit,onObservation:observation,onSelectProject:project};
+ const view=render(<RoadMap {...props} drawing={drawing}/>),map=state.maps[0];act(()=>map.handlers.get('load')());
+ for(const layer of ['road-hit','rating-hit','observations','permit-lines','permit-points','project-fill','project-lines'])act(()=>map.handlers.get(`click:${layer}`)({features:[{properties:{road_id:'r',record_id:'p',project_id:'w'}}]}));
+ expect(select).not.toHaveBeenCalled();expect(permit).not.toHaveBeenCalled();expect(observation).not.toHaveBeenCalled();expect(project).not.toHaveBeenCalled();
+ act(()=>map.handlers.get('click')({lngLat:{lng:-74.009,lat:40.713}}));expect(drawing.onPoint).toHaveBeenCalledWith([-74.009,40.713]);
+ act(()=>map.handlers.get('mousemove')({lngLat:{lng:-74.008,lat:40.713}}));expect(map.source.setData.mock.lastCall[0].features[0].geometry.coordinates).toEqual([[-74.01,40.712],[-74.008,40.713]]);
+ fireEvent.keyDown(map.canvas,{key:'Backspace'});fireEvent.keyDown(map.canvas,{key:'Enter'});fireEvent.keyDown(map.canvas,{key:'Escape'});expect(drawing.onUndo).toHaveBeenCalledOnce();expect(drawing.onFinish).toHaveBeenCalledOnce();expect(drawing.onCancel).toHaveBeenCalledOnce();
+ view.rerender(<RoadMap {...props} drawing={null}/>);expect(map.source.setData).toHaveBeenCalledWith({type:'FeatureCollection',features:[]});act(()=>map.handlers.get('click:road-hit')({features:[{properties:{road_id:'r'}}]}));expect(select).toHaveBeenCalledWith('r');
+ view.unmount();fireEvent.keyDown(map.canvas,{key:'Enter'});expect(drawing.onFinish).toHaveBeenCalledOnce();
+});
+
+it('starts a remounted map at its pinned camera instead of publishing a default viewport first',()=>{
+ const bounds:[number,number,number,number]=[-74.012,40.710,-74.005,40.715];render(<RoadMap official focusBounds={bounds} focusPadding={0} selectedId={null} onSelect={vi.fn()}/>);const map=state.maps[0];act(()=>map.handlers.get('load')());expect(map.fitBounds.mock.calls[0]).toEqual([bounds,{padding:0,duration:0}]);
+});

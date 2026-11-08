@@ -122,3 +122,9 @@ it('shows the rating legend, disables incompatible ratings, and keeps engineerin
  expect(screen.getByText(/Indicative ratings unavailable:/)).toHaveTextContent('STANDARDIZED_SNAPSHOT_MISMATCH');
  await user.click(screen.getByText('Verified segment evidence and engineering review'));await waitFor(()=>expect(getRoadConditions).toHaveBeenCalledOnce());
 });
+it('starts the visual planner from a selected road and isolates its draft on snapshot switch',async()=>{
+ const first={...snapshot,id:'nyc-'+'a'.repeat(32)},second={...snapshot,id:'nyc-'+'b'.repeat(32)},route=vi.fn();
+ const props={selected:road.id,onSelect:vi.fn(),onProjects:vi.fn(),onRoute:route};const view=render(<OfficialMapPage {...props} snapshot={first}/>);
+ fireEvent.click(await screen.findByRole('button',{name:'Plan construction'}));expect(await screen.findByLabelText('Work-zone drawing controls')).toBeVisible();expect(screen.getByLabelText('Work 1 roads')).toHaveValue(road.id);expect(route).toHaveBeenCalledWith({tool:'screening',screening:undefined,alternative:undefined,finding:undefined});
+ view.rerender(<OfficialMapPage {...props} selected={null} snapshot={second}/>);expect(screen.queryByLabelText('Work-zone drawing controls')).toBeNull();expect(screen.queryByLabelText('Work 1 title')).toBeNull();
+});

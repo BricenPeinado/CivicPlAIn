@@ -136,3 +136,7 @@ The latest M8.6 scope integrates existing M8.1–M8.5 contracts in the four M7 d
 ## Focused standardized NYC Map integration
 
 Owner-authorized 2026-11-08 scope: use the supplied derived standardized SQLite read model for **primary selected-street information** in official Map. Show indicative pavement rating/band/date/count, expandable observations, on-street permit count/details and then repair planning. Clearly label street-level evidence shared among LION segments and administrative permit dates. Keep whole-road condition verification and all existing planning systems independent. No full redesign, additional NYC fetch, database rebuild, new matching pipeline, automatic planning, deployment or broadened safety claim is included. [Integration evidence and startup](STANDARDIZED_INTEGRATION.md).
+
+## M10 interactive construction planning
+
+The owner-authorized M10 scope adds a map-first editor over existing official-screen-v1: draw up to two approximate hypothetical LineStrings, supply attributed proposed schedules and work declarations, explicitly analyze/save, compare up to two manually entered alternative schedules and request the existing grounded saved explanation. Advanced JSON and its original limits remain. Street IDs are references, never copied verified work footprints; permits never supply actual schedules. Findings relate supplied plans, and zero findings retain uncertainty. [M10 delivery](M10_IMPLEMENTATION.md) supersedes earlier UI-only limitations within this bounded scope without closing source/engineering gates.

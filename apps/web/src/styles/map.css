@@ -26,3 +26,41 @@
 @media(max-width:760px){.priority-map-panel{bottom:88px;height:calc(53svh - 88px)}}
 @media(min-width:761px) and (max-width:1150px){.priority-map-panel{right:-310px;width:310px}}
 @media(max-width:760px){.map-workspace:has(.priority-map-panel) .map-region{height:47%}}
+
+/* M10: reuse the contextual inspector/sheet while keeping the map visible. */
+.work-zone-form{border:1px solid #ccd7e0;border-left:5px solid;padding:12px;border-radius:6px}
+.work-zone-form legend{font-weight:650;font-size:14px}
+.planning-date-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.planning-date-grid label{font-size:12px;min-width:0}
+.planning-date-grid input{min-width:0;padding:6px;font-size:12px}
+.drawing-controls{background:#eef5fa;border:2px solid #335e80;border-radius:6px;padding:12px;position:sticky;top:0;z-index:2}
+.planning-actions{display:flex;flex-wrap:wrap}
+.priority-planning h3{font-size:16px;margin-top:22px}
+.priority-planning h4{font-size:15px}
+.priority-planning button,.priority-planning input,.priority-planning select{min-height:38px}
+.priority-planning .analyze-construction{background:#175878;color:#fff;border-color:#175878;font-weight:650}
+.priority-planning .analyze-construction:disabled{opacity:.65}
+.priority-planning .record-id{font-size:11px}
+.schedule-table{overflow:auto;max-width:100%;border:1px solid #d0dbe3;border-radius:5px}
+.schedule-table table{border-collapse:collapse;font-size:11px;min-width:0;width:100%;table-layout:fixed}
+.schedule-table caption{text-align:left;padding:8px;color:#435768}
+.schedule-table th,.schedule-table td{padding:7px;text-align:left;vertical-align:top;border-bottom:1px solid #d0dbe3;overflow-wrap:anywhere}
+.schedule-table th{background:#f1f5f8}
+.schedule-table th:first-child{width:36%}
+.work-zone-legend{position:absolute;right:12px;bottom:42px;max-width:255px;z-index:5;display:grid;gap:4px;font-size:11px;background:#fffffff2;padding:10px;border:1px solid #c3d2de;border-radius:6px;pointer-events:none}
+.work-zone-legend small{line-height:1.35}
+.work-zone-legend strong{padding-top:5px;color:#243c53}
+.is-planning .map-legend,.is-planning .rating-legend{display:none}
+@media(max-width:760px){
+ .is-planning .map-region{height:47%!important}
+ .is-planning .priority-map-panel{position:fixed;bottom:88px;height:calc(53svh - 88px);top:auto;left:0;right:0;padding:12px}
+ .is-planning .inspector{display:none}
+ .is-planning .screening-map-button,.is-planning .priority-map-button{display:none}
+ .is-planning .work-zone-legend{right:8px;bottom:6px;padding:6px;font-size:9px;max-width:190px}
+ .is-planning .work-zone-legend small{display:none}
+ .is-planning .map-tools{left:8px;right:8px;top:8px}
+ .is-planning .maplibregl-ctrl-bottom-left{bottom:6px}
+ .is-planning .map-reset{bottom:116px}
+ .is-planning .layer-status{top:60px;max-height:90px;overflow:auto}
+ .is-planning .screening-map-caption{display:none}
+}
