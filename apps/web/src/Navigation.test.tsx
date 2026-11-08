@@ -1,3 +1,4 @@
+vi.mock('./features/decisions/DecisionContext',()=>({DecisionContext:()=>null}));
 import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, expect, it, vi } from 'vitest';
@@ -8,13 +9,18 @@ import * as municipal from './services/municipal';
 import { roads, catalog, scenario, evaluation, meta } from './features/scenarios/testData';
 import { projects, analysis } from './features/conflicts/testData';
 import { answer } from './features/ai/testData';
-import { snapshot, road, permit, condition, meta as officialMeta } from './test-municipal';
+import { snapshot, road, permit, condition, conditionSummary, meta as officialMeta } from './test-municipal';
 import type { Dashboard } from './types/municipal';
 vi.mock('./services/api'); vi.mock('./services/municipal');
 vi.mock('./features/map/RoadMap', () => ({ RoadMap: (props: any) => <section aria-label="Test map"><button onClick={() => props.onSelect(props.official ? road.id : 'demo-r-001')}>Select a mapped road</button><button onClick={() => props.onViewport?.([-74.010,40.710,-74.005,40.715])}>Pan test map</button><output aria-label="Restored map extent">{props.focusBounds?.join(',') || 'default'}</output></section> }));
 const source = JSON.parse(readFileSync('../../data/demo/manifest.json','utf8')).evidence_source;
 const dashboard: Dashboard = { counts:{roads:1,condition:{good:0,fair:0,poor:0,unknown:1},assessments:{total:1,dated:1,accepted:0,ambiguous:1,unmatched:0},permits:{total:1,confirmed_in_scope:0,scope_candidates:1,matched:0,ambiguous:0,unmatched:1,unlocated:1}},observation_date_range:['2025-08-03','2025-08-03'],latest_retrieved_at:'2026-11-01',coverage:snapshot.coverage,dated_road_coverage:{value:0,denominator:1},permit_status_counts:[{status:'ISSUED',count:1}],permit_issue_date_range:null,source_freshness:[] };
 beforeEach(() => {
+  vi.mocked(municipal.getPermitReleases).mockResolvedValue([]);
+  vi.mocked(municipal.getPermitCoverage).mockResolvedValue({method_version:'permit-road-reference-v1',utility_coverage:'unknown',snapshot_id:snapshot.id,permit_release_id:null,total_permits:1,status_counts:{located:0,candidate:1,unlocated:0,outside_coverage:0,invalid_evidence:0},accepted_road_rows:0,precision:'No reviewed permit labels',limitations:[],source_selection:{},result_hash:'test'});
+  vi.mocked(municipal.getPermitCoordination).mockResolvedValue({data:[],meta:officialMeta});
+  vi.mocked(municipal.getIntelligenceReleases).mockResolvedValue([]);
+  vi.mocked(municipal.getConditionSummary).mockResolvedValue(conditionSummary);
   window.history.replaceState(null,'','/');
   vi.mocked(municipal.getWorkspace).mockResolvedValue({mode:'synthetic',snapshot_id:'demo-m1-v1'}); vi.mocked(municipal.getSnapshots).mockResolvedValue([snapshot]); vi.mocked(municipal.getSnapshot).mockResolvedValue(snapshot);
   vi.mocked(municipal.getDashboard).mockResolvedValue(dashboard); vi.mocked(municipal.getMunicipalViewport).mockImplementation(async kind => kind === 'roads' ? [road] : kind === 'conditions' ? [condition] : []);
@@ -78,7 +84,7 @@ it('reconciles a pending synthetic revision in its original workspace while offi
   vi.mocked(api.updateScenario).mockImplementationOnce(()=>new Promise(r=>resolve=r));
   window.history.replaceState(null,'','/#/scenarios?mode=synthetic&scenario=scenario-0');render(<App/>);
   await user.type(await screen.findByLabelText('Name'),' revised');await user.click(screen.getByRole('button',{name:'Save draft'}));
-  expect(api.updateScenario).toHaveBeenCalledOnce();await user.selectOptions(screen.getByRole('combobox',{name:'Dataset mode'}),'official');await screen.findByRole('heading',{name:'Scenario planning'});
+  expect(api.updateScenario).toHaveBeenCalledOnce();await user.selectOptions(screen.getByRole('combobox',{name:'Dataset mode'}),'official');await screen.findByRole('heading',{name:'Official planning comparisons'});
   await act(async()=>resolve({data:{...scenario(),name:scenario().name+' revised',revision:2},meta}));
   expect(window.location.hash).toContain('mode=official');expect(window.location.hash).not.toContain('scenario=');
   await user.selectOptions(screen.getByRole('combobox',{name:'Dataset mode'}),'synthetic');expect(screen.getByLabelText('Name')).toHaveValue(scenario().name+' revised');expect(screen.getByText(/Saved revision 2/)).toBeVisible();expect(window.location.hash).toContain('scenario=scenario-0');expect(api.evaluateScenario).not.toHaveBeenCalled();

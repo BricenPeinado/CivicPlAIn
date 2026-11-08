@@ -25,14 +25,25 @@ def geometry(value, crs='EPSG:4326'):
     return json.loads(json.dumps(mapping(g)))
 
 
-def candidate_matches(records, decisions):
+def candidate_matches(records, decisions, version="reviewed-candidates-v1"):
     """5m minimum separation in UTM18N + exact first OFT street-code candidates.
 
     A shared street code identifies a street, not a segment. Never auto-accept
     candidates, even a unique nearest one. Decisions bind full record content.
     """
+    if version not in {'reviewed-candidates-v1', 'reviewed-candidates-v2'}:
+        raise ValueError('Unsupported matching version')
+    if version == 'reviewed-candidates-v2':
+        from app.schemas.municipal import MunicipalRecord
+        if len({r['id'] for r in records}) != len(records):
+            raise ValueError('Duplicate input record identifier')
+        for record in records:
+            MunicipalRecord.model_validate(record)
+            if record['kind']=='road' and record['geometry'] is None:
+                raise ValueError('Road geometry required for candidate matching')
     project = Transformer.from_crs(4326, 32618, always_xy=True).transform
     roads = [r for r in records if r['kind'] == 'road']
+    by_id = {r['id']: r for r in roads}
     projected = {r['id']: transform(project, shape(r['geometry'])) for r in roads}
     tree=STRtree(list(projected.values()))
     by_code={}
@@ -55,6 +66,18 @@ def candidate_matches(records, decisions):
             if (distance is not None and distance <= 5) or (g is None and code_agrees):
                 candidates.append({'road_id': road['id'], 'distance_m': round(distance, 3) if distance is not None else None,
                     'street_code_agrees': code_agrees})
+        if version == 'reviewed-candidates-v2':
+            for candidate in candidates:
+                road = by_id[candidate['road_id']]
+                rg = projected[road['id']]
+                candidate.update(target_record_hash=digest(road),
+                    road_coverage_fraction=round(rg.intersection(g.buffer(5)).length / rg.length, 6) if g is not None else None,
+                    observation_coverage_fraction=round(g.intersection(rg.buffer(5)).length / g.length, 6) if g is not None else None,
+                    on_street_name_agrees=(' '.join((record['values'].get('on_street') or '').upper().split()) ==
+                        ' '.join((road['values'].get('name') or '').upper().split())) if record['values'].get('on_street') and road['values'].get('name') else None,
+                    direction=record['values'].get('direction'), road_type=record['values'].get('road_type'),
+                    roadbed_agreement='unknown', grade_agreement='unknown',
+                    source_record_hash=digest(record))
         candidates.sort(key=lambda c: c['road_id'])
         decision = decisions.get(record['id'])
         target = None
@@ -65,10 +88,16 @@ def candidate_matches(records, decisions):
             target = decision['road_id']
             if target not in {c['road_id'] for c in candidates}:
                 raise ValueError('Review target is not an eligible candidate')
+        if decision and version == 'reviewed-candidates-v2':
+            road = by_id[target]
+            if (decision.get('target_record_hash') != digest(road)
+                    or decision.get('scope') not in {'whole_road', 'partial'}
+                    or not decision.get('scope_reason')):
+                raise ValueError('Review requires current target hash and justified scope')
         matches.append({'id': 'match-'+digest([record['kind'], record['id']])[:24],
             'source_kind': record['kind'], 'source_record_id': record['id'], 'target_kind': 'road',
             'target_road_id': target, 'status': 'matched' if target else 'ambiguous' if candidates else 'unmatched',
-            'method': 'reviewed-candidates-v1', 'tolerance_m': 5, 'metric_crs': 'EPSG:32618',
+            'method': version, 'tolerance_m': 5, 'metric_crs': 'EPSG:32618',
             'candidates': candidates, 'decision': decision,
             'reason': 'Human-reviewed link' if target else 'Unreviewed candidates are not confirmed links' if candidates else 'No eligible candidate',
             'confidence': 'human_reviewed' if target else 'unconfirmed'})

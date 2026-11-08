@@ -1,11 +1,12 @@
 """Pure, network-free domain calculations. No database or HTTP dependencies."""
 import hashlib
 import json
-from decimal import Decimal, ROUND_CEILING, ROUND_HALF_UP, localcontext
+from decimal import Decimal, localcontext
 
 from app.schemas.planning import (Assessment, Calculation, CostScenario, Duration,
     LineItem, PlanningAssumptions, RepairOption, Suitability)
 from app.schemas.roads import Road
+from app.services.cost_math import money, workdays, assemble
 
 VERSION = 'repair-estimate-v1'
 
@@ -16,10 +17,6 @@ class MissingInputs(ValueError):
 
 def canonical_hash(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=True).encode()).hexdigest()
-
-
-def money(value: Decimal):
-    return format(value.quantize(Decimal('.01'), rounding=ROUND_HALF_UP), '.2f')
 
 
 def suitability(road: Road, assessment: Assessment | None, option: RepairOption):
@@ -35,7 +32,7 @@ def suitability(road: Road, assessment: Assessment | None, option: RepairOption)
 def duration(quantity: Decimal, option: RepairOption):
     if quantity <= 0 or not quantity.is_finite():
         raise ValueError('repair quantity must be positive and finite')
-    days = int((quantity / option.productivity_per_day).to_integral_value(rounding=ROUND_CEILING))
+    days = workdays(quantity, option.productivity_per_day)
     return Duration(active_workdays=days, setup_days=option.setup_days, curing_days=option.curing_days,
         total_preliminary_days=days + option.setup_days + option.curing_days,
         productivity_per_day=option.productivity_per_day,
@@ -90,8 +87,9 @@ def cost_scenarios(quantity: Decimal, option: RepairOption):
             for label, value in [('Mobilization', option.mobilization_usd), ('Traffic management allowance', option.traffic_management_usd)]:
                 items.append(LineItem(label=label, quantity=Decimal(1), unit='allowance', unit_rate_usd=str(value),
                     amount_usd=money(value), evidence_ids=option.evidence_ids))
-            subtotal = sum((Decimal(item.amount_usd) for item in items), Decimal(0))
-            contingency = Decimal(money(subtotal * option.contingency_fraction))
+            assembled = assemble(quantity, rate, [option.mobilization_usd, option.traffic_management_usd], option.contingency_fraction)
+            subtotal = Decimal(assembled['subtotal_usd'])
+            contingency = Decimal(assembled['contingency_usd'])
             scenarios[name] = CostScenario(line_items=items, subtotal_usd=money(subtotal),
                 contingency_fraction=option.contingency_fraction, contingency_usd=money(contingency), total_usd=money(subtotal + contingency))
         return scenarios

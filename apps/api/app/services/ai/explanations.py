@@ -14,6 +14,7 @@ REVIEW = {
     'review_tradeoffs': 'Review budget sensitivity, service scope, supplied schedules and incomplete checks together. No option is universally best; deferral requires engineering review.',
 }
 TRADEOFFS = {
+    'explain_official': ['Only the selected frozen deterministic result is explained. Cost sensitivity, policy sensitivity and schedule alternatives retain their own declared scope; no savings or actual work are established.'],
     'explain_estimate': ['Sensitivity changes bundled rates; fixed allowances remain separate. Preliminary days do not establish calendar dates.', 'A lower cost does not establish treatment suitability. Verify the source catalog exclusions.'],
     'explain_conflict': ['Supplied footprints and civil-date intervals support coordination review. They do not establish actual underground interference or quantified loss.'],
     'explain_comparison': ['Cost differences apply only to the declared roadwork scope and common comparison basis; they are not verified municipal savings.', 'Differences in supplied dates or conflict categories may merit review; they do not establish safe deferral or universal optimality.'],
@@ -98,7 +99,7 @@ class AIExplanationService:
         ordered = [f for f in evidence.facts if f.fact_id in chosen] + [f for f in evidence.facts if f.fact_id not in chosen]
         findings = [] if insufficient else [Finding(finding_id=f.fact_id, claim_text=render_fact(f),
             supporting_evidence_ids=[f.evidence_id], fact_refs=[f.fact_id], classification=f.classification) for f in ordered]
-        source = 'synthetic' if all(e.synthetic_input for e in evidence.records) else 'observed' if not any(e.synthetic_input for e in evidence.records) else 'mixed'
+        source = 'synthetic' if all(e.synthetic_input for e in evidence.records) else 'derived' if all(e.data_kind == 'derived' and not e.synthetic_input for e in evidence.records) else 'observed' if not any(e.synthetic_input for e in evidence.records) else 'mixed'
         summary = ('Insufficient evidence to answer this question. Ask about supplied costs, conditions, schedules, conflicts or assumptions; future effects and approvals are outside this evidence.' if insufficient else
             'Explanation of attached records and deterministic results. Inspect findings, assumptions and source references before human review.')
         eid = str(uuid4())

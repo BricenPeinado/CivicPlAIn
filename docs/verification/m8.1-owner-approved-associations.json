@@ -1,0 +1,117 @@
+[
+  {
+    "base_snapshot_id": "nyc-3947b35876a619b31067db96b1409ad8",
+    "source_record_id": "condition-8d7e97c9b05832b7f976715f",
+    "target_road_id": "road-05a296c232db0d7306c489d4",
+    "source_record_hash": "d9a7e6a47b7187a1047a11474da107855b9468fbf5f1cb913cc71db64e2630d8",
+    "target_record_hash": "77cbef81eb73954e3377943a49d0ee92a5d6b967aa94b8828656df22c2e68603",
+    "candidate_hash": "a509af91c16e811cb5178b9bab03bf5229324257f83c8475884319a6dd0223f2",
+    "candidate_set_hash": "a8f632826ccb0f9cf1c9bb13448da0aec55405aefb4ad451f659a3b7c0e4110d",
+    "parameter_hash": "432910fd330f1797b70850e56eaf80fbf5411e9cf3fad05736564782e3434001",
+    "status": "accepted",
+    "scope": "partial",
+    "scope_reason": "Pilot road-reference acceptance only. Whole-road assessment scope, grade and roadbed/pass compatibility are not independently established; preserve existing condition eligibility checks.",
+    "reviewer": "Project owner (user approval; CivicPlAIn hackathon pilot only)",
+    "reason": "Project owner explicitly states manual review and approves this exact observation-to-LION row reference for the hackathon pilot; not NYC DOT approval.",
+    "evidence_refs": [
+      "docs/verification/M8_1_OWNER_APPROVAL.md",
+      "base:nyc-3947b35876a619b31067db96b1409ad8",
+      "original-candidate:assoc-000323ec6ad0e73b1f96a6f189dc0ce5",
+      "original-overlay-manifest:84d2be55d81c423363e54c0748779e86d7666a127fa074d8136fdc39c3091a28",
+      "method:reviewed-candidates-v2",
+      "candidate-set-sha256:a8f632826ccb0f9cf1c9bb13448da0aec55405aefb4ad451f659a3b7c0e4110d"
+    ]
+  },
+  {
+    "base_snapshot_id": "nyc-3947b35876a619b31067db96b1409ad8",
+    "source_record_id": "condition-b3fbf48779766247f0094f6d",
+    "target_road_id": "road-3a8a39eff6275f9218f47d8f",
+    "source_record_hash": "7a5fea43ab3a5008dfaa3681fef75765864dd803a1340108716bdaaee595c034",
+    "target_record_hash": "ace894e3ba69ee205e5fecd5624457c66e970d952ae381d5cd4f937201926911",
+    "candidate_hash": "1b8520320270310a4249db154fdf1a1d3def0c2d89708321c0f7d8f55bb2814b",
+    "candidate_set_hash": "b01c1e5d75d5732a0483683752aa131d8e4d0c3f8482b07fde95ffd22680abd9",
+    "parameter_hash": "432910fd330f1797b70850e56eaf80fbf5411e9cf3fad05736564782e3434001",
+    "status": "accepted",
+    "scope": "partial",
+    "scope_reason": "Pilot road-reference acceptance only. Whole-road assessment scope, grade and roadbed/pass compatibility are not independently established; preserve existing condition eligibility checks.",
+    "reviewer": "Project owner (user approval; CivicPlAIn hackathon pilot only)",
+    "reason": "Project owner explicitly states manual review and approves this exact observation-to-LION row reference for the hackathon pilot; not NYC DOT approval.",
+    "evidence_refs": [
+      "docs/verification/M8_1_OWNER_APPROVAL.md",
+      "base:nyc-3947b35876a619b31067db96b1409ad8",
+      "original-candidate:assoc-001ce47ff1f2d0cc726a0b7195288ef0",
+      "original-overlay-manifest:84d2be55d81c423363e54c0748779e86d7666a127fa074d8136fdc39c3091a28",
+      "method:reviewed-candidates-v2",
+      "candidate-set-sha256:b01c1e5d75d5732a0483683752aa131d8e4d0c3f8482b07fde95ffd22680abd9"
+    ]
+  },
+  {
+    "base_snapshot_id": "nyc-3947b35876a619b31067db96b1409ad8",
+    "source_record_id": "condition-af6497ae3976ac464387b86a",
+    "target_road_id": "road-3788993721d12a9e8b07501f",
+    "source_record_hash": "e50806eb45f11821c28b8ce625fdf93498627c13d4d86a48eb4c421e07b671d4",
+    "target_record_hash": "6330a898faf4b9a496c28734c46b4848864bb43969d6dcff901b15b1f1a147e7",
+    "candidate_hash": "f0296b653d90254a3a276d2f0e88d896dd8fde5fec745e250968d9f007c678b9",
+    "candidate_set_hash": "4beb3b175b949d6241d627ec2226f35888b3d6113364fec09e82e97e222388c1",
+    "parameter_hash": "432910fd330f1797b70850e56eaf80fbf5411e9cf3fad05736564782e3434001",
+    "status": "accepted",
+    "scope": "partial",
+    "scope_reason": "Pilot road-reference acceptance only. Whole-road assessment scope, grade and roadbed/pass compatibility are not independently established; preserve existing condition eligibility checks.",
+    "reviewer": "Project owner (user approval; CivicPlAIn hackathon pilot only)",
+    "reason": "Project owner explicitly states manual review and approves this exact observation-to-LION row reference for the hackathon pilot; not NYC DOT approval.",
+    "evidence_refs": [
+      "docs/verification/M8_1_OWNER_APPROVAL.md",
+      "base:nyc-3947b35876a619b31067db96b1409ad8",
+      "original-candidate:assoc-00258604a799d96263b5179fefc9051c",
+      "original-overlay-manifest:84d2be55d81c423363e54c0748779e86d7666a127fa074d8136fdc39c3091a28",
+      "method:reviewed-candidates-v2",
+      "candidate-set-sha256:4beb3b175b949d6241d627ec2226f35888b3d6113364fec09e82e97e222388c1"
+    ]
+  },
+  {
+    "base_snapshot_id": "nyc-3947b35876a619b31067db96b1409ad8",
+    "source_record_id": "condition-d94ea30139a3eee0b3882d0d",
+    "target_road_id": "road-7265dd1cbaae298d0a40bc5d",
+    "source_record_hash": "41e5820dd34424a5c888b7e50327af307ce418d10e7a5e7d49d484916887b778",
+    "target_record_hash": "d6fdbb2f8b41e0ab1a871258a9f6e3e6dc671bc778ecf52be3284fae5d1fb315",
+    "candidate_hash": "281620b60c5ac7158929d0c0941799415577976f47be0f685034f16c9c47a97d",
+    "candidate_set_hash": "c1f9f7f92952ef8d9469af029c0a35a22fe0d3fdd2a095f12b1ce1aeb5d3f99a",
+    "parameter_hash": "432910fd330f1797b70850e56eaf80fbf5411e9cf3fad05736564782e3434001",
+    "status": "accepted",
+    "scope": "partial",
+    "scope_reason": "Pilot road-reference acceptance only. Whole-road assessment scope, grade and roadbed/pass compatibility are not independently established; preserve existing condition eligibility checks.",
+    "reviewer": "Project owner (user approval; CivicPlAIn hackathon pilot only)",
+    "reason": "Project owner explicitly states manual review and approves this exact observation-to-LION row reference for the hackathon pilot; not NYC DOT approval.",
+    "evidence_refs": [
+      "docs/verification/M8_1_OWNER_APPROVAL.md",
+      "base:nyc-3947b35876a619b31067db96b1409ad8",
+      "original-candidate:assoc-002844e3b179f345890781fcbf90b24e",
+      "original-overlay-manifest:84d2be55d81c423363e54c0748779e86d7666a127fa074d8136fdc39c3091a28",
+      "method:reviewed-candidates-v2",
+      "candidate-set-sha256:c1f9f7f92952ef8d9469af029c0a35a22fe0d3fdd2a095f12b1ce1aeb5d3f99a"
+    ]
+  },
+  {
+    "base_snapshot_id": "nyc-3947b35876a619b31067db96b1409ad8",
+    "source_record_id": "condition-189d3413f583f508da25efe8",
+    "target_road_id": "road-0d2c2752b2849c767482fa63",
+    "source_record_hash": "02a046d05a94b9b0a84feb438eb85e796776c9cecbc0abd562b3935deed025c7",
+    "target_record_hash": "e87aff49a8db1c3fb9ada89f4041e8cabfb053444a0d1d3aa113717cdc911c6f",
+    "candidate_hash": "a248f944d5945f5ca79366ba4a733d29ba05b8f3a13e4a8786ab2b4f8dd727bb",
+    "candidate_set_hash": "689b69f081fb626eab10f4900037a1cf48ad1d1058c9c9dd6df26f7cee2bde07",
+    "parameter_hash": "432910fd330f1797b70850e56eaf80fbf5411e9cf3fad05736564782e3434001",
+    "status": "accepted",
+    "scope": "partial",
+    "scope_reason": "Pilot road-reference acceptance only. Whole-road assessment scope, grade and roadbed/pass compatibility are not independently established; preserve existing condition eligibility checks.",
+    "reviewer": "Project owner (user approval; CivicPlAIn hackathon pilot only)",
+    "reason": "Project owner explicitly states manual review and approves this exact observation-to-LION row reference for the hackathon pilot; not NYC DOT approval.",
+    "evidence_refs": [
+      "docs/verification/M8_1_OWNER_APPROVAL.md",
+      "base:nyc-3947b35876a619b31067db96b1409ad8",
+      "original-candidate:assoc-00393e59b5d3b5f06fd0887910c93ac7",
+      "original-overlay-manifest:84d2be55d81c423363e54c0748779e86d7666a127fa074d8136fdc39c3091a28",
+      "method:reviewed-candidates-v2",
+      "candidate-set-sha256:689b69f081fb626eab10f4900037a1cf48ad1d1058c9c9dd6df26f7cee2bde07"
+    ]
+  }
+]

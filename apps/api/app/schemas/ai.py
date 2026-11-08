@@ -6,7 +6,7 @@ from app.schemas.roads import Schema
 
 ID = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=150)]
 ContextType = Literal['road', 'assessment', 'estimate', 'conflict', 'project', 'evaluation', 'comparison']
-TaskType = Literal['explain_estimate', 'explain_conflict', 'explain_comparison', 'ask']
+TaskType = Literal['explain_estimate', 'explain_conflict', 'explain_comparison', 'explain_official', 'ask']
 Mode = Literal['deterministic', 'ai']
 Classification = Literal['verified_record_fact', 'deterministic_calculation', 'conditional_interpretation', 'requires_human_review']
 
@@ -125,7 +125,7 @@ class Explanation(Schema):
     fallback_reason: str | None
     model_label: str | None
     generated_at: datetime
-    source_classification: Literal['synthetic', 'observed', 'mixed']
+    source_classification: Literal['synthetic', 'observed', 'mixed', 'derived']
     human_review_required: Literal[True] = True
     warnings: list[str]
     audit_reference: str

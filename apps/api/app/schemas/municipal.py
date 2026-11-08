@@ -41,7 +41,7 @@ class GeographicMatch(BaseModel):
     target_kind: Literal['road']
     target_road_id: str | None
     status: Literal['matched','ambiguous','unmatched']
-    method: Literal['reviewed-candidates-v1']
+    method: Literal['reviewed-candidates-v1','reviewed-candidates-v2']
     tolerance_m: Literal[5]
     metric_crs: Literal['EPSG:32618']
     candidates: list[dict]

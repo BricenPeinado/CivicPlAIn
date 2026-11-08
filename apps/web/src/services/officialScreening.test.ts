@@ -1,0 +1,7 @@
+import {afterEach,expect,it,vi} from 'vitest';
+import {computeScreening,getScreening,addScreeningNote} from './officialScreening';
+import {sid,meta} from '../test-municipal';
+afterEach(()=>vi.unstubAllGlobals());
+it('posts explicit inputs and rejects foreign snapshot or clearance claims',async()=>{const fetcher=vi.fn().mockResolvedValue({ok:true,json:async()=>({meta,data:{input_snapshot:{request:{snapshot_id:sid}},result:{snapshot_id:'foreign'}}})});vi.stubGlobal('fetch',fetcher);await expect(computeScreening({snapshot_id:sid},false)).rejects.toThrow('context');expect(fetcher.mock.calls[0][0]).toMatch(/\/preview$/);expect(fetcher.mock.calls[0][1].method).toBe('POST');});
+it('pins saved reads and propagates caller cancellation',async()=>{const ac=new AbortController();ac.abort();const fetcher=vi.fn().mockRejectedValue(new DOMException('aborted','AbortError'));vi.stubGlobal('fetch',fetcher);await expect(getScreening(sid,'screen-'+'a'.repeat(64),ac.signal)).rejects.toThrow();expect(fetcher.mock.calls[0][0]).toContain('snapshot_id='+sid);});
+it('writes a note separately without invoking analysis',async()=>{const fetcher=vi.fn().mockResolvedValue({ok:true,json:async()=>({meta,data:{id:'review-1'}})});vi.stubGlobal('fetch',fetcher);await addScreeningNote(sid,'screen-'+'a'.repeat(64),{note:'SYNTHETIC review'});expect(fetcher.mock.calls[0][0]).toContain('/notes?snapshot_id=');expect(fetcher).toHaveBeenCalledTimes(1);});

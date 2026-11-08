@@ -1,0 +1,7 @@
+import type {FeatureCollection,Geometry} from 'geojson';
+export type ScreeningActivity={activity_id:string;id:string;title:string;origin:string;road_ids:string[];location:{geometry:Geometry;certainty:string}|null;location_issue:string|null; schedule:unknown;permit_location?:unknown;administrative_dates?:unknown};
+export type ScreeningFinding={id:string;activity_ids:string[];finding_type:string;category:string;spatial:Record<string,unknown>;temporal:Record<string,unknown>;explanation:string;qualified_by:string[];required_review:string[];human_review_required:true;evidence_status:string};
+export type Screen={activities:ScreeningActivity[];findings:ScreeningFinding[];pair_checks:unknown[];activity_unknowns:unknown[];indeterminate_pair_count:number;possible_pair_count:number;checked_pair_count:number};
+export type ScreeningRecord={id?:string;input_hash:string;result_hash:string;input_snapshot:{request:{snapshot_id:string;[key:string]:unknown};[key:string]:unknown};result:{method_version:'official-screen-v1';snapshot_id:string;base:Screen;alternatives:{id:string;screen:Screen;result_hash:string;interpretation:string}[];cost_comparison:Record<string,unknown>;coverage:{utilities:'unknown';excavation_clearance:false;[key:string]:unknown};warnings:string[];contains_synthetic:false;human_review_required:true}};
+export type ScreeningNote={id:string;author:string;note:string;disposition:string;finding_id:string|null;meaning:string};
+export type MapFinding={features:FeatureCollection;road?:string};

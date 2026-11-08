@@ -68,7 +68,15 @@ def stage(acquisition: Path, decisions: dict | None = None):
     records.sort(key=lambda r:(r['kind'],r['id']))
     if not all(stats[k]['accepted'] for k in SOURCES):
         raise ValueError('Required pilot layer has no valid records')
-    if stats['lion']['accepted']>10000 or stats['permits']['accepted']>20000:
+    permit_window=bundle.get('permit_window')
+    cap=20000
+    if permit_window:
+        from app.ingestion.acquire import permit_window_query
+        query=permit_window_query(permit_window['start'],permit_window['end'])
+        cap=permit_window['cap']
+        if type(cap) is not int or not 1<=cap<=30000 or bundle['sources']['permits']['query']!={'$where':query}:
+            raise ValueError('Unreviewed permit window query/cap')
+    if stats['lion']['accepted']>10000 or stats['permits']['accepted']>cap:
         raise ValueError('Pilot safety cap exceeded')
     # OFT is an authoritative DOT location key, not an authoritative LION segment or direction match.
     groups={}
@@ -84,6 +92,11 @@ def stage(acquisition: Path, decisions: dict | None = None):
             'membership':'Unverified street-name candidates unless reviewed road link exists',
             'completeness':'Not a census of all permits intersecting the pilot; aliases/missing names can be omitted'},
         'utility_coverage':'unknown','source_status':{k:'available' for k in SOURCES}}
+    if permit_window:
+        coverage['permit_selection']={'issued_on_or_after':None,
+            'administrative_window':permit_window,'method':permit_window['method'],
+            'membership':'Borough administrative selection; geographic membership remains unverified',
+            'completeness':permit_window['limitations']+'; unknown schedules/aliases and long streets remain unresolved'}
     manifest={'contract_version':'municipal-record-v2','mode':'official','study_area_id':STUDY_AREA,
         'coverage':coverage,'capabilities':CAPABILITIES,'adapter_version':VERSION,
         'matching_version':'reviewed-candidates-v1','source_revision_ids':sorted(r['id'] for r in revisions),
