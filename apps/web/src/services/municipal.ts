@@ -1,8 +1,9 @@
+import {countMap} from '../features/map/performance';
 import { APIError, readJSON } from './http';
 import type { Bbox, Dashboard, MunicipalEnvelope, MunicipalGeoJSON, MunicipalMeta, MunicipalRecord, Snapshot, SourceRevision, Workspace } from '../types/municipal';
 const base = (import.meta.env.VITE_MUNICIPAL_API_BASE_URL || 'http://127.0.0.1:8000/api/v2').replace(/\/$/, '');
 const query = (params: Record<string, string | undefined>) => new URLSearchParams(Object.entries(params).filter((p): p is [string, string] => p[1] !== undefined)).toString();
-export const readMunicipal = <T,>(path: string, signal?: AbortSignal) => readJSON<T>(base, path, signal);
+export const readMunicipal = <T,>(path: string, signal?: AbortSignal) => {countMap('api.request');return readJSON<T>(base, path, signal);};
 export function verifyMeta(meta: MunicipalMeta, snapshot: string) {
   if (meta?.contract_version !== 'municipal-record-v2' || meta.snapshot_id !== snapshot || meta.mode !== 'official') throw new Error('The source snapshot changed. Select the dataset again.');
 }
@@ -28,8 +29,8 @@ export async function getSnapshots(signal?: AbortSignal): Promise<Snapshot[]> {
 export async function getSnapshot(id: string, signal?: AbortSignal) {
   const result = await readMunicipal<MunicipalEnvelope<Snapshot>>(`/data-snapshots/${encodeURIComponent(id)}`, signal); verifyMeta(result.meta, id); if (result.data.id !== id || result.data.contract_version !== 'municipal-record-v2' || result.data.mode !== 'official') throw new Error('Unsupported snapshot manifest.'); return result.data;
 }
-export async function getMunicipalPage(kind: 'road-segments' | 'conditions' | 'permits', snapshot: string, filters: Record<string, string | undefined> = {}, signal?: AbortSignal) {
-  const result = await readMunicipal<MunicipalEnvelope<MunicipalRecord[]>>(`/${kind}?${query({ ...filters, snapshot_id: snapshot, limit: '100' })}`, signal);
+export async function getMunicipalPage(kind: 'road-segments' | 'conditions' | 'permits', snapshot: string, filters: Record<string, string | undefined> = {}, signal?: AbortSignal, pageSize = 100) {
+  const result = await readMunicipal<MunicipalEnvelope<MunicipalRecord[]>>(`/${kind}?${query({ ...filters, snapshot_id: snapshot, limit: String(pageSize) })}`, signal);
   verifyMeta(result.meta, snapshot);
   if (!Array.isArray(result.data) || result.data.some(r => !r.id || !r.source_revision_id || r.contains_synthetic || r.classification === 'synthetic_fixture' || r.contract_version !== 'municipal-record-v2' || r.kind !== (kind === 'road-segments' ? 'road' : kind === 'conditions' ? 'condition' : 'permit'))) throw new Error('Unsupported official records. Synthetic records cannot enter this workspace.');
   if (kind === 'road-segments' && filters.release_id) for (const r of result.data) verifyConditionContext(r.condition_summary as import('../types/municipal').ConditionSummary, snapshot, r.id, filters.as_of_date || '', filters.release_id, filters.policy_id);
@@ -37,15 +38,18 @@ export async function getMunicipalPage(kind: 'road-segments' | 'conditions' | 'p
   return result;
 }
 export async function getMunicipalViewport(kind: 'roads' | 'conditions' | 'permits', snapshot: string, bbox: Bbox, signal?: AbortSignal, filters: Record<string,string> = {}): Promise<MunicipalRecord[]> {
-  const records: MunicipalRecord[] = []; const seen = new Set<string>(); let cursor: string | undefined;
+  const records: MunicipalRecord[] = []; const seen = new Set<string>(); let cursor: string | undefined; let total: number | undefined;
   do {
-    const result = await getMunicipalPage(kind === 'roads' ? 'road-segments' : kind, snapshot, { ...filters, bbox: bbox.join(','), cursor }, signal);
+    const result = await getMunicipalPage(kind === 'roads' ? 'road-segments' : kind, snapshot, { ...filters, bbox: bbox.join(','), cursor }, signal, kind === 'roads' ? 2000 : 100);
+    if (!Number.isInteger(result.meta.total_matching) || result.meta.total_matching! < 0 || total !== undefined && total !== result.meta.total_matching) throw new Error('Invalid viewport total.');
+    total = result.meta.total_matching!;
     records.push(...result.data); cursor = result.meta.next_cursor || undefined;
     if ((result.meta.total_matching ?? 0) > 2000 || records.length > 2000) throw new APIError('Zoom in to load this layer. More than 2,000 records intersect the viewport.', 'VIEWPORT_TOO_BROAD', 422);
     if (cursor && seen.has(cursor)) throw new Error('Repeated viewport cursor.');
     if (cursor) seen.add(cursor);
   } while (cursor);
   if (new Set(records.map(r => r.id)).size !== records.length) throw new Error('Duplicate viewport records.');
+  if (records.length !== total) throw new Error('Incomplete viewport results.');
   return records;
 }
 export async function getMunicipalRoad(snapshot: string, id: string, signal?: AbortSignal) {

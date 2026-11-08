@@ -15,7 +15,7 @@ vi.mock('maplibre-gl', () => ({
     getBounds() { return { getWest: () => -74.01, getSouth: () => 40.71, getEast: () => -74.0, getNorth: () => 40.72 }; }
     setFilter = vi.fn(); addControl = vi.fn(); addSource = vi.fn(); addLayer = vi.fn();
     fitBounds = vi.fn(); resize = vi.fn(); remove = vi.fn();
-    constructor() { state.maps.push(this); }
+    constructor(public options: any) { state.maps.push(this); }
     on(event: string, layerOrHandler: string | ((...args: any[]) => void), handler?: (...args: any[]) => void) {
       this.handlers.set(handler ? `${event}:${layerOrHandler}` : event, handler || layerOrHandler as (...args: any[]) => void);
     }
@@ -134,4 +134,18 @@ it('keeps priority and permit candidate reference overlays distinct from observe
  expect(layers.find((l:any)=>l.id==='priorities').paint['line-color']).toEqual(['match',['get','priority_status'],'ranked','#7951a6','#667385']);
  expect(layers.find((l:any)=>l.id==='permit-candidates').paint['line-dasharray']).toEqual([1,2]);
  expect(map.source.setData).toHaveBeenCalledWith(priorities);expect(map.source.setData).toHaveBeenCalledWith(candidates);
+});
+it('initializes locally before attaching online tiles and only updates changed sources',()=>{
+ const features={type:'FeatureCollection' as const,features:[]};
+ const props={official:true,features,selectedId:null,onSelect:vi.fn()};const view=render(<RoadMap {...props}/>),map=state.maps[0];
+ expect(map.options.style.sources).toEqual({});act(()=>map.handlers.get('load')());const count=map.source.setData.mock.calls.length;
+ view.rerender(<RoadMap {...props} candidateFeatures={{type:'FeatureCollection',features:[]}}/>);expect(map.source.setData).toHaveBeenCalledTimes(count);
+ const layers={streets:true,ratings:true,conditions:false,permits:false,shoreline:true,basemap:true};
+ view.rerender(<RoadMap {...props} layers={layers}/>);view.rerender(<RoadMap {...props} layers={{...layers,ratings:false,basemap:false}}/>);
+ expect(state.maps).toHaveLength(1);expect(map.source.setData).toHaveBeenCalledTimes(count);expect(map.setLayoutProperty).toHaveBeenCalledWith('indicative-ratings','visibility','none');
+ const ids=map.addLayer.mock.calls.map((c:any[])=>c[0].id);expect(ids).toContain('indicative-ratings');expect(ids.indexOf('indicative-ratings')).toBeLessThan(ids.indexOf('selection'));
+});
+it('allows clicking the rating line independently of official street visibility',()=>{
+ const select=vi.fn();render(<RoadMap official selectedId={null} onSelect={select}/>);const map=state.maps[0];act(()=>map.handlers.get('load')());
+ act(()=>map.handlers.get('click:rating-hit')({features:[{properties:{road_id:'road-standardized'}}]}));expect(select).toHaveBeenCalledWith('road-standardized');
 });

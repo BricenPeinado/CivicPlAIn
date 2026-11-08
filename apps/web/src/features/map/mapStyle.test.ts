@@ -22,3 +22,8 @@ it('never places unlocated or ambiguous permit records; accepted references rema
 it('has a licensed opt-out raster background and no external glyph dependency', () => {
   expect(mapStyle(false).sources).toEqual({}); const style = mapStyle(true); expect(style.sources.basemap).toMatchObject({ type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'] }); expect(JSON.stringify(style.sources)).toContain('OpenStreetMap contributors'); expect(style.glyphs).toBeUndefined();
 });
+it('keeps indicative categories separate and maps missing ratings to Unknown without inventing thresholds',async()=>{
+ const {ratingFeatures}=await import('./mapStyle');
+ const profiles=['Good','Fair','Poor','Unknown','Unclassified'].map((display_condition,i)=>({road_id:String(i),geometry:road.geometry!,street_name:'SYNTHETIC TEST',latest_rating:i===3?null:4.91,display_condition})) as import('../../services/standardized').Profile[];
+ const f=ratingFeatures(profiles).features;expect(f.map(v=>v.properties?.indicative_condition)).toEqual(['Good','Fair','Poor','Unknown','Unclassified']);expect(f[0].properties).not.toHaveProperty('condition');expect(f[0].properties?.indicative_rating).toBe(4.91);
+});

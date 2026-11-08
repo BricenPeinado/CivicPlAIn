@@ -38,7 +38,7 @@ export function parseRoute(hash: string): Route {
   const location = p.get('location'), condition = p.get('condition'), layers = p.get('layers'), bbox = p.get('bbox');
   if (location) { if (!['all','matched','ambiguous','unmatched','unlocated'].includes(location)) return invalid(); result.location = location as PermitLocation; }
   if (condition) { if (!['good','fair','poor','unknown'].includes(condition)) return invalid(); result.condition = condition as Route['condition']; }
-  if (layers !== null) { const values = layers === 'none' ? [] : layers.split(','); if (new Set(values).size !== values.length || values.some(v => !['streets','conditions','permits','shoreline','basemap'].includes(v))) return invalid(); result.layers = layers; }
+  if (layers !== null) { const values = layers === 'none' ? [] : layers.split(','); if (new Set(values).size !== values.length || values.some(v => !['streets','ratings','conditions','permits','shoreline','basemap'].includes(v))) return invalid(); result.layers = layers; }
   if (bbox) { const b = bbox.split(',').map(Number); if (b.length !== 4 || bbox.split(',').some(v => !v.trim()) || !b.every(Number.isFinite) || b[0] >= b[2] || b[1] >= b[3] || b[0] < -74.06 || b[2] > -73.95 || b[1] < 40.67 || b[3] > 40.76) return invalid(); result.bbox = b as Bbox; }
   return result;
 }

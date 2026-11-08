@@ -2,6 +2,11 @@
 import json
 import sqlite3
 from contextlib import contextmanager, closing
+from threading import RLock
+import math
+from shapely.geometry import shape, box
+from shapely.strtree import STRtree
+from shapely.errors import ShapelyError
 
 from fastapi import HTTPException
 from pydantic import ValidationError
@@ -10,6 +15,8 @@ from pydantic import ValidationError
 class StandardizedRepository:
     def __init__(self, path):
         self.path = path
+        self._map_lock = RLock()
+        self._map_index = None
 
     @contextmanager
     def connection(self, snapshot):
@@ -35,7 +42,7 @@ class StandardizedRepository:
                 if metadata['source_snapshot'] != snapshot:
                     raise HTTPException(409, 'STANDARDIZED_SNAPSHOT_MISMATCH: select the standardized source snapshot')
                 yield conn
-        except (sqlite3.Error, ValueError, TypeError, ValidationError) as exc:
+        except (sqlite3.Error, ValueError, TypeError, KeyError, ShapelyError, ValidationError) as exc:
             raise HTTPException(503, 'STANDARDIZED_DATABASE_INCOMPATIBLE: supplied database does not satisfy standardized-read-v1') from exc
 
     def profile(self, conn, road):
@@ -66,3 +73,33 @@ class StandardizedRepository:
                 value['geometry'] = json.loads(geometry) if geometry else None
             data.append(value)
         return data, total, offset + len(data) if offset + len(data) < total else None
+
+    def map_ratings(self, snapshot, bounds, limit):
+        """One immutable spatial index, invalidated on artifact replacement; no DB writes."""
+        with self._map_lock, self.connection(snapshot) as conn:
+            stat = self.path.stat()
+            identity = (str(self.path.resolve()), stat.st_ino, stat.st_size, stat.st_mtime_ns, snapshot)
+            if self._map_index is None or self._map_index[0] != identity:
+                rows = conn.execute('SELECT p.*,r.source_revision_id FROM road_profiles p JOIN roads r USING(road_id) ORDER BY p.road_id LIMIT 100001').fetchall()
+                if len(rows) > 100000:
+                    raise ValueError('Map index capacity exceeded')
+                profiles, geometries = [], []
+                for row in rows:
+                    value = dict(row)
+                    value['geometry'] = json.loads(value.pop('geometry_json'))
+                    if not isinstance(value['geometry'], dict) or value['geometry'].get('type') not in {'LineString', 'MultiLineString'}:
+                        raise ValueError('Invalid map geometry type')
+                    geometry = shape(value['geometry'])
+                    if geometry.geom_type not in {'LineString', 'MultiLineString'} or geometry.is_empty or not geometry.is_valid or not all(math.isfinite(v) for v in geometry.bounds):
+                        raise ValueError('Invalid map geometry')
+                    w, s, e, n = geometry.bounds
+                    if not (-180 <= w <= e <= 180 and -90 <= s <= n <= 90):
+                        raise ValueError('Invalid map coordinates')
+                    profiles.append(value)
+                    geometries.append(geometry)
+                self._map_index = (identity, profiles, STRtree(geometries))
+            _, profiles, tree = self._map_index
+            indices = tree.query(box(*bounds), predicate='intersects')
+            if len(indices) > limit:
+                raise HTTPException(422, 'VIEWPORT_TOO_BROAD: zoom in; no partial rating results returned')
+            return sorted((profiles[int(i)] for i in indices), key=lambda p: p['road_id'])

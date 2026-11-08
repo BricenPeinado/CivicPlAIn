@@ -84,3 +84,52 @@ def test_invalid_profile_data_is_explicitly_incompatible(artifact,tmp_path):
     with client(tmp_path,artifact) as c:
         r=c.get('/api/v2/standardized/roads/road-a',params={'snapshot_id':SID})
         assert r.status_code==503 and r.json()['error']['code']=='STANDARDIZED_DATABASE_INCOMPATIBLE'
+
+
+def test_map_ratings_complete_bounded_indexed_and_readonly(artifact,tmp_path):
+    before=hashlib.sha256(artifact.read_bytes()).hexdigest()
+    p={'snapshot_id':SID,'bbox':'-74.01,40.69,-73.99,40.72'}
+    with client(tmp_path,artifact) as c:
+        r=c.get('/api/v2/standardized/map-ratings',params=p)
+        assert r.status_code==200,r.text
+        body=r.json()
+        assert [v['road_id'] for v in body['data']]==['road-a','road-b']
+        assert body['data'][0]['latest_rating']==4.91
+        assert body['data'][1]['latest_rating'] is None
+        assert body['meta']['complete'] is True
+        assert body['meta']['verified_segment_condition'] is False
+        assert body['meta']['association_basis']=='on_street_name'
+        assert body['meta']['map_contract']=='indicative-map-v1'
+        index=c.app.state.standardized._map_index
+        assert c.get('/api/v2/standardized/map-ratings',params=p).json()==body
+        assert c.app.state.standardized._map_index is index
+        # Boundary intersection is included; no matching geometry means a real empty result.
+        assert len(c.get('/api/v2/standardized/map-ratings',params=p|{'bbox':'-74,40.71,-73.99,40.72'}).json()['data'])==2
+        assert c.get('/api/v2/standardized/map-ratings',params=p|{'bbox':'-74.02,40.72,-74.01,40.73'}).json()['data']==[]
+        too_many=c.get('/api/v2/standardized/map-ratings',params=p|{'limit':1})
+        assert too_many.status_code==422 and too_many.json()['error']['code']=='VIEWPORT_TOO_BROAD'
+        assert 'data' not in too_many.json()
+        for invalid in [{'bbox':'nan,40,-73,41'},{'bbox':'-74,41,-75,40'},{'bbox':'-180,-90,180,90'},{'limit':2001},{'limit':0},{'cursor':'x'}]:
+            assert c.get('/api/v2/standardized/map-ratings',params=p|invalid).status_code==422
+        assert c.get('/api/v2/standardized/map-ratings',params={'snapshot_id':SID}).status_code==422
+        assert c.get('/api/v2/standardized/map-ratings',params=p|{'snapshot_id':'other'}).status_code==409
+        assert c.post('/api/v2/standardized/map-ratings',params=p).status_code==405
+    assert hashlib.sha256(artifact.read_bytes()).hexdigest()==before
+
+
+def test_map_index_replacement_and_invalid_artifacts(artifact,tmp_path):
+    p={'snapshot_id':SID,'bbox':'-74.01,40.69,-73.99,40.72'}
+    with client(tmp_path,artifact) as c:
+        assert c.get('/api/v2/standardized/map-ratings',params=p).status_code==200
+        old=c.app.state.standardized._map_index
+        # Only this authored disposable test artifact is modified.
+        with sqlite3.connect(artifact) as db:
+            db.execute("UPDATE streets SET latest_rating=8.0,display_condition='Good'")
+        r=c.get('/api/v2/standardized/map-ratings',params=p)
+        assert r.json()['data'][0]['display_condition']=='Good'
+        assert c.app.state.standardized._map_index is not old
+        with sqlite3.connect(artifact) as db:
+            db.execute("UPDATE roads SET geometry_json='{}'")
+        assert c.get('/api/v2/standardized/map-ratings',params=p).status_code==503
+    with client(tmp_path,tmp_path/'absent.sqlite3') as c:
+        assert c.get('/api/v2/standardized/map-ratings',params=p).status_code==503

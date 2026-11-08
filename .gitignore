@@ -38,6 +38,7 @@ out/
 *.sqlite-*
 *.sqlite3-*
 *.db-*
+*.db.gz
 
 # Downloaded and generated data, never blanket-ignore reviewed data/demo fixtures.
 /data/raw/*

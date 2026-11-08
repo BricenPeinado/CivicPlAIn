@@ -77,7 +77,7 @@ def snapshot(request:Request,snapshot_id:str):
 @router.get('/road-segments')
 @router.get('/road-segments/geojson')
 def roads(request:Request,snapshot_id:str,bbox:str|None=None,q:str|None=None,
-          condition:str|None=None,limit:Limit=100,cursor:str|None=None,
+          condition:str|None=None,limit:Annotated[int,Query(ge=1,le=2000)]=100,cursor:str|None=None,
           release_id:str|None=None,as_of_date:str|None=None,policy_id:str|None=None):
     strict(request,['snapshot_id','bbox','q','condition','limit','cursor','release_id','as_of_date','policy_id'])
     validate_policy_context(policy_id,snapshot_id,release_id)
@@ -102,12 +102,14 @@ def roads(request:Request,snapshot_id:str,bbox:str|None=None,q:str|None=None,
                 release_id=release_id,policy_id=policy_id)
     if condition:
         records=[r for r in records if r['condition_summary']['category']==condition]
-    if geo and len(records)>2000:
+    if (geo or bounds is not None and limit > 100) and len(records)>2000:
         raise HTTPException(422,'VIEWPORT_TOO_BROAD: refine viewport to at most 2000 features')
     result=listing(request,records,snapshot_id,limit,cursor)
     if geo:
         return as_geojson(result)
-    return result
+    # Records are already validated/dumped in JSON mode by the repository. Avoid
+    # FastAPI's second recursive conversion of complete provenance on every pan.
+    return JSONResponse(result)
 
 
 def as_geojson(result):

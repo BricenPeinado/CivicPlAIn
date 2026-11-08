@@ -16,7 +16,7 @@ export function recordFeatures(records: MunicipalRecord[]): FeatureCollection<Ge
 export function mapStyle(online: boolean): StyleSpecification {
   return { version: 8, sources: online ? { basemap: { type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256,
     maxzoom: 19, attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a> · ODbL' } } : {},
-    layers: [{ id: 'paper', type: 'background', paint: { 'background-color': '#f1f3f2' } }, ...(online ? [{ id: 'basemap', type: 'raster' as const, source: 'basemap', paint: { 'raster-saturation': -.8, 'raster-opacity': .6, 'raster-contrast': -.12 } }] : [])] };
+    layers: [{ id: 'paper', type: 'background', paint: { 'background-color': '#f1f3f2' } }, ...(online ? [{ id: 'basemap', type: 'raster' as const, source: 'basemap', paint: { 'raster-saturation': -.35, 'raster-opacity': .88, 'raster-contrast': -.05 } }] : [])] };
 }
 /** Accepted road references remain lines, never fabricated permit points or work zones. */
 export function permitMapFeatures(records: MunicipalRecord[], roads: MunicipalRecord[]): FeatureCollection {
@@ -29,4 +29,9 @@ export function permitMapFeatures(records: MunicipalRecord[], roads: MunicipalRe
     }
     return [];
   }));
+}
+
+/** Presentation only: original categories, never engineering classifications. */
+export function ratingFeatures(profiles: import('../../services/standardized').Profile[]): FeatureCollection {
+  return {type:'FeatureCollection',features:profiles.map(p=>({type:'Feature',id:p.road_id,geometry:p.geometry,properties:{road_id:p.road_id,name:p.street_name,indicative_condition:p.latest_rating===null?'Unknown':p.display_condition,indicative_rating:p.latest_rating}}))};
 }

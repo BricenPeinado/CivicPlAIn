@@ -1,5 +1,6 @@
 import {useEffect, useRef, useState} from 'react';
 import {getStandardized, type Profile, type Pavement, type StreetPermit, type Result} from '../../services/standardized';
+import {timeMap} from '../map/performance';
 import {sourceDate, shown} from '../../components/MunicipalEvidence';
 
 function RecentRecords({snapshot,road,kind}: {snapshot:string;road:string;kind:'pavement'|'permits'}) {
@@ -34,15 +35,15 @@ function RecentRecords({snapshot,road,kind}: {snapshot:string;road:string;kind:'
 export function StreetEvidence({snapshot,road}: {snapshot:string;road:string}) {
   const [profile,setProfile]=useState<Profile|null>(null),[error,setError]=useState(''),[retry,setRetry]=useState(0);
   useEffect(()=>{
-    const ac=new AbortController();setProfile(null);setError('');
-    getStandardized<Profile>(snapshot,road,undefined,0,ac.signal).then(r=>{if(!ac.signal.aborted)setProfile(r.data);}).catch(e=>{if(!ac.signal.aborted)setError(e.message);});
+    const started=performance.now();const ac=new AbortController();setProfile(null);setError('');
+    getStandardized<Profile>(snapshot,road,undefined,0,ac.signal).then(r=>{if(!ac.signal.aborted){setProfile(r.data);timeMap('street.rating',started);}}).catch(e=>{if(!ac.signal.aborted)setError(e.message);});
     return()=>ac.abort();
   },[snapshot,road,retry]);
   if(error)return <section role="alert"><h2>Street evidence unavailable</h2><p>{error}</p><button onClick={()=>setRetry(v=>v+1)}>Retry street evidence</button></section>;
   if(!profile||profile.road_id!==road)return <p role="status">Loading named-street evidence…</p>;
   return <section aria-label="Standardized street evidence">
     <h2>Indicative pavement condition</h2><strong className="rating">{profile.latest_rating??'Unknown'}{profile.latest_rating!==null&&<small> / 10</small>}</strong>
-    <p><strong>{profile.display_condition}</strong> · Latest street observation: {sourceDate(profile.latest_inspection_at)}</p>
+    <p><strong>{profile.latest_rating===null || profile.display_condition==='Unclassified'?'Unknown':profile.display_condition}</strong> · Latest street observation: {sourceDate(profile.latest_inspection_at)}</p>
     <p>{profile.street_observation_count} named-street pavement observations</p>
     <p>Shared street-level evidence for {profile.street_name}; not a verified measurement of the selected segment. Indicative bands are application categories, not official NYC DOT grades.</p>
     <RecentRecords key={`${snapshot}:${road}:pavement`} snapshot={snapshot} road={road} kind="pavement"/>

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import type { GeoJSONSource, Map as MapInstance, MapLayerMouseEvent } from 'maplibre-gl';
 import type { FeatureCollection } from 'geojson';
@@ -8,11 +8,12 @@ import type { Bbox } from '../../types/municipal';
 import type { LayerState } from '../../hooks/useMunicipalData';
 import { categoryColors } from '../conflicts/ConflictReview';
 import { colors } from './colors';
+import {countMap,timeMap} from './performance';
 import { emptyCollection, FOCUS, mapStyle, onlineBasemap, pilotColors } from './mapStyle';
 maplibregl.setWorkerUrl(workerUrl);
 export { colors } from './colors';
 interface Props {
-  roads?: RoadsCollection; features?: FeatureCollection; observations?: FeatureCollection; permits?: FeatureCollection; shoreline?: FeatureCollection;
+  roads?: RoadsCollection; ratings?: FeatureCollection; features?: FeatureCollection; observations?: FeatureCollection; permits?: FeatureCollection; shoreline?: FeatureCollection;
   screeningFeatures?: FeatureCollection; priorityFeatures?: FeatureCollection; candidateFeatures?: FeatureCollection; selectedGeometry?: FeatureCollection; focusPadding?: number; focusBounds?: Bbox | null; official?: boolean; layers?: LayerState;
   selectedId: string | null; onSelect: (id: string) => void; onViewport?: (bbox: Bbox) => void;
   onObservation?: (id: string) => void; onPermit?: (id: string) => void;
@@ -20,7 +21,8 @@ interface Props {
   onSelectProject?: (id: string) => void; showProjects?: boolean; visibleCategories?: InfrastructureCategory[];
 }
 const EMPTY: never[] = [];
-export function RoadMap({ screeningFeatures, priorityFeatures, candidateFeatures, roads, features, observations, permits, shoreline, selectedGeometry, focusBounds, focusPadding = 55, official = false, layers,
+const EMPTY_COLLECTION=emptyCollection();
+export function RoadMap({ screeningFeatures, priorityFeatures, candidateFeatures, roads, ratings, features, observations, permits, shoreline, selectedGeometry, focusBounds, focusPadding = 55, official = false, layers,
   selectedId, onSelect, onViewport, onObservation, onPermit, projects = EMPTY, highlightedProjects = EMPTY, highlightedRoads = EMPTY,
   onSelectProject, showProjects = true, visibleCategories = EMPTY }: Props) {
   const container = useRef<HTMLDivElement>(null), map = useRef<MapInstance | null>(null);
@@ -28,15 +30,18 @@ export function RoadMap({ screeningFeatures, priorityFeatures, candidateFeatures
   callbacks.current = { onSelect, onViewport, onObservation, onPermit, onSelectProject };
   const [ready, setReady] = useState(false), [failure, setFailure] = useState(false), [tileFailure, setTileFailure] = useState(false);
   const [hover, setHover] = useState<string | null>(null), [retry, setRetry] = useState(0);
+  const published=useRef(new Map<string,{data:FeatureCollection;signature:string}>());
+  const synthetic=useMemo<FeatureCollection>(()=>({type:'FeatureCollection',features:(roads?.features||[]).map(f=>({...f,id:f.properties.id,properties:{road_id:f.properties.id,name:f.properties.name,condition:f.properties.condition_summary.category}}))}),[roads]);
   const [layerError, setLayerError] = useState(false);
   useEffect(() => {
+    const started=performance.now(); published.current.clear();
     let active = true, loaded = false; setReady(false); setFailure(false); setTileFailure(false); setLayerError(false);
     let instance: MapInstance | undefined, observer: ResizeObserver | undefined;
     const deadline = window.setTimeout(() => { if (active && !loaded) setFailure(true); }, 12000);
     try {
       instance = new maplibregl.Map({ container: container.current!, center: [-74.007, 40.7125], zoom: 15.8,
         maxZoom: 20, minZoom: 13, maxBounds: official ? [-74.030, 40.695, -73.980, 40.730] : undefined,
-        attributionControl: false, style: mapStyle(official && onlineBasemap),
+        attributionControl: false, style: mapStyle(false),
       });
       map.current = instance;
       instance.getCanvas().setAttribute('aria-label', official ? 'Lower Manhattan map. Arrow keys pan; plus and minus zoom. Use the street list to select records.' : 'Synthetic map. Use the street list to select records.');
@@ -47,11 +52,15 @@ export function RoadMap({ screeningFeatures, priorityFeatures, candidateFeatures
       instance.on('load', () => {
         if (!instance || !active) return;
         loaded = true; clearTimeout(deadline);
-        for (const id of ['shoreline', 'roads', 'observations', 'permits', 'selection', 'projects', 'screening', 'priorities', 'candidates']) instance.addSource(id, { type: 'geojson', data: emptyCollection() });
+        for (const id of ['shoreline', 'roads', 'ratings', 'observations', 'permits', 'selection', 'projects', 'screening', 'priorities', 'candidates']) instance.addSource(id, { type: 'geojson', data: emptyCollection() });
         instance.addLayer({ id: 'shoreline', type: 'line', source: 'shoreline', paint: { 'line-color': '#9ab5c5', 'line-width': 2 } });
-        instance.addLayer({ id: 'road-casing', type: 'line', source: 'roads', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#fff', 'line-width': official ? 6 : 13 } });
+        instance.addLayer({ id: 'road-casing', type: 'line', source: 'roads', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#fff', 'line-width': official ? 3.5 : 13 } });
         instance.addLayer({ id: 'road-color', type: 'line', source: 'roads', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: {
           'line-color': ['match', ['get', 'condition'], 'good', official ? pilotColors.good : colors.good, 'fair', official ? pilotColors.fair : colors.fair, 'poor', official ? pilotColors.poor : colors.poor, official ? pilotColors.unknown : colors.unknown], 'line-width': official ? 2.3 : 6 } });
+        instance.addLayer({id:'indicative-ratings',type:'line',source:'ratings',layout:{'line-cap':'round','line-join':'round'},paint:{
+          'line-color':['match',['get','indicative_condition'],'Good',pilotColors.good,'Fair',pilotColors.fair,'Poor',pilotColors.poor,pilotColors.unknown],
+          'line-width':['interpolate',['linear'],['zoom'],13,2,17,4,20,6],'line-opacity':.9}});
+        instance.addLayer({id:'rating-hit',type:'line',source:'ratings',paint:{'line-width':16,'line-opacity':0}});
         instance.addLayer({ id: 'road-selected', type: 'line', source: 'roads', filter: ['==', ['get', 'road_id'], ''], paint: { 'line-color': '#086cc9', 'line-width': 10, 'line-opacity': .5 } });
         instance.addLayer({ id: 'road-hover', type: 'line', source: 'roads', filter: ['==', ['get', 'road_id'], ''], paint: { 'line-color': '#194d78', 'line-width': 8, 'line-opacity': .4 } });
         instance.addLayer({ id: 'road-hit', type: 'line', source: 'roads', paint: { 'line-width': 18, 'line-opacity': 0 } });
@@ -78,13 +87,25 @@ export function RoadMap({ screeningFeatures, priorityFeatures, candidateFeatures
           instance!.getCanvas().style.cursor = 'pointer'; instance!.setFilter('road-hover', ['==', ['get', 'road_id'], id]); setHover(e.features?.[0]?.properties?.name || id);
         });
         instance.on('mouseleave', 'road-hit', () => { if (active) { instance!.getCanvas().style.cursor = ''; instance!.setFilter('road-hover', ['==', ['get', 'road_id'], '']); setHover(null); } });
+        instance.on('click','rating-hit',(e:MapLayerMouseEvent)=>{
+          if(instance!.queryRenderedFeatures(e.point,{layers:['observations','permit-lines','permit-points','road-hit']}).length)return;
+          const id=e.features?.[0]?.properties?.road_id;if(id)callbacks.current.onSelect(String(id));
+        });
+        instance.on('mousemove','rating-hit',(e:MapLayerMouseEvent)=>{if(active){instance!.getCanvas().style.cursor='pointer';setHover(e.features?.[0]?.properties?.name||null);}});
+        instance.on('mouseleave','rating-hit',()=>{if(active){instance!.getCanvas().style.cursor='';setHover(null);}});
         for (const layer of ['project-fill', 'project-lines']) instance.on('click', layer, (e: MapLayerMouseEvent) => { const id = e.features?.[0]?.properties?.project_id; if (id) callbacks.current.onSelectProject?.(String(id)); });
         for (const layer of ['observations', 'permit-lines', 'permit-points']) instance.on('click', layer, (e: MapLayerMouseEvent) => {
           if (layer === 'observations' && instance!.queryRenderedFeatures(e.point, { layers: ['permit-lines', 'permit-points'] }).length) return;
           const id = e.features?.[0]?.properties?.record_id; if (id) (layer === 'observations' ? callbacks.current.onObservation : callbacks.current.onPermit)?.(String(id));
         });
         instance.fitBounds(official ? FOCUS : [-74.012, 40.710, -74.000, 40.720], { padding: 40, duration: 0 });
-        setReady(true);
+        setReady(true);timeMap('map.ready',started);
+        // Local readiness is independent of remote raster availability/load events.
+        if(official && onlineBasemap){
+          const online=mapStyle(true);
+          instance.addSource('basemap',online.sources.basemap);
+          instance.addLayer(online.layers.find(l=>l.id==='basemap')!,'shoreline');
+        }
       });
       instance.on('moveend', () => {
         if (!active || !official || !callbacks.current.onViewport) return;
@@ -104,15 +125,19 @@ export function RoadMap({ screeningFeatures, priorityFeatures, candidateFeatures
   }, [official, retry]);
   useEffect(() => {
     if (!ready || !map.current) return;
-    const synthetic: FeatureCollection = { type: 'FeatureCollection', features: (roads?.features || []).map(f => ({ ...f, id: f.properties.id,
-      properties: { road_id: f.properties.id, name: f.properties.name, condition: f.properties.condition_summary.category } })) };
-    for (const [id, data] of Object.entries({ roads: features || synthetic, observations, permits, shoreline, screening:screeningFeatures, priorities:priorityFeatures, candidates:candidateFeatures, selection: selectedGeometry }))
-      (map.current.getSource(id) as GeoJSONSource)?.setData(data || emptyCollection());
-  }, [roads, features, observations, permits, shoreline, screeningFeatures, priorityFeatures, candidateFeatures, selectedGeometry, ready]);
+    for (const [id, input] of Object.entries({ roads: features || synthetic, ratings, observations, permits, shoreline, screening:screeningFeatures, priorities:priorityFeatures, candidates:candidateFeatures, selection: selectedGeometry })) {
+      const data=input || EMPTY_COLLECTION;
+      const previous=published.current.get(id);
+      if(previous?.data===data)continue;
+      const signature=JSON.stringify(data);
+      if(previous?.signature!==signature && (previous || data.features.length>0)){(map.current.getSource(id) as GeoJSONSource)?.setData(data);countMap(`geojson.${id}`);}
+      published.current.set(id,{data,signature});
+    }
+  }, [synthetic, features, ratings, observations, permits, shoreline, screeningFeatures, priorityFeatures, candidateFeatures, selectedGeometry, ready]);
   useEffect(() => { if (ready) map.current?.setFilter('road-selected', ['==', ['get', 'road_id'], selectedId || '']); }, [selectedId, ready]);
   useEffect(() => {
     if (!ready || !map.current || !layers) return;
-    const groups = { streets: ['road-casing', 'road-color', 'road-hover', 'road-hit', 'road-labels'], conditions: ['observations'], permits: ['permit-lines', 'permit-points'], shoreline: ['shoreline'], basemap: ['basemap'] };
+    const groups = { streets: ['road-casing', 'road-color', 'road-hover', 'road-hit', 'road-labels'], ratings:['indicative-ratings','rating-hit'], conditions: ['observations'], permits: ['permit-lines', 'permit-points'], shoreline: ['shoreline'], basemap: ['basemap'] };
     for (const key of Object.keys(groups) as (keyof LayerState)[]) for (const id of groups[key])
       if (map.current.getLayer(id)) map.current.setLayoutProperty(id, 'visibility', layers[key] && !(key === 'basemap' && tileFailure) ? 'visible' : 'none');
   }, [layers, ready, tileFailure]);
