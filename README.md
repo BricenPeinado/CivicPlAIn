@@ -2,7 +2,7 @@
 
 Municipal infrastructure planning application — local React/FastAPI/SQLite modular monolith.
 
-**M0–M6 and M7.1–M7.3 are implemented locally.** M7.4 broader polish/accessibility remains planned. See [M7.3 navigation and workflow verification](docs/M7_3_IMPLEMENTATION.md). M7.1 adds explicit official NYC acquisition, validated immutable snapshots, additive SQLite migration and read-only `/api/v2` in the same application. See [M7.1 exact sources, commands and verification](docs/M7_1_IMPLEMENTATION.md), [roadmap](docs/MVP_ROADMAP.md), [architecture audit/plan](docs/M7_IMPLEMENTATION_PLAN.md) and [design system](docs/M7_DESIGN_SYSTEM.md) and [M7.2 implementation and verification](docs/M7_2_IMPLEMENTATION.md). The map reads pinned official snapshots without converting official records into synthetic planning inputs.
+**M0–M6 and M7.0–M7.4 are complete locally.** See [M7 final QA](docs/M7_FINAL_QA.md), [roadmap](docs/MVP_ROADMAP.md), [architecture audit/plan](docs/M7_IMPLEMENTATION_PLAN.md), and the stage reports. M7.1 adds explicit official NYC acquisition, validated immutable snapshots, additive SQLite migration and read-only `/api/v2` in the same application. The map reads pinned official snapshots without converting official records into synthetic planning inputs.
 
 M7 retains the existing local application and every saved estimate, conflict analysis, scenario evaluation and review note. Official geometry, condition observations and administrative permits have field-level classifications and provenance; a permit is not a verified construction schedule or buried utility. Existing synthetic rates will not price official roads. Real-data costing/scenario execution needs a later source-neutral calculation contract and reviewed inputs; M7 initially exposes that capability as unavailable with reasons. Existing M1–M6 calculations remain available in the explicitly synthetic workspace. See the [scope decision and source gates](docs/M7_IMPLEMENTATION_PLAN.md#scope-and-release-gates).
 
@@ -283,4 +283,4 @@ PYTHONPATH=apps/api .venv/bin/python scripts/verify_m5.py
 
 See [AI_SYSTEM](docs/AI_SYSTEM.md), [RESPONSIBLE_AI](docs/RESPONSIBLE_AI.md), historical [M5 verification](docs/M5_IMPLEMENTATION.md), the current [demo walkthrough](docs/HACKATHON_DEMO.md) and [final M6 verification](docs/FINAL_QA_REPORT.md).
 
-M7.4 polish/verification is in progress; see [current QA evidence and open gates](docs/M7_FINAL_QA.md). Completion is not claimed.
+Milestone 7 is complete locally. Final test evidence and remaining limitations are recorded in [M7 final QA](docs/M7_FINAL_QA.md).

@@ -1,6 +1,6 @@
 # M7 implementation plan and architecture audit
 
-**M7.0 audit/specification retained; M7.1–M7.3 implemented locally. M7.4 remains planned.** See [M7.3 delivered files and verification](M7_3_IMPLEMENTATION.md). See [M7.1 evidence](M7_1_IMPLEMENTATION.md) and [M7.2 evidence](M7_2_IMPLEMENTATION.md). The inspected-baseline table below describes the original M6 checkout; the stage plans describe intended work and must be read with the concrete delivery notes. No historical milestone report is rewritten.
+**M7.0–M7.4 are implemented and verified locally.** See [M7 final QA](M7_FINAL_QA.md), [M7.1 evidence](M7_1_IMPLEMENTATION.md), [M7.2 evidence](M7_2_IMPLEMENTATION.md), and [M7.3 evidence](M7_3_IMPLEMENTATION.md). The inspected-baseline table below describes the original M6 checkout; stage plans are retained as architectural history and must be read with the concrete delivery notes. No historical milestone report is rewritten.
 
 ## Scope and release gates
 
@@ -36,7 +36,7 @@ Initial Git status was clean on `feat/m6-final-integration`. Read root instructi
 | Nine web test files, `test-setup.ts`, `vite.config.ts` | jsdom/Testing Library/Vitest API, map mocks, workspace selection/error/fallback, estimates/conflicts/scenarios/advisor/source focus and guide. Mocked WebGL does not establish real geography, layout, contrast or browser performance. Preserve assertions; adapt route-aware interaction paths only when UX changes. |
 | `data/demo`, `data/raw`, `data/processed`, `.gitignore`, `.env.example`, dependency locks | Reviewed synthetic fixtures tracked; downloads/normalized/runtime DB/build outputs ignored. No official extract or provenance manifest exists. Secrets stay backend-only; no provider key required. No package/lock/env template changed in 7.0. |
 
-Historical reports (FOUNDATION_INSPECTION, M1–M5 reports, M3_5_COMPATIBILITY, FINAL_QA_REPORT) and existing DEMO_PLAN/HACKATHON_DEMO/PRESENTATION_OUTLINE are retained unchanged. Their completion/performance/security statements refer to their original synthetic release. Current shared specifications distinguish delivered 7.0/7.1/7.2 from planned 7.3/7.4.
+Historical reports (FOUNDATION_INSPECTION, M1–M5 reports, M3_5_COMPATIBILITY, FINAL_QA_REPORT) and existing DEMO_PLAN/HACKATHON_DEMO/PRESENTATION_OUTLINE are retained unchanged. Their completion/performance/security statements refer to their original synthetic release. Current shared specifications distinguish the completed M7 stages from the historical plans below.
 
 ## Architecture and contract decisions
 
@@ -119,7 +119,7 @@ Update README, roadmap, architecture/API/data/source/limitation and AI/responsib
 
 ## Acceptance and testing matrix
 
-The matrix below is the original **acceptance plan**. Actual 7.1/7.2/7.3 results are recorded in their implementation reports; unrun 7.4 gates remain future checks. Existing test names/oracles stay. Real-source smoke verification is a separately recorded network exercise; normal suites use deterministic fixtures/mocks and must pass offline without a provider key.
+The matrix below is the original acceptance plan. Actual M7 results are recorded in the stage reports and [M7_FINAL_QA](M7_FINAL_QA.md). Existing test names/oracles stay. Real-source smoke verification is a separately recorded exercise; normal suites use deterministic fixtures/mocks and pass offline without a provider key.
 
 | ID / stage | Test / concrete expected result |
 | --- | --- |

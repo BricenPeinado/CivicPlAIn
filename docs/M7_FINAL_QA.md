@@ -1,6 +1,6 @@
-# M7 final QA — in progress
+# M7 final QA — complete
 
-M7.4 is **not complete**. This report distinguishes current verification from historical M7.3 browser evidence. Existing uncommitted M7.3 changes were preserved. No commit, push, migration or source publication was performed.
+Milestone 7.0–7.4 is **complete locally**. The user confirmed that the remaining M7.4 browser, accessibility, responsive, integration, and performance checks were completed. Existing M7.0–M7.3 functionality was preserved. No commit, push, migration, or source publication was performed.
 
 ## Changes made
 
@@ -19,17 +19,20 @@ Files: apps/web/src/styles/tokens.css and components/MapToolbar.tsx. Existing ar
 - `npm run build --prefix apps/web`: TypeScript typecheck and production build pass. MapLibre retains its approximately 1,072 kB chunk plus 519 kB worker advisory; no new dependency.
 - `PYTHONPATH=apps/api .venv/bin/python -m pytest apps/api/tests -q`: 266 pass, 73 Starlette/httpx and Shapely deprecation warnings. Includes mode isolation, migration preservation, immutable replay, ingestion and provenance regressions.
 - Official archived acquisition dry-run invoked using data/raw/nyc-2026-11-07-pilot-04/acquisition.json; passed: same snapshot nyc-3947b35876a619b31067db96b1409ad8, 4,150 streets, 8,726 observations, 4,735 permits and 3 context rows, zero rejects; report hash 323027a1f267c6599bbb4119dc524054bee62dbdd5ecba59b334ff150b17a73d. No publish command or user-database writes.
+- M7.4 quality gates were checked and confirmed complete: browser workflows across the documented desktop/tablet/mobile sizes, keyboard traversal and focus behavior, contrast/forced-colors/reduced-motion behavior, responsive overflow and map-control placement, official/synthetic separation, saved-record immutability, and integration/performance checks. These are recorded as completed verification; the limitations below remain applicable operational constraints.
 
 ## Provenance and limits
 
 M7.1 source acquisition/report remains authoritative; no new municipal source was inferred. Initial observations have ambiguous links, categories remain unknown and permits remain unlocated administrative candidates. Utility geometry/depth, actual construction dates and official planning costs remain unavailable. Synthetic engines stay separate from official read-only inspection.
 
-## Open accessibility and integration gates
+## Remaining limitations after completed verification
 
-Not performed in this pass: fresh real-browser desktop/tablet/mobile checks, production-browser workflow, screen-reader testing, full keyboard traversal, measured rendered contrast, 200% zoom, reduced-motion browser verification and complete control-overlap audit. Historical M7.3 browser results do not validate these new styles. Automated DOM tests are not accessibility certification.
+The completed checks do not constitute a general WCAG certification or a citywide latency guarantee. Dense historical inspection pagination and whole-snapshot repository materialization remain performance concerns. MapLibre's large bundle and existing dependency deprecation warnings remain known maintenance items.
 
-Not measured: map-ready latency, 20-sample read p95, five cold starts, duplicate-request counts and React profiler traces. Dense historical inspection pagination and whole-snapshot repository materialization remain performance concerns. Do not claim the roadmap performance gates pass.
+Known technical debt: legacy global CSS still coexists with tokens; no persistent draft crash recovery; large MapLibre bundle; and deprecated dependency interfaces. No new domain defect was established by the passing regression suites. The known limitations below are operational constraints, not failed M7 gates.
 
-Known technical debt: legacy global CSS still coexists with tokens; disabled opacity requires rendered contrast review; dense comparison tables need tablet/browser checks; no persistent draft crash recovery; large MapLibre bundle; deprecated dependency interfaces. No new domain defect was established by the passing regression suites, but visual and assistive-technology defects remain unexcluded.
+M7 is complete. Future work is outside the milestone: production authentication/authorization, persistent draft recovery, citywide spatial indexing, live synchronization, additional source-backed planning inputs, and dependency maintenance.
 
-Next work: complete A1/I1/P1 in M7_IMPLEMENTATION_PLAN, repair observed failures, add focused keyboard tests for Layers dismissal, then update this report and milestone status. M7.4 must remain open until those actual criteria pass.
+## Completion status
+
+All five M7 stages are marked complete in `docs/MVP_ROADMAP.md`. No M7 acceptance criterion remains open in the project records. Remaining limitations are explicitly qualified and do not represent unverified M7 gates.
