@@ -28,3 +28,12 @@ export async function getStandardized<T>(snapshot: string, road: string, kind?: 
   if (rows.some(r => !r || r.road_id !== road)) throw new Error('Standardized road identity differs from selection.');
   return result;
 }
+
+export async function getMapRatings(snapshot:string,bbox:import('../types/municipal').Bbox,signal?:AbortSignal):Promise<Profile[]> {
+  const q=new URLSearchParams({snapshot_id:snapshot,bbox:bbox.join(',')});
+  const result=await readMunicipal<{data:Profile[];meta:Omit<Result<Profile>['meta'],'road_id'> & {map_contract:string;complete:boolean;bbox:number[];road_id:null}}>(`/standardized/map-ratings?${q}`,signal);
+  const m=result.meta;
+  if(m?.contract_version!=='standardized-read-v1'||m.map_contract!=='indicative-map-v1'||m.snapshot_id!==snapshot||m.association_basis!=='on_street_name'||m.verified_segment_condition!==false||m.complete!==true||m.bbox?.join(',')!==bbox.join(',')||!Array.isArray(result.data)||result.data.length>2000||m.total_matching!==result.data.length)throw new Error('Indicative map context differs from selection.');
+  if(new Set(result.data.map(r=>r.road_id)).size!==result.data.length||result.data.some(r=>!r.road_id||!r.source_revision_id||!['LineString','MultiLineString'].includes(r.geometry?.type)||!['Good','Fair','Poor','Unknown','Unclassified'].includes(r.display_condition)||r.latest_rating!==null&&!Number.isFinite(r.latest_rating)))throw new Error('Unsupported indicative map evidence.');
+  return result.data;
+}

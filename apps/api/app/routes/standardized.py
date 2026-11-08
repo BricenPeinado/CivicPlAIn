@@ -1,8 +1,10 @@
 """Separate indicative street-name presentation, never engineering evidence."""
 from typing import Annotated, Literal
 from fastapi import APIRouter, Query, Request
-from pydantic import BaseModel
+from pydantic import BaseModel, FiniteFloat, Field
 from app.routes.municipal import strict
+from app.routes.roads import parse_bbox
+from app.core.repository import InvalidQuery
 
 router = APIRouter(prefix='/api/v2/standardized')
 Limit = Annotated[int, Query(ge=1, le=100)]
@@ -17,9 +19,9 @@ class Profile(BaseModel):
     object_id: str | None
     geometry: dict
     source_revision_id: str
-    street_observation_count: int
-    permits_on_street: int
-    latest_rating: float | None
+    street_observation_count: int = Field(ge=0)
+    permits_on_street: int = Field(ge=0)
+    latest_rating: FiniteFloat | None
     latest_inspection_at: str | None
     display_condition: Literal['Good', 'Fair', 'Poor', 'Unknown', 'Unclassified']
     display_basis: str | None
@@ -83,3 +85,19 @@ def related(request: Request, road_id: str, kind: Literal['pavement', 'permits']
         model = Pavement if kind == 'pavement' else Permit
         data = [model.model_validate(row).model_dump() for row in rows]
     return envelope(snapshot_id, road_id, data, total, next_offset)
+
+
+@router.get('/map-ratings')
+def map_ratings(request: Request, snapshot_id: str, bbox: str,
+                limit: Annotated[int, Query(ge=1, le=2000)] = 2000):
+    strict(request, ['snapshot_id', 'bbox', 'limit'])
+    bounds = parse_bbox(bbox)
+    # Same approved navigable Lower Manhattan context as the map/URL contract.
+    if not (-74.06 <= bounds[0] < bounds[2] <= -73.95 and 40.67 <= bounds[1] < bounds[3] <= 40.76):
+        raise InvalidQuery('Rating bbox exceeds approved map context')
+    repo = request.app.state.standardized
+    with repo.connection(snapshot_id):
+        data = [Profile.model_validate(row).model_dump() for row in repo.map_ratings(snapshot_id, bounds, limit)]
+    result = envelope(snapshot_id, None, data, len(data))
+    result['meta'].update({'bbox': bounds, 'complete': True, 'map_contract': 'indicative-map-v1'})
+    return result

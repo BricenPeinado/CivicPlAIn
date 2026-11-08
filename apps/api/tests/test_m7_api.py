@@ -157,3 +157,20 @@ def test_dashboard_activity_and_freshness_preserve_source_meaning(client):
     # Administrative status remains an exact source filter, never a construction-state inference.
     assert c.get('/api/v2/permits',params={'snapshot_id':s['snapshot_id'],'status':'ISSUED','location':'unlocated'}).json()['meta']['total_matching']==1
     assert c.get('/api/v2/permits',params={'snapshot_id':s['snapshot_id'],'status':'issued'}).json()['data']==[]
+
+
+def test_large_map_page_preserves_full_records_and_rejects_oversize(client,monkeypatch):
+    c,s=client
+    params={'snapshot_id':s['snapshot_id'],'bbox':'-74.011,40.711,-74.008,40.713','limit':2000}
+    response=c.get('/api/v2/road-segments',params=params)
+    assert response.status_code==200
+    assert response.json()['meta']['next_cursor'] is None
+    assert len(response.json()['data'])==response.json()['meta']['total_matching']==1
+    assert 'field_provenance' in response.json()['data'][0]
+    assert c.get('/api/v2/road-segments',params=params|{'limit':2001}).status_code==422
+    road=response.json()['data'][0]
+    monkeypatch.setattr(c.app.state.municipal,'records',lambda *args: [road]*2001)
+    monkeypatch.setattr(c.app.state.municipal,'enrich',lambda sid,records:records)
+    oversized=c.get('/api/v2/road-segments',params=params)
+    assert oversized.status_code==422 and oversized.json()['error']['code']=='VIEWPORT_TOO_BROAD'
+    assert 'data' not in oversized.json()

@@ -109,3 +109,29 @@
 
 
 .scenario-actions{flex-wrap:wrap}.comparison-scope{padding:14px;background:#fff8e8;font-size:13px}.advisor-mode input{margin-right:8px}.repair-planner,.repair-workspace,.scenario-planner,.scenario-result,.advisor-panel{min-width:0;overflow-wrap:anywhere}.table-scroll table caption{text-align:left;padding:12px;font-size:13px}.project-row.selected,.finding-row.selected{border-color:#1d6aa0;background:#eaf3fb}.scenario-planner :is(input,select,textarea,button):focus-visible{outline-color:var(--focus)}
+
+.rating-legend { position:absolute; z-index:2; bottom:54px; left:16px; max-width:min(300px,calc(100% - 32px)); background:rgba(255,255,255,.96); border:1px solid #d8dfe2; border-radius:8px; padding:8px 12px; display:flex; flex-wrap:wrap; gap:8px 14px; font-size:12px; box-shadow:0 2px 8px #152b3a12; }
+.rating-legend span { display:inline-flex; align-items:center; gap:5px; }
+.rating-legend i { width:16px; height:4px; display:inline-block; }
+.rating-legend small { flex-basis:100%; line-height:1.4; }
+@media(max-width:760px) { .rating-legend { bottom:64px; left:10px; max-width:240px; padding:6px 8px; gap:4px 10px; } }
+
+/* Keep planning actions and navigation clear of the always-visible rating legend. */
+.priority-map-button { bottom:150px; }
+.screening-map-button { bottom:200px; }
+.map-reset { bottom:250px; }
+.maplibregl-ctrl-bottom-left { left:auto; right:10px; bottom:130px; }
+.layer-control fieldset { left:auto; right:0; max-height:calc(100svh - 210px); overflow:auto; }
+@media(max-width:760px) { .priority-map-button { bottom:150px; } .screening-map-button { bottom:200px; } .map-reset { bottom:250px; } }
+
+@media(max-width:760px) { .rating-legend { top:80px; bottom:auto; } }
+@media(max-width:760px) {
+  .maplibregl-ctrl-bottom-left { left:auto; right:10px; bottom:215px; }
+  .layer-control fieldset { max-height:min(42svh,320px); }
+  .has-selection .rating-legend { top:70px; max-width:calc(100% - 180px); }
+  .has-selection .priority-map-button,.has-selection .screening-map-button { left:auto; right:12px; width:140px; font-size:11px; padding:6px; bottom:auto; }
+  .has-selection .screening-map-button { top:70px; }
+  .has-selection .priority-map-button { top:122px; }
+  .has-selection .map-reset { bottom:80px; }
+  .has-selection .maplibregl-ctrl-bottom-left { bottom:24px; }
+}

@@ -70,3 +70,7 @@ it('rejects cross-release permit evidence and confirmed coordination claims',asy
  await expect(getMunicipalPermit(sid,permit.id,undefined,undefined,true)).rejects.toThrow('context');
  await expect(getPermitCoordination(sid,permit.id)).rejects.toThrow('Unsupported coordination');
 });
+it('rejects incomplete final viewport pages instead of caching a silent omission',async()=>{
+ vi.stubGlobal('fetch',vi.fn().mockResolvedValue(reply({data:[road],meta:{...meta,total_matching:2}})));
+ await expect(getMunicipalViewport('roads',sid,snapshot.coverage.bbox)).rejects.toThrow('Incomplete viewport');
+});

@@ -7,7 +7,8 @@ import { OfficialMapPage } from './OfficialMapPage';
 import { getIntelligenceReleases, getConditionSummary, getMunicipalViewport, getMunicipalRoad, getMunicipalPage, getRoadConditions, getShoreline, getSource } from '../services/municipal';
 import { meta, road, condition, snapshot, permit, conditionSummary } from '../test-municipal';
 vi.mock('../services/municipal');
-vi.mock('../features/map/RoadMap', () => ({ RoadMap: (p: any) => <div aria-label="Test map"><button onClick={() => p.onSelect(road.id)}>Select street</button><button onClick={() => p.onObservation(condition.id)}>Select observation</button><button onClick={() => p.onViewport([-74.009,40.711,-74.004,40.715])}>Pan map</button><output aria-label="Visible streets">{p.layers.streets ? p.features.features.length : 0}</output><output aria-label="Visible observations">{p.layers.conditions ? p.observations.features.length : 0}</output></div> }));
+vi.mock('../services/standardized',()=>({getMapRatings:vi.fn().mockResolvedValue([])}));
+vi.mock('../features/map/RoadMap', () => ({ RoadMap: (p: any) => <div aria-label="Test map"><button onClick={() => p.onSelect(road.id)}>Select street</button><button onClick={() => p.onObservation(condition.id)}>Select observation</button><button onClick={() => p.onViewport([-73.999,40.711,-73.994,40.715])}>Pan map</button><output aria-label="Visible streets">{p.layers.streets ? p.features.features.length : 0}</output><output aria-label="Visible observations">{p.layers.conditions ? p.observations.features.length : 0}</output></div> }));
 beforeEach(() => {
   vi.mocked(getIntelligenceReleases).mockResolvedValue([]);
   vi.mocked(getConditionSummary).mockResolvedValue(conditionSummary);
@@ -20,7 +21,7 @@ it('loads real-mode records, independent layers and a keyboard street list', asy
   const user = userEvent.setup(), select = vi.fn(); render(<OfficialMapPage snapshot={snapshot} selected={null} onSelect={select} onProjects={vi.fn()}/>);
   await waitFor(() => expect(screen.getByLabelText('Visible streets')).toHaveTextContent('1')); expect(screen.getByRole('heading', { name: 'Start with a street.' })).toBeVisible(); expect(getMunicipalViewport).not.toHaveBeenCalledWith('conditions', expect.anything(), expect.anything(), expect.anything());
   await user.click(screen.getByRole('button', { name: 'Layers' })); await user.click(screen.getByRole('checkbox', { name: 'Pavement observations' })); await waitFor(() => expect(screen.getByLabelText('Visible observations')).toHaveTextContent('1'));
-  await user.click(screen.getByRole('checkbox', { name: 'Official streets' })); expect(screen.getByLabelText('Visible streets')).toHaveTextContent('0'); expect(screen.getByLabelText('Visible observations')).toHaveTextContent('1');
+  await user.click(screen.getByRole('checkbox', { name: 'Official street geometry' })); expect(screen.getByLabelText('Visible streets')).toHaveTextContent('0'); expect(screen.getByLabelText('Visible observations')).toHaveTextContent('1');
   await user.click(screen.getByRole('button', { name: 'Open street list' })); const list = screen.getByRole('region', { name: 'Keyboard accessible road list' }); const street = within(list).getByRole('button', { name: /Test Street/ }); street.focus(); await user.keyboard('{Enter}'); expect(select).toHaveBeenCalledWith(road.id);
   await user.keyboard('{Escape}'); expect(screen.queryByRole('region', { name: 'Keyboard accessible road list' })).not.toBeInTheDocument(); expect(screen.getByRole('textbox', { name: 'Find road segments' })).toHaveFocus();
 });
@@ -41,11 +42,11 @@ it('offers inspection and located permit evidence by keyboard without enabling t
   await user.click(within(list).getByRole('button', { name: 'Inspections' })); const inspection = await within(list).findByRole('button', { name: /3.38.*2025-08-03/ });
   expect(screen.getByLabelText('Visible observations')).toHaveTextContent('0'); inspection.focus(); await user.keyboard('{Enter}'); expect(screen.getByText('3.38 / 10')).toBeVisible(); expect(screen.getByText(/not an accepted link/)).toBeVisible();
   await user.click(within(list).getByRole('button', { name: 'Located permits' })); const record = await within(list).findByRole('button', { name: new RegExp(permit.source_record_key) }); record.focus(); await user.keyboard('{Enter}'); expect(screen.getByText(/not a confirmed construction footprint/)).toBeVisible();
-  const previous = vi.mocked(getMunicipalViewport).mock.calls.at(-1)![2]; await user.click(within(list).getByRole('button', { name: 'Narrow geographic view' })); await waitFor(() => expect(vi.mocked(getMunicipalViewport).mock.calls.at(-1)![2]).not.toEqual(previous));
+  const calls = vi.mocked(getMunicipalViewport).mock.calls.length; await user.click(within(list).getByRole('button', { name: 'Narrow geographic view' })); await waitFor(() => expect(getMunicipalViewport).toHaveBeenCalledTimes(calls));
 });
 it('retains the street list when an optional layer fails and explains unlocated coverage', async () => {
   vi.mocked(getMunicipalViewport).mockImplementation(async kind => { if (kind === 'conditions') throw new Error('Inspection source unavailable'); return kind === 'roads' ? [road] : []; });
-  const user = userEvent.setup(); render(<OfficialMapPage snapshot={snapshot} selected={null} onSelect={vi.fn()} onProjects={vi.fn()}/>); await user.click(screen.getByRole('button', { name: 'Layers' })); await user.click(screen.getByRole('checkbox', { name: 'Pavement observations' })); expect(await screen.findByRole('alert')).toHaveTextContent('Inspection source unavailable'); await user.click(screen.getByRole('checkbox', { name: 'Located permits' })); expect(await screen.findByText(/No located permits in this viewport/)).toBeVisible(); await user.click(screen.getByRole('button', { name: 'Open street list' })); expect(await screen.findByRole('button', { name: /Test Street.*LION/ })).toBeVisible();
+  const user = userEvent.setup(); render(<OfficialMapPage snapshot={snapshot} selected={null} onSelect={vi.fn()} onProjects={vi.fn()}/>); await user.click(screen.getByRole('button', { name: 'Layers' })); await user.click(screen.getByRole('checkbox', { name: 'Pavement observations' })); expect(await screen.findByRole('alert')).toHaveTextContent('Inspection source unavailable'); await user.click(screen.getByRole('checkbox', { name: 'Permit locations' })); expect(await screen.findByText(/No located permits in this viewport/)).toBeVisible(); await user.click(screen.getByRole('button', { name: 'Open street list' })); expect(await screen.findByRole('button', { name: /Test Street.*LION/ })).toBeVisible();
 });
 it('ignores a stale selected-road response after switching selection', async () => {
   let resolve!: (r: typeof road) => void; vi.mocked(getMunicipalRoad).mockImplementationOnce(() => new Promise(r => { resolve = r; })).mockResolvedValueOnce({ ...road, id: 'road-test-b', values: { name: 'Second Street' } });
@@ -111,4 +112,13 @@ it.each([{raw:'7.72',rounded:8,grade:'good',nonRating:null},{raw:'0.0',rounded:n
   await user.selectOptions(screen.getByRole('combobox',{name:'Road category'}),'good');
   expect(onRoute).toHaveBeenCalledWith({condition:'good'});
   await waitFor(()=>expect(getMunicipalViewport).toHaveBeenCalledWith('roads',sid,expect.anything(),expect.any(AbortSignal),{release_id:id,as_of_date:'2026-11-08',policy_id:policy.id}));
+});
+it('shows the rating legend, disables incompatible ratings, and keeps engineering history lazy',async()=>{
+ const {getMapRatings}=await import('../services/standardized');vi.mocked(getMapRatings).mockRejectedValueOnce(new Error('STANDARDIZED_SNAPSHOT_MISMATCH: select matching snapshot'));
+ const user=userEvent.setup();render(<OfficialMapPage snapshot={snapshot} selected={road.id} onSelect={vi.fn()} onProjects={vi.fn()}/>);
+ await screen.findByRole('heading',{name:'Test Street'});expect(getRoadConditions).not.toHaveBeenCalled();expect(getConditionSummary).not.toHaveBeenCalled();
+ expect(screen.getByLabelText('Indicative street rating legend')).toHaveTextContent('Indicative street-level ratings. Not verified segment conditions.');
+ await user.click(screen.getByRole('button',{name:'Layers'}));await waitFor(()=>expect(screen.getByRole('checkbox',{name:'Indicative Street Ratings'})).toBeDisabled());
+ expect(screen.getByText(/Indicative ratings unavailable:/)).toHaveTextContent('STANDARDIZED_SNAPSHOT_MISMATCH');
+ await user.click(screen.getByText('Verified segment evidence and engineering review'));await waitFor(()=>expect(getRoadConditions).toHaveBeenCalledOnce());
 });

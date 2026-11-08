@@ -48,7 +48,7 @@ it('restores official camera/layers/search across views and browser history with
   window.history.replaceState(null,'',`/#/map?mode=official&snapshot=${snapshot.id}&mapq=Test&layers=streets,conditions&bbox=-74.01,40.71,-74.005,40.715`);const user=userEvent.setup();render(<App/>);await screen.findByRole('region',{name:'Test map'});
   expect(screen.getByRole('textbox',{name:'Find road segments'})).toHaveValue('Test');expect(screen.getByLabelText('Restored map extent')).toHaveTextContent('-74.01,40.71,-74.005,40.715');
   await nav(user,'Overview');await screen.findByRole('heading',{name:'Infrastructure overview'});await act(async()=>window.history.back());await screen.findByRole('region',{name:'Test map'});expect(screen.getByRole('textbox',{name:'Find road segments'})).toHaveValue('Test');
-  await user.click(screen.getByRole('button',{name:'Layers'}));expect(screen.getByRole('checkbox',{name:'Pavement observations'})).toBeChecked();expect(screen.getByRole('checkbox',{name:'Located permits'})).not.toBeChecked(); expect(api.analyzeConflicts).not.toHaveBeenCalled();
+  await user.click(screen.getByRole('button',{name:'Layers'}));expect(screen.getByRole('checkbox',{name:'Pavement observations'})).toBeChecked();expect(screen.getByRole('checkbox',{name:'Permit locations'})).not.toBeChecked(); expect(api.analyzeConflicts).not.toHaveBeenCalled();
 });
 it('runs explicit synthetic coordination, links project→road→planner, preserves draft across views and evaluates only on request',async()=>{
   const user=userEvent.setup();render(<App/>);await user.click(await screen.findByRole('button',{name:'Select a mapped road'}));await screen.findByRole('heading',{name:/Demo segment R-001/});
