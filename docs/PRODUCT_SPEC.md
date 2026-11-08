@@ -64,7 +64,7 @@ M0–M6 implemented these as panels on one page. M7 supersedes that layout with 
 
 ## Exclusions and success
 
-No live utility clearance, excavation authorization, engineering certification, procurement, automatic approval, payments, traffic simulation, or citywide predictive claims. Prioritization and detours are stretch; forecasting, continuous live synchronization, other asset categories, and multi-tenancy remain beyond M7. Manually reviewed official geographic snapshots are now M7 scope.
+No live utility clearance, excavation authorization, engineering certification, procurement, automatic approval, payments, traffic simulation, or citywide predictive claims. Prioritization and real-road planning have proposed M8 gates below; detours, forecasting, continuous live synchronization, other asset categories and multi-tenancy remain deferred. Manually reviewed official geographic snapshots are implemented M7 scope.
 
 MVP success means a reviewer can complete the workflow above on frozen fixtures, reproduce each total and conflict from cited inputs, distinguish synthetic examples from observations, see a budget tradeoff and a missing-utility warning, and recover to deterministic explanations when AI fails. M6 must demonstrate both a detected conflict and an indeterminate case. Demo savings are hypothetical and are not validated municipal savings.
 
@@ -93,3 +93,42 @@ M7-F5: Preserve all old saved records, IDs, calculation/replay versions, optimis
 M7-F6: Navigation loads one primary workflow. View/mode/snapshot/road, official map camera/layers, separate map/permit searches, permit status/location, road category and record/analysis/scenario/evaluation selections are shareable in 7.3. Invalid links show a correction state while retaining an already mounted synthetic editor. Replacing a dirty scenario requires explicit keep/discard; ordinary view switches do not replace it. Filters are scoped visibly. Pending writes and dirty scenario edits survive ordinary route changes; mode changes retain mounted synthetic drafts and pending-write reconciliation in their original context, without copying or discarding them. No navigation/GET creates estimates, analyses, evaluations or AI audits.
 
 M7 nonfunctional acceptance is defined by test IDs in M7_IMPLEMENTATION_PLAN: explicit snapshot isolation; reproducible local ingestion; atomic publication; bounded paginated reads; accessible fallback; verified source attribution; local/no-key operation after import; preservation of immutable history. Performance numbers are targets to measure on stated hardware, not verified claims. New architecture does not remove the unauthenticated local-only release boundary.
+
+## M8 product scope (partially implemented)
+
+[M8_IMPLEMENTATION_PLAN](M8_IMPLEMENTATION_PLAN.md) defines sequential A1–A7 acceptance gates. M8.0 changed documentation only. M8.1 now partially implements M8-F1 and the user-requested read-only M8-F2/Map subset; its real human-review/category source gates remain open. [M8_1_IMPLEMENTATION](M8_1_IMPLEMENTATION.md) is the implementation record. Completed M7 inspection behavior remains the baseline; its statement that official planning is unavailable describes current runtime, not a prohibition on separately gated M8 contracts.
+
+- M8-F1: Associate actual NYC road rows and pavement observations through reviewed versioned scope-aware links, including partial/one-to-many coverage; retain competing and unknown associations and original evidence.
+- M8-F2: Present defensible source-applicable or explicitly labeled application-policy condition classifications and recency relative to a supplied date; preserve decimal ratings, non-rating reasons, pass/direction, conflicts and unknowns. No condition forecast or automatic treatment prescription.
+- M8-F3: Improve bounded permit coverage and reviewed road references without converting administrative windows/statuses into physical work/utility facts.
+- M8-F4: Enable explicit real-road estimates only from reviewed quantities/methods/prices or supplied planning assumptions; show units, price basis, nullable bounds/duration, exclusions and immutable inputs. Never reuse synthetic rates/suitability.
+- M8-F5: Provide transparent maintenance planning priorities with components, policy weights, tied ranks, sensitivity and an unknown/unranked queue. No safety urgency, automatic funding or program selection.
+- M8-F6: Screen qualified spatial/temporal evidence and compare explicitly authored official-road scenarios with unknown coverage/incomplete checks, protected drafts and reproducible saved results. Administrative-window findings are labeled separately from actual-work/hypothetical findings.
+- M8-F7: Integrate into the same Map, Overview, Projects and Scenarios; explicit pinned intelligence context, source disclosure, keyboard/no-WebGL fallback, deterministic no-key explanations and accountable human review. Navigation/GET never execute or persist planning analyses/evaluations or write AI audits; deterministic inspection projections remain read-only. All M0–M7 saved records and synthetic semantics remain usable.
+
+M8 does not add live synchronization, excavation clearance, utility inference, autonomous approvals/spending, automatic schedules, forecasts, citywide coverage/performance claims or production deployment. Source gates may block a stage; disclose partial delivery rather than filling gaps to meet a screen narrative.
+
+
+### M8.1 owner-approved pilot checkpoint
+
+The [owner-approved M8.1 pilot](M8_1_PILOT_IMPLEMENTATION.md) supplies five explicit reviewed road references and a visibly project-defined grading assumption. The map/inspector/filter path distinguishes accepted observation grades from eligible road conditions; it preserves raw values, inspection/source/review/policy lineage, Unknown reasons and explicit release/date context. Five partial links do not supply a supported whole-road rating. This authorized M8.1 extension does not complete M8.2 or enable official costing/ranking/scenario/AI engines.
+
+Current owner-authorized M8.2 scope is Geographic Matching and Construction Coordination; see [M8_2_IMPLEMENTATION](M8_2_IMPLEMENTATION.md) for the revised stage gate. Projects now supports searchable official permits, five location-evidence statuses, review/provenance/date disclosures, snapshot-wide coverage and explicit potential coordination screening. Permit road references remain candidates until reviewed; administrative windows remain separate from actual schedules. Zero accepted permit links means positive real-world accepted-location/precision acceptance remains blocked. Synthetic projects/scenarios are preserved; costing, ranking, confirmed conflicts and later-stage work are not started.
+
+
+## M8.3 current official-road repair planning
+
+The official street inspector now opens an explicit repair-planning form with blank numeric inputs. A planner can declare independent localized-patch/resurfacing scopes, provenance, area rates, allowances, contingency and optional rate sensitivity/productivity, then preview/save/retrieve immutable estimates. Results are calculated planning assumptions, never bids, expenditures, measured road dimensions, engineering suitability or construction schedules. No authoritative NYC pricing catalog is activated; missing required inputs make cost unavailable. Reconstruction and official scenario execution remain unavailable. [Implementation and open acceptance gate](M8_3_IMPLEMENTATION.md); this owner-authorized milestone does not resolve prior data-source/review gates or start M8.4.
+
+
+## M8.4 transparent road review priorities
+
+Dashboard and Map now expose explicit road-review policies over a bounded selected road-row set. Maintenance-need and inspection-evidence objectives remain distinct. Per-road explanations expose exact contributions, unknowns, source/inspection dates, costs, administrative-reference limits and required human review. Search/status filters preserve saved ranks; compare 2–5 roads and inspect explicitly supplied policy variants. Numeric policy fields start blank. Users explicitly preview/save/retrieve frozen runs; current policy/source evidence limits can yield all-unranked results. No default municipal weights, traffic/risk/failure/lifespan assumptions, budget allocation or optimal citywide repair schedule. The positive data/policy gate is recorded in [M8_4_IMPLEMENTATION](M8_4_IMPLEMENTATION.md), independently of prior milestone blockers.
+
+## M8.5 delivered construction coordination scope
+
+Map offers explicit official-context construction screening: choose administrative evidence separately from hypothetical/cited work declarations, provide geometry/schedules/assumptions and policy thresholds, inspect qualified concurrent work, multiple closure plans, sequential pavement-rework or adjacent-work opportunities, compare named schedule alternatives, save replayable results and record separate human notes. Planner declarations do not become official observations. Unknown grade/location/timing/depth and missing utility coverage remain visible; no finding is clearance. Same-scope cost differences require a frozen estimate and explicit schedule-cost additions; fewer findings never imply savings. Supported findings relate supplied plans, not verified actual municipal construction. General official scenario management and M8.6 remain unimplemented. See M8_5_IMPLEMENTATION for actual gate limits.
+
+## M8.6 owner-authorized product integration
+
+The latest M8.6 scope integrates existing M8.1–M8.5 contracts in the four M7 destinations, adds pinned saved planning context and evidence-grounded explanations, and retains the map as primary surface. Official Scenarios presents within-result treatment, policy and schedule alternatives only where the existing saved contract supports them. No new general municipal scenario CRUD/evaluation, cross-scope budget model or real-work source claim is introduced. This supersedes earlier planned stage numbering, without passing earlier positive source/review gates. Existing synthetic scenarios remain separate and intact. Acceptance evidence and deferred capabilities: [M8_6_IMPLEMENTATION](M8_6_IMPLEMENTATION.md).

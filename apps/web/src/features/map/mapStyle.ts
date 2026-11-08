@@ -5,11 +5,12 @@ export const onlineBasemap = !import.meta.env.VITE_BASEMAP || import.meta.env.VI
 export const PILOT: [number, number, number, number] = [-74.020, 40.700, -73.985, 40.725];
 export const FOCUS: [number, number, number, number] = [-74.011, 40.709, -74.003, 40.716];
 export const emptyCollection = (): FeatureCollection => ({ type: 'FeatureCollection', features: [] });
+export const pilotColors = {good: '#277953', fair: '#e2b52b', poor: '#c43d3d', unknown: '#859198'};
 export function recordFeatures(records: MunicipalRecord[]): FeatureCollection<Geometry> {
   return { type: 'FeatureCollection', features: records.filter(r => r.geometry).map(r => ({ type: 'Feature', id: r.id, geometry: r.geometry!, properties: {
     road_id: r.kind === 'road' ? r.id : '', record_id: r.id, name: r.values.name || r.values.on_street || r.source_record_key,
     rating: r.values.rating !== null && r.values.rating !== undefined && Number.isFinite(Number(r.values.rating)) ? Number(r.values.rating) : -1,
-    condition: 'unknown', location_basis: r.location_basis || 'source_geometry',
+    condition: r.kind === 'road' ? r.condition_summary?.category || 'unknown' : 'unknown', location_basis: r.location_basis || 'source_geometry',
   } })) };
 }
 export function mapStyle(online: boolean): StyleSpecification {

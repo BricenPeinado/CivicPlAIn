@@ -8,19 +8,19 @@ import type { Bbox } from '../../types/municipal';
 import type { LayerState } from '../../hooks/useMunicipalData';
 import { categoryColors } from '../conflicts/ConflictReview';
 import { colors } from './colors';
-import { emptyCollection, FOCUS, mapStyle, onlineBasemap } from './mapStyle';
+import { emptyCollection, FOCUS, mapStyle, onlineBasemap, pilotColors } from './mapStyle';
 maplibregl.setWorkerUrl(workerUrl);
 export { colors } from './colors';
 interface Props {
   roads?: RoadsCollection; features?: FeatureCollection; observations?: FeatureCollection; permits?: FeatureCollection; shoreline?: FeatureCollection;
-  selectedGeometry?: FeatureCollection; focusPadding?: number; focusBounds?: Bbox | null; official?: boolean; layers?: LayerState;
+  screeningFeatures?: FeatureCollection; priorityFeatures?: FeatureCollection; candidateFeatures?: FeatureCollection; selectedGeometry?: FeatureCollection; focusPadding?: number; focusBounds?: Bbox | null; official?: boolean; layers?: LayerState;
   selectedId: string | null; onSelect: (id: string) => void; onViewport?: (bbox: Bbox) => void;
   onObservation?: (id: string) => void; onPermit?: (id: string) => void;
   projects?: WorkProject[]; highlightedProjects?: string[]; highlightedRoads?: string[];
   onSelectProject?: (id: string) => void; showProjects?: boolean; visibleCategories?: InfrastructureCategory[];
 }
 const EMPTY: never[] = [];
-export function RoadMap({ roads, features, observations, permits, shoreline, selectedGeometry, focusBounds, focusPadding = 55, official = false, layers,
+export function RoadMap({ screeningFeatures, priorityFeatures, candidateFeatures, roads, features, observations, permits, shoreline, selectedGeometry, focusBounds, focusPadding = 55, official = false, layers,
   selectedId, onSelect, onViewport, onObservation, onPermit, projects = EMPTY, highlightedProjects = EMPTY, highlightedRoads = EMPTY,
   onSelectProject, showProjects = true, visibleCategories = EMPTY }: Props) {
   const container = useRef<HTMLDivElement>(null), map = useRef<MapInstance | null>(null);
@@ -47,11 +47,11 @@ export function RoadMap({ roads, features, observations, permits, shoreline, sel
       instance.on('load', () => {
         if (!instance || !active) return;
         loaded = true; clearTimeout(deadline);
-        for (const id of ['shoreline', 'roads', 'observations', 'permits', 'selection', 'projects']) instance.addSource(id, { type: 'geojson', data: emptyCollection() });
+        for (const id of ['shoreline', 'roads', 'observations', 'permits', 'selection', 'projects', 'screening', 'priorities', 'candidates']) instance.addSource(id, { type: 'geojson', data: emptyCollection() });
         instance.addLayer({ id: 'shoreline', type: 'line', source: 'shoreline', paint: { 'line-color': '#9ab5c5', 'line-width': 2 } });
         instance.addLayer({ id: 'road-casing', type: 'line', source: 'roads', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#fff', 'line-width': official ? 6 : 13 } });
         instance.addLayer({ id: 'road-color', type: 'line', source: 'roads', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: {
-          'line-color': official ? '#738a9b' : ['match', ['get', 'condition'], 'good', colors.good, 'fair', colors.fair, 'poor', colors.poor, colors.unknown], 'line-width': official ? 2.3 : 6 } });
+          'line-color': ['match', ['get', 'condition'], 'good', official ? pilotColors.good : colors.good, 'fair', official ? pilotColors.fair : colors.fair, 'poor', official ? pilotColors.poor : colors.poor, official ? pilotColors.unknown : colors.unknown], 'line-width': official ? 2.3 : 6 } });
         instance.addLayer({ id: 'road-selected', type: 'line', source: 'roads', filter: ['==', ['get', 'road_id'], ''], paint: { 'line-color': '#086cc9', 'line-width': 10, 'line-opacity': .5 } });
         instance.addLayer({ id: 'road-hover', type: 'line', source: 'roads', filter: ['==', ['get', 'road_id'], ''], paint: { 'line-color': '#194d78', 'line-width': 8, 'line-opacity': .4 } });
         instance.addLayer({ id: 'road-hit', type: 'line', source: 'roads', paint: { 'line-width': 18, 'line-opacity': 0 } });
@@ -60,7 +60,11 @@ export function RoadMap({ roads, features, observations, permits, shoreline, sel
           'line-color': ['case', ['<', ['get', 'rating'], 0], '#667385', ['interpolate', ['linear'], ['get', 'rating'], 0, '#c3d9e9', 10, '#185b8f']] } });
         instance.addLayer({ id: 'permit-lines', type: 'line', source: 'permits', filter: ['!=', ['geometry-type'], 'Point'], paint: { 'line-color': '#9c650c', 'line-width': 5, 'line-dasharray': [1, 1] } });
         instance.addLayer({ id: 'permit-points', type: 'circle', source: 'permits', filter: ['==', ['geometry-type'], 'Point'], paint: { 'circle-radius': 6, 'circle-color': '#9c650c', 'circle-stroke-color': '#fff', 'circle-stroke-width': 2 } });
+        instance.addLayer({id:'permit-candidates',type:'line',source:'candidates',paint:{'line-color':'#8c6a2d','line-width':6,'line-dasharray':[1,2]}});
+        instance.addLayer({id:'priorities',type:'line',source:'priorities',paint:{'line-color':['match',['get','priority_status'],'ranked','#7951a6','#667385'],'line-width':5,'line-dasharray':[3,2]}});
         instance.addLayer({ id: 'selection', type: 'line', source: 'selection', paint: { 'line-color': '#0069c7', 'line-width': 6 } });
+        instance.addLayer({id:'screening-fill',type:'fill',source:'screening',filter:['==',['geometry-type'],'Polygon'],paint:{'fill-color':'#c65e05','fill-opacity':.16}});
+        instance.addLayer({id:'screening-lines',type:'line',source:'screening',paint:{'line-color':'#c65e05','line-width':5,'line-dasharray':[2,1]}});
         if (official) instance.addLayer({ id: 'road-labels', type: 'symbol', source: 'roads', minzoom: 13,
           layout: { 'symbol-placement': 'line', 'text-field': ['get', 'name'], 'text-font': ['Arial', 'Helvetica', 'sans-serif'], 'text-size': 11, 'symbol-spacing': 350 },
           paint: { 'text-color': '#344c5e', 'text-halo-color': '#fff', 'text-halo-width': 2 } });
@@ -102,9 +106,9 @@ export function RoadMap({ roads, features, observations, permits, shoreline, sel
     if (!ready || !map.current) return;
     const synthetic: FeatureCollection = { type: 'FeatureCollection', features: (roads?.features || []).map(f => ({ ...f, id: f.properties.id,
       properties: { road_id: f.properties.id, name: f.properties.name, condition: f.properties.condition_summary.category } })) };
-    for (const [id, data] of Object.entries({ roads: features || synthetic, observations, permits, shoreline, selection: selectedGeometry }))
+    for (const [id, data] of Object.entries({ roads: features || synthetic, observations, permits, shoreline, screening:screeningFeatures, priorities:priorityFeatures, candidates:candidateFeatures, selection: selectedGeometry }))
       (map.current.getSource(id) as GeoJSONSource)?.setData(data || emptyCollection());
-  }, [roads, features, observations, permits, shoreline, selectedGeometry, ready]);
+  }, [roads, features, observations, permits, shoreline, screeningFeatures, priorityFeatures, candidateFeatures, selectedGeometry, ready]);
   useEffect(() => { if (ready) map.current?.setFilter('road-selected', ['==', ['get', 'road_id'], selectedId || '']); }, [selectedId, ready]);
   useEffect(() => {
     if (!ready || !map.current || !layers) return;

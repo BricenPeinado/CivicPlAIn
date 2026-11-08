@@ -1,0 +1,104 @@
+{
+  "contract_version": "priority-verification-v1",
+  "database_integrity": "PASS",
+  "interpretation": "Technical QA policies are not independently reviewed municipal policies. Ranking unknown evidence does not establish pavement need, risk or an optimal schedule.",
+  "mode": "read_only_offline_no_approval",
+  "runs": [
+    {
+      "distinct_rank_values": [
+        1
+      ],
+      "eligible_official_condition_rows": 0,
+      "id": "priority-036d10710d35e7451728eb0ef972101c4b82c0b18e049b690d33a6acd3d1711a",
+      "input_hash": "036d10710d35e7451728eb0ef972101c4b82c0b18e049b690d33a6acd3d1711a",
+      "objective": "inspection_review",
+      "other_existing_snapshots_isolated": [
+        "nyc-3947b35876a619b31067db96b1409ad8"
+      ],
+      "pinned_evidence": "PASS",
+      "policy_hash": "044a2f6f1d5c9363545c1dd88a0dd5ce7958f8a5d740a105f4da48240bc4b253",
+      "ranked": 100,
+      "replay": "PASS",
+      "result_hash": "b60bc3abc2cad1a332975b7ebea8c0408bc200b2a6f4d930e3a4d96f8693e8ce",
+      "scoped_road_rows": 100,
+      "selected_cost_rows": 0,
+      "sensitivity": [
+        {
+          "policy_hash": "84a140d42350933ff3818c1dea5c6a6bbb6a0d643a85b4713e882333cb3a121f",
+          "ranked": 0,
+          "result_hash": "98c3d82642f28fbcd47e1df71ef612a3fa1e07363c552d7eb86ec0d3bf9b35cf",
+          "unranked": 100
+        }
+      ],
+      "unranked": 0,
+      "verified_coordination_opportunities": 0
+    },
+    {
+      "distinct_rank_values": [
+        1
+      ],
+      "eligible_official_condition_rows": 0,
+      "id": "priority-4c29be8a9b8e8c9bc650749ab8142029d4ee83fc13ec260fa424cca3cc61aa28",
+      "input_hash": "4c29be8a9b8e8c9bc650749ab8142029d4ee83fc13ec260fa424cca3cc61aa28",
+      "objective": "inspection_review",
+      "other_existing_snapshots_isolated": [
+        "nyc-3947b35876a619b31067db96b1409ad8"
+      ],
+      "pinned_evidence": "PASS",
+      "policy_hash": "3bd8f355441eb65e23e93e26e2d9cd9f86d5a8d04fb6201fcf06cd7581f478e0",
+      "ranked": 2,
+      "replay": "PASS",
+      "result_hash": "d6b6b75ea55270d30c2b4cbe9fe64ae0cd269bfc523c92d0a27e5194f8879ec6",
+      "scoped_road_rows": 2,
+      "selected_cost_rows": 0,
+      "sensitivity": [],
+      "unranked": 0,
+      "verified_coordination_opportunities": 0
+    },
+    {
+      "distinct_rank_values": [
+        1
+      ],
+      "eligible_official_condition_rows": 0,
+      "id": "priority-71a44fe2da00edf4a5bbbd51d4e00e9195086278dab2939f8cbbc130593244c8",
+      "input_hash": "71a44fe2da00edf4a5bbbd51d4e00e9195086278dab2939f8cbbc130593244c8",
+      "objective": "inspection_review",
+      "other_existing_snapshots_isolated": [
+        "nyc-3947b35876a619b31067db96b1409ad8"
+      ],
+      "pinned_evidence": "PASS",
+      "policy_hash": "f9c1317780ac9da9af98eb26eadba81e50d3f50088f29fac03968fc89d08850b",
+      "ranked": 1,
+      "replay": "PASS",
+      "result_hash": "90b3d21e83a4fd5ef12ed5a2dba96276bac4f538cd9bb288c13eacf226b8bc6b",
+      "scoped_road_rows": 100,
+      "selected_cost_rows": 1,
+      "sensitivity": [],
+      "unranked": 99,
+      "verified_coordination_opportunities": 0
+    },
+    {
+      "distinct_rank_values": [],
+      "eligible_official_condition_rows": 0,
+      "id": "priority-e1ede80d3aa1e704e7840b78ba57572e4c28c44a2997975989192198803d82dc",
+      "input_hash": "e1ede80d3aa1e704e7840b78ba57572e4c28c44a2997975989192198803d82dc",
+      "objective": "maintenance_review",
+      "other_existing_snapshots_isolated": [
+        "nyc-3947b35876a619b31067db96b1409ad8"
+      ],
+      "pinned_evidence": "PASS",
+      "policy_hash": "7556183dd6885f0f96a8871054dd810d2787328891f21f3ee492059d742398c1",
+      "ranked": 0,
+      "replay": "PASS",
+      "result_hash": "cd97c5f3c5e8c7cbce4ec536857af89a9b8e868f9c9bd0479c3d24b4e2b0aabc",
+      "scoped_road_rows": 100,
+      "selected_cost_rows": 0,
+      "sensitivity": [],
+      "unranked": 100,
+      "verified_coordination_opportunities": 0
+    }
+  ],
+  "saved_runs": 4,
+  "snapshot_id": "nyc-4620b9e30c1c0bd5be4252fe27999c80",
+  "verification_hash": "f37c65c8cb25609d84596dc350d907d594861994386d2b2a748cc813d91b8706"
+}

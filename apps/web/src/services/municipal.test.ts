@@ -44,3 +44,29 @@ it('rejects unaccepted road-condition links even when a latest ID is supplied', 
   const { condition } = await import('../test-municipal'); vi.stubGlobal('fetch', vi.fn().mockResolvedValue(reply({ data: [condition], meta: { ...meta, latest_usable_id: condition.id } })));
   await expect(getRoadConditions(sid, road.id)).rejects.toThrow('unaccepted road link');
 });
+
+it('binds condition summaries to road, snapshot, date and explicit intelligence release', async () => {
+  const { getConditionSummary } = await import('./municipal');
+  const { conditionSummary } = await import('../test-municipal');
+  const fetch = vi.fn().mockResolvedValueOnce(reply({data:conditionSummary,meta})).mockResolvedValueOnce(reply({data:{...conditionSummary,intelligence_release_id:'wrong'},meta})).mockResolvedValueOnce(reply({data:{...conditionSummary,as_of_date:'2025-01-01'},meta}));vi.stubGlobal('fetch',fetch);
+  expect(await getConditionSummary(sid,road.id,'2026-11-01','365')).toEqual(conditionSummary);
+  expect(fetch.mock.calls[0][0]).toContain('stale_after_days=365');
+  await expect(getConditionSummary(sid,road.id,'2026-11-01','365',undefined,'intel-selected')).rejects.toThrow('context');
+  await expect(getConditionSummary(sid,road.id,'2026-11-01','365')).rejects.toThrow('context');
+});
+it('rejects road colors from an unrelated policy or release context', async () => {
+ const {getMunicipalPage}=await import('./municipal');const {conditionSummary}=await import('../test-municipal');
+ const policy={id:'civicplain-pilot-pavement-v1.0',name:'CivicPlAIn Pilot Policy v1.0',hash:'a'.repeat(64),classification:'planning_assumption',official_nyc_dot_policy:false};
+ const filters={release_id:'intel-selected',as_of_date:'2026-11-01',policy_id:policy.id};
+ const summary={...conditionSummary,method_version:'road-condition-v2-pilot',intelligence_release_id:filters.release_id,category:'good',policy};
+ vi.stubGlobal('fetch',vi.fn().mockResolvedValueOnce(reply({data:[{...road,condition_summary:summary}],meta})).mockResolvedValueOnce(reply({data:[{...road,condition_summary:{...summary,road_id:'wrong'}}],meta})).mockResolvedValueOnce(reply({data:[{...road,condition_summary:{...summary,policy:{...policy,official_nyc_dot_policy:true}}}],meta})));
+ expect((await getMunicipalPage('road-segments',sid,filters)).data).toHaveLength(1);
+ await expect(getMunicipalPage('road-segments',sid,filters)).rejects.toThrow('context');
+ await expect(getMunicipalPage('road-segments',sid,filters)).rejects.toThrow('context');
+});
+it('rejects cross-release permit evidence and confirmed coordination claims',async()=>{
+ const {getPermitCoordination}=await import('./municipal');
+ vi.stubGlobal('fetch',vi.fn().mockResolvedValueOnce(reply({data:{...permit,permit_location:{snapshot_id:sid,permit_release_id:'foreign',status:'located',method_version:'permit-road-reference-v1',actual_schedule:'unknown'}},meta})).mockResolvedValueOnce(reply({data:[{snapshot_id:sid,permit_release_id:null,permit_ids:[permit.id],confirmed_conflict:true,actual_work_overlap:'unknown'}],meta})));
+ await expect(getMunicipalPermit(sid,permit.id,undefined,undefined,true)).rejects.toThrow('context');
+ await expect(getPermitCoordination(sid,permit.id)).rejects.toThrow('Unsupported coordination');
+});

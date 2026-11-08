@@ -1,0 +1,156 @@
+{
+  "contract_version": "screening-verification-v1",
+  "database_integrity": "PASS",
+  "interpretation": "Agent QA work/schedules/cost additions are explicit technical assumptions, not documented actual construction, approved municipal inputs or independent review. No finding is excavation clearance.",
+  "mode": "read_only_offline_no_approval",
+  "runs": [
+    {
+      "alternatives": [],
+      "checked_pairs": 1,
+      "cost_comparison": {
+        "comparisons": [],
+        "reason": "No complete explicit same-scope estimate and schedule-cost assumptions supplied",
+        "status": "unavailable"
+      },
+      "finding_categories": {},
+      "finding_types": {},
+      "id": "screen-0f83edc2c87ef78a821bc6954b8360e16f56b99bf1b5d1ed8ad23e2fc387e54b",
+      "indeterminate_pairs": 1,
+      "input_hash": "0f83edc2c87ef78a821bc6954b8360e16f56b99bf1b5d1ed8ad23e2fc387e54b",
+      "other_bases_isolated": [
+        "nyc-3947b35876a619b31067db96b1409ad8"
+      ],
+      "permit_location_status_counts": {
+        "candidate": 1,
+        "unlocated": 1
+      },
+      "permits_promoted_to_work_footprints_or_schedules": 0,
+      "pinned_evidence": "PASS",
+      "possible_pairs": 1,
+      "replay": "PASS",
+      "result_hash": "d8acfe19b4f523a79a7c34f0665855a44017ee2bcdd1e345ac3e5744e310afc4",
+      "review_notes": 1,
+      "selected_permits": 2,
+      "work_declarations": 0
+    },
+    {
+      "alternatives": [
+        {
+          "findings": 0,
+          "id": "roadwork-after",
+          "indeterminate_pairs": 6,
+          "result_hash": "d83460730a1efc2b7ab27d3b9a6acee09210238b7e2fb1b1a31528d04a61bd95"
+        }
+      ],
+      "checked_pairs": 6,
+      "cost_comparison": {
+        "base_explicit_addition_usd": "0.00",
+        "base_total_usd": "20.10",
+        "basis": "Same frozen estimate scope in every schedule; differences are exclusively attributed explicit nonoverlapping additions. Not predicted savings, actual expenditure or bid.",
+        "common_estimate_usd": "20.10",
+        "comparisons": [
+          {
+            "alternative_id": "roadwork-after",
+            "difference_from_base_usd": "0.00",
+            "explicit_addition_usd": "0.00",
+            "total_usd": "20.10"
+          }
+        ],
+        "estimate_id": "estimate-7843b258635471f760f0965601fb686933914773cdded23807b8d84dc086f761",
+        "evidence": {
+          "alternative_schedule_additions": {
+            "roadwork-after": {
+              "evidence": {
+                "author": "Codex technical QA only \u2014 no municipal review or approval",
+                "citations": [],
+                "classification": "planning_assumption",
+                "entered_on": "2026-11-08",
+                "note": "Agent-authored hypothetical spatial/schedule/cost test. Dates and location are explicit assumptions, not actual work, measured footprint, utility location or verified construction. No spending or work authorization."
+              },
+              "unit": "USD",
+              "value": "0"
+            }
+          },
+          "base_schedule_addition": {
+            "evidence": {
+              "author": "Codex technical QA only \u2014 no municipal review or approval",
+              "citations": [],
+              "classification": "planning_assumption",
+              "entered_on": "2026-11-08",
+              "note": "Agent-authored hypothetical spatial/schedule/cost test. Dates and location are explicit assumptions, not actual work, measured footprint, utility location or verified construction. No spending or work authorization."
+            },
+            "unit": "USD",
+            "value": "0"
+          },
+          "comparable_scope_and_nonoverlap": "declared_same_scope_nonoverlapping_additions",
+          "estimate_id": "estimate-7843b258635471f760f0965601fb686933914773cdded23807b8d84dc086f761",
+          "evidence": {
+            "author": "Codex technical QA only \u2014 no municipal review or approval",
+            "citations": [],
+            "classification": "planning_assumption",
+            "entered_on": "2026-11-08",
+            "note": "Agent-authored hypothetical spatial/schedule/cost test. Dates and location are explicit assumptions, not actual work, measured footprint, utility location or verified construction. No spending or work authorization."
+          },
+          "treatment": "resurface",
+          "work_id": "qa-resurface"
+        },
+        "exclusions": [
+          "Real construction, traffic, utility and engineering costs unverified; not an actionable project budget"
+        ],
+        "quantity_m2": "20",
+        "scope": {
+          "area": {
+            "evidence": {
+              "author": "Codex technical QA only \u2014 not planner approval",
+              "citations": [],
+              "classification": "planning_assumption",
+              "entered_on": "2026-11-08",
+              "note": "Treatment area: Technical browser verification only. These authored test values are not measured road area, market prices or an approved municipal estimate."
+            },
+            "unit": "m2",
+            "value": "20"
+          },
+          "description": "TECHNICAL QA ONLY \u2014 hypothetical partial test area, not a verified work footprint",
+          "extent": "partial",
+          "length": null,
+          "width": null
+        },
+        "status": "declared_comparable_scope",
+        "treatment": "resurface",
+        "unknowns": [
+          "Treatment suitability and pavement structure unverified",
+          "Actual work footprint/schedule and utility locations unknown",
+          "Rate sensitivity bounds not supplied; cost range unavailable",
+          "Duration unavailable: explicit quantity, productivity, setup and curing assumptions required"
+        ]
+      },
+      "finding_categories": {
+        "potential_coordination_opportunity": 1
+      },
+      "finding_types": {
+        "potential_pavement_rework": 1
+      },
+      "id": "screen-8f64d5c10a1d1d6602693ff40ddec6c04c15c630f07ff770ce2b4f57f569e610",
+      "indeterminate_pairs": 6,
+      "input_hash": "8f64d5c10a1d1d6602693ff40ddec6c04c15c630f07ff770ce2b4f57f569e610",
+      "other_bases_isolated": [
+        "nyc-3947b35876a619b31067db96b1409ad8"
+      ],
+      "permit_location_status_counts": {
+        "candidate": 1,
+        "unlocated": 1
+      },
+      "permits_promoted_to_work_footprints_or_schedules": 0,
+      "pinned_evidence": "PASS",
+      "possible_pairs": 6,
+      "replay": "PASS",
+      "result_hash": "83bb261f0f14a65ba6e0494638071c593bca38030cbac007511b20d25c271ed0",
+      "review_notes": 2,
+      "selected_permits": 2,
+      "work_declarations": 2
+    }
+  ],
+  "saved_runs": 2,
+  "snapshot_id": "nyc-4620b9e30c1c0bd5be4252fe27999c80",
+  "verification_hash": "d81ccff4ac6294e6ad1261a7424f9411f570a943c1db11132e0b2bbfd7442dde"
+}

@@ -27,6 +27,62 @@ for table in ['source_revisions','data_snapshots','snapshot_sources','import_rec
         TABLES.append(f"CREATE TRIGGER {table}_no_{action.lower()} BEFORE {action} ON {table} BEGIN SELECT RAISE(ABORT,'Official snapshots are immutable'); END")
 
 
+M8_TABLES = [
+    """CREATE TABLE intelligence_releases(id TEXT PRIMARY KEY, base_snapshot_id TEXT NOT NULL REFERENCES data_snapshots(id),
+       manifest_hash TEXT NOT NULL UNIQUE, manifest_json TEXT NOT NULL, published_at TEXT NOT NULL, UNIQUE(id,base_snapshot_id))""",
+    """CREATE TABLE road_associations(release_id TEXT NOT NULL, id TEXT NOT NULL, base_snapshot_id TEXT NOT NULL,
+       source_kind TEXT NOT NULL CHECK(source_kind='condition'), source_record_id TEXT NOT NULL,
+       target_kind TEXT NOT NULL CHECK(target_kind='road'), target_road_id TEXT,
+       status TEXT NOT NULL CHECK(status IN ('candidate','accepted','rejected','unmatched')), payload TEXT NOT NULL,
+       PRIMARY KEY(release_id,id), UNIQUE(release_id,source_record_id,target_road_id),
+       CHECK((status='unmatched' AND target_road_id IS NULL) OR (status!='unmatched' AND target_road_id IS NOT NULL)),
+       FOREIGN KEY(release_id,base_snapshot_id) REFERENCES intelligence_releases(id,base_snapshot_id),
+       FOREIGN KEY(base_snapshot_id,source_kind,source_record_id) REFERENCES import_records(snapshot_id,kind,id),
+       FOREIGN KEY(base_snapshot_id,target_kind,target_road_id) REFERENCES import_records(snapshot_id,kind,id))""",
+    'CREATE INDEX associations_by_road ON road_associations(base_snapshot_id,release_id,target_road_id,status)',
+]
+for table in ['intelligence_releases','road_associations']:
+    for action in ['UPDATE','DELETE']:
+        M8_TABLES.append(f"CREATE TRIGGER {table}_no_{action.lower()} BEFORE {action} ON {table} BEGIN SELECT RAISE(ABORT,'Intelligence releases are immutable'); END")
+
+
+# Separate additive family: the historical schema-8 condition-only CHECK is unchanged.
+M9_TABLES = [statement.replace('road_associations', 'permit_associations').replace("source_kind='condition'", "source_kind='permit'").replace('associations_by_road', 'permit_associations_by_road')
+    for statement in M8_TABLES if 'intelligence_releases' not in statement or 'CREATE TABLE road_associations' in statement]
+
+
+M10_TABLES=[
+    """CREATE TABLE municipal_estimates(id TEXT PRIMARY KEY, snapshot_id TEXT NOT NULL,
+        road_kind TEXT NOT NULL CHECK(road_kind='road'), road_id TEXT NOT NULL,
+        input_hash TEXT NOT NULL UNIQUE, result_hash TEXT NOT NULL, payload TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY(snapshot_id,road_kind,road_id) REFERENCES import_records(snapshot_id,kind,id))""",
+    'CREATE INDEX municipal_estimates_by_road ON municipal_estimates(snapshot_id,road_id,id)',
+]
+for action in ['UPDATE','DELETE']:
+    M10_TABLES.append(f"CREATE TRIGGER municipal_estimates_no_{action.lower()} BEFORE {action} ON municipal_estimates BEGIN SELECT RAISE(ABORT,'Municipal estimates are immutable'); END")
+
+
+M11_TABLES=[
+    '''CREATE TABLE prioritization_runs(id TEXT PRIMARY KEY, snapshot_id TEXT NOT NULL REFERENCES data_snapshots(id),
+       input_hash TEXT NOT NULL UNIQUE, result_hash TEXT NOT NULL, payload TEXT NOT NULL, created_at TEXT NOT NULL)''',
+    'CREATE INDEX priority_by_snapshot ON prioritization_runs(snapshot_id,id)',
+]
+for action in ['UPDATE','DELETE']:
+    M11_TABLES.append(f"CREATE TRIGGER priority_no_{action.lower()} BEFORE {action} ON prioritization_runs BEGIN SELECT RAISE(ABORT,'Priority runs are immutable'); END")
+
+
+M12_TABLES=[
+    "CREATE TABLE official_screenings(id TEXT PRIMARY KEY, snapshot_id TEXT NOT NULL REFERENCES data_snapshots(id), input_hash TEXT NOT NULL UNIQUE, result_hash TEXT NOT NULL, payload TEXT NOT NULL, created_at TEXT NOT NULL)",
+    "CREATE INDEX screening_by_snapshot ON official_screenings(snapshot_id,id)",
+    "CREATE TABLE official_screening_notes(id TEXT PRIMARY KEY, screening_id TEXT NOT NULL REFERENCES official_screenings(id), payload TEXT NOT NULL)",
+    "CREATE INDEX notes_by_screening ON official_screening_notes(screening_id,id)",
+]
+for table in ['official_screenings','official_screening_notes']:
+    for action in ['UPDATE','DELETE']:
+        M12_TABLES.append(f"CREATE TRIGGER {table}_no_{action.lower()} BEFORE {action} ON {table} BEGIN SELECT RAISE(ABORT,'Screenings and review notes are immutable'); END")
+
+
 def fingerprint(conn):
     """All preexisting complete rows, including JSON bytes, plus schema/triggers."""
     definitions = conn.execute("SELECT type,name,tbl_name,sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type,name").fetchall()
@@ -54,7 +110,7 @@ def inspect_version(conn):
         validate_shape(conn,1)
         return 1
     versions=dict(conn.execute('SELECT version,name FROM schema_migrations'))
-    expected={2:'m2-additive-v1',3:'m3-additive-v1',4:'m4-additive-v1',5:'m5-additive-v1',7:'m7-official-snapshots-v1'}
+    expected={2:'m2-additive-v1',3:'m3-additive-v1',4:'m4-additive-v1',5:'m5-additive-v1',7:'m7-official-snapshots-v1',8:'m8-road-intelligence-v1',9:'m8-permit-intelligence-v1',10:'m8-municipal-estimates-v1',11:'m8-prioritization-v1',12:'m8-official-screening-v1'}
     if not versions or any(expected.get(v)!=name for v,name in versions.items()):
         raise ValueError('Unknown migration version or name')
     if set(versions) != {v for v in expected if v <= max(versions)}:
@@ -67,7 +123,7 @@ def validate_shape(conn,version):
     """Known markers alone are insufficient: verify every required legacy/new DDL object."""
     with sqlite3.connect(':memory:') as expected:
         expected.executescript(SCHEMA)
-        for v,statements in [(2,M2_SCHEMA),(3,M3_SCHEMA),(4,M4_SCHEMA),(5,M5_SCHEMA),(7,TABLES)]:
+        for v,statements in [(2,M2_SCHEMA),(3,M3_SCHEMA),(4,M4_SCHEMA),(5,M5_SCHEMA),(7,TABLES),(8,M8_TABLES),(9,M9_TABLES),(10,M10_TABLES),(11,M11_TABLES),(12,M12_TABLES)]:
             if v<=version:
                 for statement in statements:
                     expected.execute(statement)
@@ -78,7 +134,9 @@ def validate_shape(conn,version):
                 raise ValueError('Malformed schema or missing immutable constraint; refusing migration')
 
 
-def migrate(path: Path, backup: Path, inject_failure=False):
+def migrate(path: Path, backup: Path, inject_failure=False, target_version=7):
+    if target_version not in {7,8,9,10,11,12}:
+        raise ValueError('Unsupported target migration version')
     if path.resolve() == backup.resolve() or backup.exists():
         raise ValueError('Backup must be a new distinct file')
     if not path.exists():
@@ -88,10 +146,10 @@ def migrate(path: Path, backup: Path, inject_failure=False):
         conn.execute('PRAGMA foreign_keys=ON')
         version=inspect_version(conn)
         check(conn)
-        if version==7:
+        if version>=target_version:
             # Verify readiness even when marker exists.
             conn.execute('SELECT snapshot_id FROM import_records LIMIT 1')
-            return {'status':'already_current','version':7}
+            return {'status':'already_current','version':version}
         original=fingerprint(conn)
         backup.parent.mkdir(parents=True,exist_ok=True)
         # sqlite backup includes committed WAL pages. Caller must quiesce external writers.
@@ -114,11 +172,32 @@ def migrate(path: Path, backup: Path, inject_failure=False):
                 for statement in statements:
                     conn.execute(statement)
                 conn.execute('INSERT OR IGNORE INTO schema_migrations VALUES (?,?)',(number,f'm{number}-additive-v1'))
-        for statement in TABLES:
-            conn.execute(statement)
+        if version < 7:
+            for statement in TABLES:
+                conn.execute(statement)
+            conn.execute("INSERT INTO schema_migrations VALUES(7,'m7-official-snapshots-v1')")
+        if target_version >= 8 and version < 8:
+            for statement in M8_TABLES:
+                conn.execute(statement)
+            conn.execute("INSERT INTO schema_migrations VALUES(8,'m8-road-intelligence-v1')")
+        if target_version >= 9 and version < 9:
+            for statement in M9_TABLES:
+                conn.execute(statement)
+            conn.execute("INSERT INTO schema_migrations VALUES(9,'m8-permit-intelligence-v1')")
+        if target_version >= 10 and version < 10:
+            for statement in M10_TABLES:
+                conn.execute(statement)
+            conn.execute("INSERT INTO schema_migrations VALUES(10,'m8-municipal-estimates-v1')")
+        if target_version >= 11 and version < 11:
+            for statement in M11_TABLES:
+                conn.execute(statement)
+            conn.execute("INSERT INTO schema_migrations VALUES(11,'m8-prioritization-v1')")
+        if target_version >= 12 and version < 12:
+            for statement in M12_TABLES:
+                conn.execute(statement)
+            conn.execute("INSERT INTO schema_migrations VALUES(12,'m8-official-screening-v1')")
         if inject_failure:
             raise sqlite3.OperationalError('Injected migration failure')
-        conn.execute("INSERT INTO schema_migrations VALUES(7,'m7-official-snapshots-v1')")
         after=fingerprint(conn)
         for name,values in baseline['rows'].items():
             if name=='schema_migrations':
@@ -130,7 +209,7 @@ def migrate(path: Path, backup: Path, inject_failure=False):
             raise ValueError('Legacy schema changed')
         check(conn)
         conn.commit()
-        return {'status':'migrated','version':7,'backup':str(backup),
+        return {'status':'migrated','version':target_version,'backup':str(backup),
             'legacy_fingerprint':hashlib.sha256(json.dumps(original,sort_keys=True).encode()).hexdigest()}
     except Exception:
         conn.rollback()

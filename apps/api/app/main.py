@@ -15,6 +15,10 @@ from app.core.repository import InvalidQuery, RoadRepository
 from app.models.database import initialize
 from app.routes.roads import router
 from app.routes.planning import router as planning_router
+from app.routes.municipal_planning import router as municipal_planning_router
+from app.routes.prioritization import router as priority_router
+from app.routes.official_screening import router as official_screening_router
+from app.routes.decision_support import router as decision_router
 from app.core.planning_repository import PlanningRepository
 from app.services.estimates import MissingInputs
 from app.core.conflict_repository import ConflictRepository
@@ -85,7 +89,7 @@ def create_app(settings: Settings | None = None, ai_settings=None, ai_provider=N
     @app.exception_handler(HTTPException)
     async def http_error(request, exc):
         codes = {404: "NOT_FOUND", 405: "METHOD_NOT_ALLOWED"}
-        for code in ['MIGRATION_REQUIRED','VIEWPORT_TOO_BROAD','SOURCE_LAYER_UNAVAILABLE']:
+        for code in ['MIGRATION_REQUIRED','VIEWPORT_TOO_BROAD','SOURCE_LAYER_UNAVAILABLE','MISSING_PLANNING_INPUTS']:
             if str(exc.detail).startswith(code+':'):
                 codes[exc.status_code]=code
         return error(request, exc.status_code, codes.get(exc.status_code, "HTTP_ERROR"), str(exc.detail))
@@ -105,6 +109,10 @@ def create_app(settings: Settings | None = None, ai_settings=None, ai_provider=N
     app.include_router(ai_router)
     app.include_router(review_router)
     app.include_router(municipal_router)
+    app.include_router(municipal_planning_router)
+    app.include_router(priority_router)
+    app.include_router(official_screening_router)
+    app.include_router(decision_router)
     return app
 
 

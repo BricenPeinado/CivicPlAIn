@@ -6,6 +6,9 @@ export const readMunicipal = <T,>(path: string, signal?: AbortSignal) => readJSO
 export function verifyMeta(meta: MunicipalMeta, snapshot: string) {
   if (meta?.contract_version !== 'municipal-record-v2' || meta.snapshot_id !== snapshot || meta.mode !== 'official') throw new Error('The source snapshot changed. Select the dataset again.');
 }
+function verifyConditionContext(value: import('../types/municipal').ConditionSummary | undefined, snapshot: string, road: string, asOf: string, releaseId?: string, policyId?: string) {
+ if (!value || value.road_id !== road || value.snapshot_id !== snapshot || value.method_version !== (policyId ? 'road-condition-v2-pilot' : 'road-condition-v1') || (value.policy?.id || undefined) !== policyId || value.as_of_date !== asOf || value.intelligence_release_id !== (releaseId || null) || !['good','fair','poor','unknown'].includes(value.category) || policyId && value.policy?.official_nyc_dot_policy !== false) throw new Error('Condition context differs from selection.');
+}
 export async function getWorkspace(signal?: AbortSignal): Promise<Workspace> {
   const result = await readMunicipal<{ data: Workspace }>('/workspace', signal);
   if (!['official', 'synthetic'].includes(result.data?.mode) || result.data.mode === 'official' && !/^nyc-[a-f0-9]{32}$/.test(result.data.snapshot_id || '')) throw new Error('Unsupported workspace configuration.');
@@ -29,6 +32,8 @@ export async function getMunicipalPage(kind: 'road-segments' | 'conditions' | 'p
   const result = await readMunicipal<MunicipalEnvelope<MunicipalRecord[]>>(`/${kind}?${query({ ...filters, snapshot_id: snapshot, limit: '100' })}`, signal);
   verifyMeta(result.meta, snapshot);
   if (!Array.isArray(result.data) || result.data.some(r => !r.id || !r.source_revision_id || r.contains_synthetic || r.classification === 'synthetic_fixture' || r.contract_version !== 'municipal-record-v2' || r.kind !== (kind === 'road-segments' ? 'road' : kind === 'conditions' ? 'condition' : 'permit'))) throw new Error('Unsupported official records. Synthetic records cannot enter this workspace.');
+  if (kind === 'road-segments' && filters.release_id) for (const r of result.data) verifyConditionContext(r.condition_summary as import('../types/municipal').ConditionSummary, snapshot, r.id, filters.as_of_date || '', filters.release_id, filters.policy_id);
+  if (kind==='permits' && (filters.evidence==='true' || filters.permit_release_id)) for (const r of result.data) verifyPermitContext(r,snapshot,filters.permit_release_id);
   return result;
 }
 export async function getMunicipalViewport(kind: 'roads' | 'conditions' | 'permits', snapshot: string, bbox: Bbox, signal?: AbortSignal, filters: Record<string,string> = {}): Promise<MunicipalRecord[]> {
@@ -70,9 +75,52 @@ export async function getDashboard(snapshot: string, signal?: AbortSignal) {
   const result = await readMunicipal<MunicipalEnvelope<Dashboard>>(`/dashboard?${query({ snapshot_id: snapshot })}`, signal); verifyMeta(result.meta, snapshot); return result.data;
 }
 
-export async function getMunicipalPermit(snapshot: string, id: string, signal?: AbortSignal) {
-  const result = await readMunicipal<MunicipalEnvelope<MunicipalRecord>>(`/permits/${encodeURIComponent(id)}?${query({ snapshot_id: snapshot })}`, signal); verifyMeta(result.meta, snapshot);
+export async function getMunicipalPermit(snapshot: string, id: string, signal?: AbortSignal, releaseId?: string, evidence=false) {
+  const result = await readMunicipal<MunicipalEnvelope<MunicipalRecord>>(`/permits/${encodeURIComponent(id)}?${query({ snapshot_id: snapshot,permit_release_id:releaseId,evidence:evidence?'true':undefined })}`, signal); verifyMeta(result.meta, snapshot);
+  if (evidence || releaseId) verifyPermitContext(result.data,snapshot,releaseId);
   if (result.data.contains_synthetic) throw new Error('Synthetic records cannot enter the official workspace.');
   if (result.data.id !== id || result.data.kind !== 'permit' || result.data.contract_version !== 'municipal-record-v2') throw new Error('Permit identity differs from selection.');
   return result.data;
+}
+
+export async function getConditionSummary(snapshot: string, road: string, asOf: string, staleDays: string, signal?: AbortSignal, releaseId?: string, policyId?: string) {
+ const result = await readMunicipal<MunicipalEnvelope<import('../types/municipal').ConditionSummary>>(`/road-segments/${encodeURIComponent(road)}/condition-summary?${query({snapshot_id:snapshot,as_of_date:asOf,stale_after_days:staleDays || undefined,release_id:releaseId,policy_id:policyId})}`,signal);
+ verifyMeta(result.meta,snapshot);
+ verifyConditionContext(result.data,snapshot,road,asOf,releaseId,policyId);
+ return result.data;
+}
+
+export async function getIntelligenceReleases(snapshot: string, signal?: AbortSignal) {
+ const values: import('../types/municipal').IntelligenceRelease[] = []; let cursor: string | undefined; const seen = new Set<string>();
+ do {
+  const result = await readMunicipal<MunicipalEnvelope<import('../types/municipal').IntelligenceRelease[]>>(`/intelligence-releases?${query({snapshot_id:snapshot,limit:'100',cursor})}`, signal);
+  verifyMeta(result.meta,snapshot);
+  if (!Array.isArray(result.data) || result.data.some(r => r.base_snapshot_id !== snapshot || r.contract_version !== 'road-intelligence-v1' || r.contains_synthetic)) throw new Error('Unsupported intelligence release context.');
+  values.push(...result.data);cursor = result.meta.next_cursor || undefined;
+  if (values.length > 1000 || cursor && seen.has(cursor)) throw new Error('Unsupported release pagination.');
+  if (cursor) seen.add(cursor);
+ } while(cursor);
+ return values;
+}
+
+function verifyPermitContext(record: MunicipalRecord,snapshot:string,releaseId?:string) {
+ const p=record.permit_location;
+ if (!p || p.snapshot_id!==snapshot || p.permit_release_id!==(releaseId||null) || p.method_version!=='permit-road-reference-v1' || !['located','candidate','unlocated','outside_coverage','invalid_evidence'].includes(p.status) || p.actual_schedule!=='unknown') throw new Error('Permit evidence context differs from selection.');
+}
+export async function getPermitReleases(snapshot:string,signal?:AbortSignal) {
+ const all:import('../types/municipal').PermitRelease[]=[];let cursor:string|undefined;const seen=new Set<string>();
+ do {
+  const r=await readMunicipal<MunicipalEnvelope<import('../types/municipal').PermitRelease[]>>(`/intelligence-releases?${query({snapshot_id:snapshot,kind:'permit',cursor})}`,signal);verifyMeta(r.meta,snapshot);
+  if (!Array.isArray(r.data) || r.data.some(p=>p.base_snapshot_id!==snapshot || p.contract_version!=='permit-intelligence-v1' || p.contains_synthetic)) throw new Error('Unsupported permit release.');
+  all.push(...r.data);cursor=r.meta.next_cursor||undefined;
+  if(all.length>1000 || cursor && seen.has(cursor))throw new Error('Unsupported permit release pagination.');if(cursor)seen.add(cursor);
+ }while(cursor);return all;
+}
+export async function getPermitCoverage(snapshot:string,releaseId?:string,signal?:AbortSignal) {
+ const r=await readMunicipal<MunicipalEnvelope<import('../types/municipal').PermitCoverage>>(`/permit-location-coverage?${query({snapshot_id:snapshot,permit_release_id:releaseId})}`,signal);verifyMeta(r.meta,snapshot);
+ if(r.data.snapshot_id!==snapshot || r.data.permit_release_id!==(releaseId||null))throw new Error('Permit coverage context differs from selection.');return r.data;
+}
+export async function getPermitCoordination(snapshot:string,id:string,releaseId?:string,cursor?:string,signal?:AbortSignal) {
+ const r=await readMunicipal<MunicipalEnvelope<import('../types/municipal').CoordinationCandidate[]>>(`/permits/${encodeURIComponent(id)}/coordination-candidates?${query({snapshot_id:snapshot,permit_release_id:releaseId,cursor})}`,signal);verifyMeta(r.meta,snapshot);
+ if(!Array.isArray(r.data) || r.data.some(p=>p.snapshot_id!==snapshot || p.permit_release_id!==(releaseId||null) || !p.permit_ids.includes(id) || p.confirmed_conflict!==false || p.actual_work_overlap!=='unknown'))throw new Error('Unsupported coordination evidence.');return r;
 }

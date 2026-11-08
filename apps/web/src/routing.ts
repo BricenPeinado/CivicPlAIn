@@ -6,10 +6,12 @@ export interface Route {
   permit?: string; mappermit?: string; project?: string; finding?: string; analysis?: string; scenario?: string; evaluation?: string;
   mapq?: string; permitq?: string; status?: string; location?: PermitLocation;
   condition?: 'good' | 'fair' | 'poor' | 'unknown'; bbox?: Bbox; layers?: string;
+  estimate?: string; priority?: string; screening?: string; tool?: 'estimate'|'priority'|'screening'; alternative?: string;
+  intelligence?: string; asof?: string; permitrelease?: string; locstatus?: 'located'|'candidate'|'unlocated'|'outside_coverage'|'invalid_evidence';
 }
 const ids = ['permit', 'mappermit', 'project', 'finding', 'analysis', 'scenario', 'evaluation'] as const;
 const texts = ['mapq', 'permitq', 'status'] as const;
-const allowed = ['mode', 'snapshot', 'road', ...ids, ...texts, 'location', 'condition', 'bbox', 'layers'];
+const allowed = ['mode', 'snapshot', 'road', ...ids, ...texts, 'location', 'condition', 'bbox', 'layers', 'intelligence', 'asof', 'permitrelease', 'locstatus', 'estimate', 'priority', 'screening', 'tool', 'alternative'];
 const validId = (id: string) => id.length <= 180 && /^[\w.:-]+$/.test(id);
 export function parseRoute(hash: string): Route {
   const [path, query = '', extra] = hash.replace(/^#/, '').split('?');
@@ -21,6 +23,16 @@ export function parseRoute(hash: string): Route {
   const mode = p.get('mode'), snapshot = p.get('snapshot');
   if (mode && !['official', 'synthetic'].includes(mode) || snapshot && !/^nyc-[a-f0-9]{32}$/.test(snapshot) || result.road && !validId(result.road)) return invalid();
   result.mode = mode as Route['mode'] || undefined; result.snapshot = snapshot || undefined;
+  for (const [key,prefix] of [['estimate','estimate'],['priority','priority'],['screening','screen']] as const) { const value=p.get(key);if(value){if(!new RegExp('^'+prefix+'-[a-f0-9]{64}$').test(value))return invalid();result[key]=value;} }
+  const tool=p.get('tool'),alternative=p.get('alternative');
+  if(tool){if(!['estimate','priority','screening'].includes(tool))return invalid();result.tool=tool as Route['tool'];}
+  if(alternative){if(!validId(alternative))return invalid();result.alternative=alternative;}
+  const intelligence = p.get('intelligence'), asof = p.get('asof');
+  if (intelligence) { if (!/^intel-[a-f0-9]{32}$/.test(intelligence)) return invalid(); result.intelligence = intelligence; }
+  const permitrelease=p.get('permitrelease'), locstatus=p.get('locstatus');
+  if (permitrelease) {if (!/^intel-[a-f0-9]{32}$/.test(permitrelease)) return invalid();result.permitrelease=permitrelease;}
+  if (locstatus) {if (!['located','candidate','unlocated','outside_coverage','invalid_evidence'].includes(locstatus)) return invalid();result.locstatus=locstatus as Route['locstatus'];}
+  if (asof) { if (!/^\d{4}-\d{2}-\d{2}$/.test(asof) || !Number.isFinite(Date.parse(asof)) || new Date(asof).toISOString().slice(0,10) !== asof) return invalid(); result.asof = asof; }
   for (const key of ids) { const v = p.get(key); if (v) { if (!validId(v)) return invalid(); result[key] = v; } }
   for (const key of texts) { const v = p.get(key); if (v) { if (v.length > 100 || !v.trim() || /[\u0000-\u001f]/.test(v)) return invalid(); result[key] = v; } }
   const location = p.get('location'), condition = p.get('condition'), layers = p.get('layers'), bbox = p.get('bbox');
@@ -32,7 +44,7 @@ export function parseRoute(hash: string): Route {
 }
 export function routeHref(route: Route) {
   const p = new URLSearchParams(); if (route.mode) p.set('mode', route.mode); if (route.mode === 'official' && route.snapshot) p.set('snapshot', route.snapshot); if (route.road) p.set('road', route.road);
-  for (const key of [...ids, ...texts, 'location', 'condition', 'layers'] as const) if (route[key]) p.set(key, route[key]);
+  for (const key of [...ids, ...texts, 'location', 'condition', 'layers', 'intelligence', 'asof', 'permitrelease', 'locstatus', 'estimate', 'priority', 'screening', 'tool', 'alternative'] as const) if (route[key]) p.set(key, route[key]);
   if (route.bbox) p.set('bbox', route.bbox.join(','));
   return `#/${route.view}${p.size ? `?${p}` : ''}`;
 }

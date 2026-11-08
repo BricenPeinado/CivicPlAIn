@@ -74,7 +74,26 @@ def paged_socrata(kind, where, folder, cap, prefix=''):
     return rows, params
 
 
-def acquire(output: Path, permit_since: str):
+def permit_window_query(start, end):
+    first,last=date.fromisoformat(start),date.fromisoformat(end)
+    if first.isoformat()!=start or last.isoformat()!=end or first>=last or (last-first).days>31:
+        raise ValueError('Permit administrative window must be 1–31 days, YYYY-MM-DD')
+    return ("boroughname='MANHATTAN' AND ((issuedworkstartdate <= '"+end+"T00:00:00' AND issuedworkenddate >= '"+start+
+        "T00:00:00') OR (permitissuedate >= '"+start+"T00:00:00' AND permitissuedate < '"+end+"T00:00:00'))")
+
+
+def acquire(output: Path, permit_since: str, permit_window_start=None, permit_window_end=None, permit_cap=20000, base_acquisition=None):
+    if not 1<=permit_cap<=30000:raise ValueError('Permit cap must be 1–30000')
+    window=None
+    if permit_window_start is not None or permit_window_end is not None:
+        if not permit_window_start or not permit_window_end:raise ValueError('Both administrative window bounds required')
+        window=permit_window_query(permit_window_start,permit_window_end)
+    if base_acquisition is not None and not window:raise ValueError('Pinned base reuse requires explicit administrative-window acquisition')
+    original=None
+    if base_acquisition is not None:
+        from app.ingestion.pipeline import stage
+        stage(base_acquisition,{}) # Verify complete original archive and reviewed source schemas first.
+        original=json.loads(base_acquisition.read_text())
     since = date.fromisoformat(permit_since)
     if since.year < 2020 or since > date.today():
         raise ValueError('Permit issue lower bound must be 2020 or later and not future')
@@ -91,8 +110,17 @@ def acquire(output: Path, permit_since: str):
     bundle = {'format':'civicplain-nyc-acquisition-1', 'retrieved_at':datetime.now(timezone.utc).isoformat(),
         'study_area':'lower-manhattan-pilot-v2', 'bbox':PILOT, 'context_bbox':CONTEXT,
         'permit_since':permit_since, 'terms':terms, 'sources':{}}
+    if window:
+        bundle['permit_window']={'start':permit_window_start,'end':permit_window_end,'cap':permit_cap,
+            'method':'Manhattan administrative-overlap-or-issued; no street-name restriction',
+            'limitations':'Possible administrative overlap; missing validity dates retained only if issued within window; not active work'}
     for kind, source in SOURCES.items():
         folder = output/kind
+        if original is not None and kind!='permits':
+            import shutil
+            shutil.copytree(base_acquisition.parent/kind,folder)
+            bundle['sources'][kind]=original['sources'][kind]
+            continue
         folder.mkdir()
         meta = json_fetch(source['metadata'],folder/'metadata.json')
         if schema(meta,kind) != SCHEMAS[kind]:
@@ -129,7 +157,9 @@ def acquire(output: Path, permit_since: str):
             where=f"intersects(the_geom, '{polygon}')"
             if kind=='pavement':
                 where="boroughname='Manhattan' AND "+where
-            if kind=='permits':
+            if kind=='permits' and window:
+                rows,params=paged_socrata(kind,window,folder,permit_cap)
+            elif kind=='permits':
                 streets=sorted({r['attributes']['Street'] for r in bundle['sources']['lion']['rows'] if r['attributes'].get('Street')})
                 rows,queries=[],[]
                 for start in range(0,len(streets),20):

@@ -1,4 +1,5 @@
 """Pure M3 screening: projected geometry, deterministic rules, no HTTP/DB/LLM."""
+from app.services.screening_math import overlap_bounds
 from collections import defaultdict
 from datetime import datetime, timezone
 from itertools import combinations
@@ -138,7 +139,7 @@ def analyze(projects: list[WorkProject], roads: list[Road], parameters: Analysis
         if not spatial_known or not all(da + db):
             continue
         temporal = TemporalEvidence(intervals={a.id: da, b.id: db}, interval_basis={a.id: ba, b.id: bb})
-        overlap_start, overlap_end = max(da[0], db[0]), min(da[1], db[1])
+        overlap_start, overlap_end = overlap_bounds(da, db)
         kinds = []
         if overlap_start < overlap_end and a.schedule_status != 'completed' and b.schedule_status != 'completed':
             temporal.overlap_start, temporal.overlap_end = overlap_start, overlap_end

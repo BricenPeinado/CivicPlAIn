@@ -10,6 +10,14 @@ M7.1 ingestion does not alter this implemented provider/evidence contract. M7 of
 A future real-data advisor requires a versioned evidence projection/classification/citation and review contract with source-revision hashes, field lineage, unknown/assumption propagation and replay validation. Preserve fact-reference-only selection, deterministic server rendering, no-key fallback, source-failure closed behavior and no mutation tools. It must not fabricate prices, schedules, utility locations or predictions. That extension is outside M7's official inspection scope and cannot be enabled by a frontend label change. See [M7 plan](M7_IMPLEMENTATION_PLAN.md).
 
 
+## M8 planned official evidence extension (unimplemented)
+
+M8.0 only audits/documents. Official AI remains unavailable in the runtime; [M8 plan](M8_IMPLEMENTATION_PLAN.md) gates a separate `municipal-ai-evidence-v1` projection in M8.7 after deterministic official results exist. No provider/key setup or live calls are needed. Keep all current synthetic contracts/audits/replays unchanged.
+
+The new projection must carry the six DATA_MODEL classifications, base snapshot/intelligence release, accepted association/decision, policy/catalog/assumption/calculation versions and full source/input/result hashes. Validate frozen inputs and replay before building allowlisted facts. Raw source text, contacts, geometry, reviewer notes and user questions never become provider context. Model cannot assign matches/categories/recency/weights/prices/schedules or alter source facts. Only exact fact/template reference selection is allowed; deterministic server rendering inserts all mandatory unknown/coverage/assumption/review warnings independently of selection. No tools or autonomous actions.
+
+Use useful deterministic official explanations without a key/network; provider refusal, timeout/429/bad citations/unsupported output fall back with reason, while source-integrity/replay failures fail closed. Preserve bounded projection/truncation disclosure, audit failure semantics and separate explicit human notes. New official interaction/note storage must reference official artifacts, not synthetic-only review FKs. No explanation or note approves work, safe deferral or spending; no GET/navigation creates an interaction. Tests and source privacy gates are A7 in the plan.
+
 ## Architecture and allowed tasks
 
 The existing FastAPI monolith owns: reference validation → EvidenceBuilder → context integrity validation → optional LLMProvider → structured selection/citation validation → deterministic rendering or fallback → append-only audit. The React advisor receives only the public REST response. No model gets SQL, Python, mutation tools, web research, arbitrary files, raw utility geometry or database access.
@@ -62,3 +70,32 @@ Additive migration 5 preserves existing payloads. Foreign keys and update/delete
 The full regression suite retains all M5 selection, citation, unsupported money/date/unit/prose, provider failure, timeout, rate-limit, audit and no-mutation cases. M6 additionally tests malicious scenario names/descriptions through save → evaluation → evidence projection → mocked provider and malicious user questions. Raw narrative never reaches provider input or rendered verified claims; unsupported questions return insufficient evidence without another call. Existing road-note/project-description injection tests remain passing.
 
 Actual browser checks used API-backed estimate, conflict and comparison explanations, source disclosure/focus, optional-AI not-configured fallback, and unavailable-local-API timeout/retry recovery. No paid/live OpenAI request was made. Deterministic mode and no-key fallback require only local services; no OS-wide network settings were changed during testing. The 1 MiB transport cap complements the smaller 48,000-byte/96-fact AI projection limit. See FINAL_QA_REPORT for measured local API timings and limits; these tests do not establish perfect hallucination prevention or truthful source inputs.
+
+### M8.1 deterministic inspection boundary
+
+M8.1 adds no provider call, prompt, tool, official AI evidence package or audit mutation. Road condition summaries are pure typed read projections over immutable source/association context, explicit date and labeled recency assumptions. Source decimal values and timestamps remain exact; unsupported classifications and ambiguous links/pass/scope remain unknown. Existing v1 deterministic explanation/provider fallback behavior is unchanged. New official AI support remains a later gated stage.
+
+
+### M8.1 owner-approved pilot checkpoint
+
+The [M8.1 pilot policy](M8_1_PILOT_IMPLEMENTATION.md) is a pure deterministic server calculation, outside AI. Project-owner association approvals are hash-bound local annotations, never model-generated links or municipal endorsements. Pilot-derived observation grades, accepted reference scope and unavailable road-wide condition remain distinct. No official data is added to provider context or official advisor enabled by this checkpoint; existing deterministic/no-key synthetic explanations and mutation restrictions remain unchanged.
+
+
+## M8.3 deterministic estimate path
+
+Official-road estimates run without any model/provider or network calculation. Entered source citations remain unverified planning metadata; they are not sent to a provider or fetched. This milestone does not enable the official-data AI advisor or allow an explanation to create/modify numeric inputs, approve treatments or save calculations. Server-derived results retain their independent typed input/result snapshots.
+
+
+## M8.4 ranking is outside AI
+
+`maintenance-priority-v1` has no provider call, model-generated weight/factor/score, network lookup or AI mutation path. Human policy rationale is metadata, never executable instructions. Results/explanations are deterministic server facts/templates; official AI advice remains unavailable. No OpenAI API key is required. Missing traffic/risk/schedule evidence cannot be supplied by prose.
+
+## M8.5 deterministic official screening
+
+`official-screen-v1` computes evidence-qualified construction screening entirely without AI. There is no official explanation-provider endpoint or AI mutation tool. Work/permit provenance, assumptions, unknowns and review status remain structured and replayable; no generated prose can populate missing geometry, schedule, grade, utility depth or numerical findings. Schedule alternatives never imply optimized outcomes, savings, safe excavation or municipal approval. Existing synthetic advisor behavior remains unchanged.
+
+## M8.6 official saved-result explanations
+
+Explicit v2 decision-support explanation requests replay one selected estimate, priority run or screening before constructing `official-scalar-projection-v1` using existing `ai-evidence-v1`. Context types reuse estimate/evaluation/conflict; task `explain_official`. Static labels and validated result scalars only; no work titles, permit narrative, geometry, review notes, citations' free text, policy rationale or raw user question is sent. Missing values remain explicit null facts. Output is `derived`, never a new observation or independently approved plan.
+
+Existing provider chooses fact/evidence IDs/templates only; server validates exact evidence hash, citations, all caveat codes and required review action, then renders all material facts from deterministic values. No numerical generation, tools, approvals, arbitrary-source instruction authority or missing-input substitution. No-key mode works locally; optional AI with no key returns `fallback/not_configured`. Invalid/provider-failure output falls back with reason; audit failure fails closed. Full source references and provenance are available from the frozen result, separate from model context. See [M8.6 report](M8_6_IMPLEMENTATION.md). Historical statements that *all* official explanation is unavailable are superseded only for these replay-verified saved contracts; arbitrary official records/general scenarios remain unsupported.

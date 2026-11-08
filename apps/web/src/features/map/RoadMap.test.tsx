@@ -3,6 +3,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { RoadMap } from './RoadMap';
 import type { RoadsCollection } from '../../types/api';
+import { pilotColors } from './mapStyle';
 const state = vi.hoisted(() => ({ maps: [] as any[] }));
 vi.mock('maplibre-gl', () => ({
   setWorkerUrl: vi.fn(), NavigationControl: class {}, AttributionControl: class {},
@@ -28,6 +29,12 @@ const roads = { type: 'FeatureCollection', features: [{ type: 'Feature', id: 'de
   geometry: { type: 'LineString', coordinates: [[-74.01,40.71],[-74.009,40.711]] },
   properties: { id:'demo-r-001', name:'Demo segment R-001', condition_summary: { category:'poor' } },
 }], meta: { next_cursor:null } } as RoadsCollection;
+it('uses the pilot green/yellow/red/gray palette for official road classifications', () => {
+  render(<RoadMap official features={{type:'FeatureCollection',features:[]}} selectedId={null} onSelect={vi.fn()}/>);
+  const map=state.maps[0];act(()=>map.handlers.get('load')());
+  const layer=map.addLayer.mock.calls.map((c:any[])=>c[0]).find((l:any)=>l.id==='road-color');
+  expect(layer.paint['line-color']).toEqual(['match',['get','condition'],'good',pilotColors.good,'fair',pilotColors.fair,'poor',pilotColors.poor,pilotColors.unknown]);
+});
 it('transports stable IDs to MapLibre properties and updates selection highlighting', () => {
   const onSelect = vi.fn();
   const rendered = render(<RoadMap roads={roads} selectedId={null} onSelect={onSelect}/>);
@@ -103,4 +110,28 @@ it('isolates tile failure while keeping official layers interactive and independ
 });
 it('preserves records while exposing an official source-rendering failure', () => {
   render(<RoadMap official selectedId={null} onSelect={vi.fn()}/>); const map = state.maps[0]; act(() => map.handlers.get('load')()); act(() => map.handlers.get('error')({ sourceId: 'roads' })); expect(screen.getByRole('status')).toHaveTextContent('A map layer could not render'); expect(screen.getByRole('button', { name: 'Return to study focus' })).toBeEnabled();
+});
+
+it('draws supplied screening shapes above road selection and clears the overlay independently', () => {
+  const shapes={type:'FeatureCollection' as const,features:[{type:'Feature' as const,id:'work:test',properties:{evidence:'SYNTHETIC TEST supplied geometry'},geometry:{type:'LineString' as const,coordinates:[[-74.01,40.712],[-74.009,40.712]]}}]};
+  const view=render(<RoadMap official screeningFeatures={shapes} selectedId={null} onSelect={vi.fn()}/>);
+  const map=state.maps[0];act(()=>map.handlers.get('load')());
+  const layers=map.addLayer.mock.calls.map((call:any[])=>call[0].id);
+  expect(layers.indexOf('screening-lines')).toBeGreaterThan(layers.indexOf('selection'));
+  expect(map.addSource).toHaveBeenCalledWith('screening',expect.anything());
+  expect(map.source.setData).toHaveBeenCalledWith(shapes);
+  const empty={type:'FeatureCollection' as const,features:[]};
+  view.rerender(<RoadMap official screeningFeatures={empty} selectedId={null} onSelect={vi.fn()}/>);
+  expect(map.source.setData).toHaveBeenCalledWith(empty);
+});
+
+it('keeps priority and permit candidate reference overlays distinct from observed condition and supplied work',()=>{
+ const priorities={type:'FeatureCollection' as const,features:[{type:'Feature' as const,properties:{road_id:'r',priority_status:'unranked'},geometry:{type:'LineString' as const,coordinates:[[-74.01,40.71],[-74.009,40.71]]}}]};
+ const candidates={...priorities,features:priorities.features.map(f=>({...f,properties:{road_id:'r',record_id:'p',evidence:'Candidate reference, not footprint'}}))};
+ render(<RoadMap official priorityFeatures={priorities} candidateFeatures={candidates} selectedId={null} onSelect={vi.fn()}/>);
+ const map=state.maps[0];act(()=>map.handlers.get('load')());
+ const layers=map.addLayer.mock.calls.map((v:any[])=>v[0]);
+ expect(layers.find((l:any)=>l.id==='priorities').paint['line-color']).toEqual(['match',['get','priority_status'],'ranked','#7951a6','#667385']);
+ expect(layers.find((l:any)=>l.id==='permit-candidates').paint['line-dasharray']).toEqual([1,2]);
+ expect(map.source.setData).toHaveBeenCalledWith(priorities);expect(map.source.setData).toHaveBeenCalledWith(candidates);
 });

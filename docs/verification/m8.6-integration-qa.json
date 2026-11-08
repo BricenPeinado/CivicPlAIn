@@ -1,0 +1,219 @@
+{
+  "version": "m86-integration-qa-v1",
+  "technical_qa_only": true,
+  "independent_municipal_review": false,
+  "snapshot": "nyc-4620b9e30c1c0bd5be4252fe27999c80",
+  "as_of": "2026-11-08",
+  "summary": {
+    "version": "decision-context-v1",
+    "snapshot_id": "nyc-4620b9e30c1c0bd5be4252fe27999c80",
+    "as_of_date": "2026-11-08",
+    "release_id": null,
+    "policy_id": null,
+    "condition": {
+      "roads": 4150,
+      "eligible": 0,
+      "requiring_review": 4150,
+      "categories": {
+        "good": 0,
+        "fair": 0,
+        "poor": 0,
+        "unknown": 4150
+      },
+      "reasons": {
+        "NO_ACCEPTED_ELIGIBLE_ASSESSMENT": 4150
+      }
+    },
+    "saved": {
+      "estimate": {
+        "status": "available",
+        "count": 2,
+        "records": [
+          {
+            "id": "estimate-7843b258635471f760f0965601fb686933914773cdded23807b8d84dc086f761",
+            "road_id": "road-0003cbb8adbb7e90987b689e",
+            "input_hash": "7843b258635471f760f0965601fb686933914773cdded23807b8d84dc086f761",
+            "result_hash": "c59c22fe65bd7321760e76a29476008e0bfe11bfe6f0e9a8ee9368d632f164b1",
+            "created_at": "2026-11-08T08:32:10.213864+00:00"
+          },
+          {
+            "id": "estimate-afafbf9e89704095fd8e832bd17941dff6d210a84969e4b46f587922940827aa",
+            "road_id": "road-0003cbb8adbb7e90987b689e",
+            "input_hash": "afafbf9e89704095fd8e832bd17941dff6d210a84969e4b46f587922940827aa",
+            "result_hash": "e0c7530f4bdd0bf56038b5403fc6923af684f964fa03100a454c3bd1e70bc5a5",
+            "created_at": "2026-11-08T08:29:04.730026+00:00"
+          }
+        ],
+        "truncated": false
+      },
+      "priority": {
+        "status": "available",
+        "count": 4,
+        "records": [
+          {
+            "id": "priority-036d10710d35e7451728eb0ef972101c4b82c0b18e049b690d33a6acd3d1711a",
+            "input_hash": "036d10710d35e7451728eb0ef972101c4b82c0b18e049b690d33a6acd3d1711a",
+            "result_hash": "b60bc3abc2cad1a332975b7ebea8c0408bc200b2a6f4d930e3a4d96f8693e8ce",
+            "created_at": "2026-11-08T09:17:53.617906+00:00"
+          },
+          {
+            "id": "priority-4c29be8a9b8e8c9bc650749ab8142029d4ee83fc13ec260fa424cca3cc61aa28",
+            "input_hash": "4c29be8a9b8e8c9bc650749ab8142029d4ee83fc13ec260fa424cca3cc61aa28",
+            "result_hash": "d6b6b75ea55270d30c2b4cbe9fe64ae0cd269bfc523c92d0a27e5194f8879ec6",
+            "created_at": "2026-11-08T09:21:42.532511+00:00"
+          },
+          {
+            "id": "priority-71a44fe2da00edf4a5bbbd51d4e00e9195086278dab2939f8cbbc130593244c8",
+            "input_hash": "71a44fe2da00edf4a5bbbd51d4e00e9195086278dab2939f8cbbc130593244c8",
+            "result_hash": "90b3d21e83a4fd5ef12ed5a2dba96276bac4f538cd9bb288c13eacf226b8bc6b",
+            "created_at": "2026-11-08T09:19:14.406955+00:00"
+          },
+          {
+            "id": "priority-e1ede80d3aa1e704e7840b78ba57572e4c28c44a2997975989192198803d82dc",
+            "input_hash": "e1ede80d3aa1e704e7840b78ba57572e4c28c44a2997975989192198803d82dc",
+            "result_hash": "cd97c5f3c5e8c7cbce4ec536857af89a9b8e868f9c9bd0479c3d24b4e2b0aabc",
+            "created_at": "2026-11-08T09:19:13.826874+00:00"
+          }
+        ],
+        "truncated": false
+      },
+      "screening": {
+        "status": "available",
+        "count": 2,
+        "records": [
+          {
+            "id": "screen-0f83edc2c87ef78a821bc6954b8360e16f56b99bf1b5d1ed8ad23e2fc387e54b",
+            "input_hash": "0f83edc2c87ef78a821bc6954b8360e16f56b99bf1b5d1ed8ad23e2fc387e54b",
+            "result_hash": "d8acfe19b4f523a79a7c34f0665855a44017ee2bcdd1e345ac3e5744e310afc4",
+            "created_at": "2026-11-08T09:49:31.495477+00:00"
+          },
+          {
+            "id": "screen-8f64d5c10a1d1d6602693ff40ddec6c04c15c630f07ff770ce2b4f57f569e610",
+            "input_hash": "8f64d5c10a1d1d6602693ff40ddec6c04c15c630f07ff770ce2b4f57f569e610",
+            "result_hash": "83bb261f0f14a65ba6e0494638071c593bca38030cbac007511b20d25c271ed0",
+            "created_at": "2026-11-08T09:49:23.695917+00:00"
+          }
+        ],
+        "truncated": false
+      }
+    },
+    "utility_coverage": "unknown",
+    "human_review_required": true,
+    "meaning": "Saved runs are separate planning assumptions, not unique projects or actual work. No cross-run totals or automatic latest selection."
+  },
+  "replayed": {
+    "estimate": [
+      {
+        "id": "estimate-7843b258635471f760f0965601fb686933914773cdded23807b8d84dc086f761",
+        "input_hash": "7843b258635471f760f0965601fb686933914773cdded23807b8d84dc086f761",
+        "result_hash": "c59c22fe65bd7321760e76a29476008e0bfe11bfe6f0e9a8ee9368d632f164b1",
+        "explanation_evidence_hash": "c846c8c5b164ac70d63b704150145acdc68aa7fedf052824e03c5d0486377dae",
+        "projected_fact_count": 7,
+        "alternatives": [
+          {
+            "treatment": "resurface",
+            "base_usd": "20.10",
+            "duration": null
+          }
+        ]
+      },
+      {
+        "id": "estimate-afafbf9e89704095fd8e832bd17941dff6d210a84969e4b46f587922940827aa",
+        "input_hash": "afafbf9e89704095fd8e832bd17941dff6d210a84969e4b46f587922940827aa",
+        "result_hash": "e0c7530f4bdd0bf56038b5403fc6923af684f964fa03100a454c3bd1e70bc5a5",
+        "explanation_evidence_hash": "82d6afacf09405d11803f4b04adde0180dbe5e88f69d1aae825c7a5b0c6008c1",
+        "projected_fact_count": 13,
+        "alternatives": [
+          {
+            "treatment": "patch",
+            "base_usd": "22.13",
+            "duration": null
+          },
+          {
+            "treatment": "resurface",
+            "base_usd": "22.13",
+            "duration": null
+          }
+        ]
+      }
+    ],
+    "priority": [
+      {
+        "id": "priority-036d10710d35e7451728eb0ef972101c4b82c0b18e049b690d33a6acd3d1711a",
+        "input_hash": "036d10710d35e7451728eb0ef972101c4b82c0b18e049b690d33a6acd3d1711a",
+        "result_hash": "b60bc3abc2cad1a332975b7ebea8c0408bc200b2a6f4d930e3a4d96f8693e8ce",
+        "explanation_evidence_hash": "c16c3eb4bce0217ab88767ce4f72917b6e0604c226a36feac8d90c8069d9c9b7",
+        "projected_fact_count": 5,
+        "ranked": 100,
+        "unranked": 0
+      },
+      {
+        "id": "priority-4c29be8a9b8e8c9bc650749ab8142029d4ee83fc13ec260fa424cca3cc61aa28",
+        "input_hash": "4c29be8a9b8e8c9bc650749ab8142029d4ee83fc13ec260fa424cca3cc61aa28",
+        "result_hash": "d6b6b75ea55270d30c2b4cbe9fe64ae0cd269bfc523c92d0a27e5194f8879ec6",
+        "explanation_evidence_hash": "2cc1ff66432ff26481df8d2e0229d79176376a7e4f65067098f7723b003bf534",
+        "projected_fact_count": 5,
+        "ranked": 2,
+        "unranked": 0
+      },
+      {
+        "id": "priority-71a44fe2da00edf4a5bbbd51d4e00e9195086278dab2939f8cbbc130593244c8",
+        "input_hash": "71a44fe2da00edf4a5bbbd51d4e00e9195086278dab2939f8cbbc130593244c8",
+        "result_hash": "90b3d21e83a4fd5ef12ed5a2dba96276bac4f538cd9bb288c13eacf226b8bc6b",
+        "explanation_evidence_hash": "ab45e6e937f767ce074b6d29a8077a3272cfc1b597354eb43dc4a40260e841a2",
+        "projected_fact_count": 5,
+        "ranked": 1,
+        "unranked": 99
+      },
+      {
+        "id": "priority-e1ede80d3aa1e704e7840b78ba57572e4c28c44a2997975989192198803d82dc",
+        "input_hash": "e1ede80d3aa1e704e7840b78ba57572e4c28c44a2997975989192198803d82dc",
+        "result_hash": "cd97c5f3c5e8c7cbce4ec536857af89a9b8e868f9c9bd0479c3d24b4e2b0aabc",
+        "explanation_evidence_hash": "0937d375f8ae09c30ab37b8f895befcbb0746480995fca830d0cdf486de541ec",
+        "projected_fact_count": 5,
+        "ranked": 0,
+        "unranked": 100
+      }
+    ],
+    "screening": [
+      {
+        "id": "screen-0f83edc2c87ef78a821bc6954b8360e16f56b99bf1b5d1ed8ad23e2fc387e54b",
+        "input_hash": "0f83edc2c87ef78a821bc6954b8360e16f56b99bf1b5d1ed8ad23e2fc387e54b",
+        "result_hash": "d8acfe19b4f523a79a7c34f0665855a44017ee2bcdd1e345ac3e5744e310afc4",
+        "explanation_evidence_hash": "8eb6e4ebc946c948bb05e5a9a90df29d3c83a8be703be2d615cdd3a19f60fd85",
+        "projected_fact_count": 4,
+        "findings": 0,
+        "indeterminate_pairs": 1,
+        "alternatives": []
+      },
+      {
+        "id": "screen-8f64d5c10a1d1d6602693ff40ddec6c04c15c630f07ff770ce2b4f57f569e610",
+        "input_hash": "8f64d5c10a1d1d6602693ff40ddec6c04c15c630f07ff770ce2b4f57f569e610",
+        "result_hash": "83bb261f0f14a65ba6e0494638071c593bca38030cbac007511b20d25c271ed0",
+        "explanation_evidence_hash": "71dade5fe0317fc4422ca4509f966208cd0de5d5cb1f925e40b7a1491410bcaf",
+        "projected_fact_count": 7,
+        "findings": 1,
+        "indeterminate_pairs": 6,
+        "alternatives": [
+          {
+            "id": "roadwork-after",
+            "findings": 0,
+            "indeterminate_pairs": 6
+          }
+        ]
+      }
+    ]
+  },
+  "storage_counts_unchanged": true,
+  "counts": {
+    "import_records": 53540,
+    "municipal_estimates": 2,
+    "prioritization_runs": 4,
+    "official_screenings": 2,
+    "official_screening_notes": 3,
+    "ai_interactions": 5
+  },
+  "utility_coverage": "unknown",
+  "actual_work_conflict_coverage": "unavailable",
+  "report_hash": "38163a207d374a1f854c5b50554613e198d62f6cbf591eae08edbbe93a2e52c5"
+}
