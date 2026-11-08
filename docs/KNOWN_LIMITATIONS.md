@@ -4,7 +4,7 @@ Reviewed for M6 on 2026-11-07. No critical or high-severity application crash wa
 
 ## M7.1 official-data integration limits
 
-M7.1 backend ingestion/read API and explicit migration are implemented and tested; M7.2 implements the map shell and official inspection; M7.3 implements purposeful views/navigation. M7.4 retains comprehensive polish/accessibility verification. See [M7.3 evidence](M7_3_IMPLEMENTATION.md). See [M7.1 sources, tests and evidence](M7_1_IMPLEMENTATION.md). Historical M6 limitations below apply to the retained synthetic workspace.
+M7.1 backend ingestion/read API and explicit migration, M7.2 map/official inspection, M7.3 purposeful views/navigation, and M7.4 polish/accessibility/integration verification are complete locally. See [M7 final QA](M7_FINAL_QA.md), [M7.3 evidence](M7_3_IMPLEMENTATION.md), and [M7.1 sources, tests and evidence](M7_1_IMPLEMENTATION.md). Historical M6 limitations below apply to the retained synthetic workspace.
 
 | Boundary | Current limitation |
 | --- | --- |
@@ -13,7 +13,7 @@ M7.1 backend ingestion/read API and explicit migration are implemented and teste
 | Rating categories | Decimal ratings and official inspection datetimes are present, but current dictionary category ranges leave decimal gaps and a local-street exception unsupported by available class fields. Categories remain unknown; zero classified poor/good/fair roads does not mean zero poor/good/fair streets. |
 | Source/version freshness | LION ArcGIS edit marker is not asserted equal to ZIP catalog release 26c. Mutable APIs lack transactional export guarantees; count/update checks detect observed changes, not all possible concurrent changes. Archived checksums freeze this import; no automatic/live refresh or accuracy guarantee. |
 | Terms and distribution | Catalog licenseId is null; no CC/public-domain inference. Portal terms/dictionaries are hashed, city/DOT pages were browser-reviewed but automated download returned 403. M7.2 displays the mandatory NYC DOT application disclaimer in Sources & terms and links source-specific terms in provenance. Extracts remain ignored/local; no blanket redistribution/deployment clearance. |
-| Interface | M7.2 reads pinned v2 official snapshots, with independent overlays, source labels, inspector and keyboard fallback. The initial snapshot has no accepted condition/permit road links; overlays never invent them. M7.3 adds overview coverage/activity/freshness, permit filters/details, context/camera/layer/record links and focused preserved scenario tools. M7.4 accessibility/cross-browser certification remains open. |
+| Interface | M7.2 reads pinned v2 official snapshots, with independent overlays, source labels, inspector and keyboard fallback. The initial snapshot has no accepted condition/permit road links; overlays never invent them. M7.3 adds overview coverage/activity/freshness, permit filters/details, context/camera/layer/record links and focused preserved scenario tools. M7.4 verification covered the documented browser/accessibility/responsive integration gates; limitations below remain. |
 | Scope/performance | 10,000-road/20,000-permit pilot limits; 2,000-feature viewport cap, explicit refinement error. Full pilot may exceed viewport cap. Some bounded read filters/summaries materialize records in Python; this is not a citywide/tile/query platform. No citywide benchmark. |
 | Storage/recovery | Explicit schema-7 migration preserves rows and verifies a private SQLite backup including committed WAL. Writers must be quiesced. Busy/injected failure/backup comparisons are tested; real disk exhaustion/power interruption and production disaster recovery are unrun. Local files/hashes are not tamper-proof or encrypted. Current import_runs stores successful publication audits; failed/acquired reports remain local disk evidence. |
 | Engineering/AI | Real costing, actual schedules, traffic/budget, conflict/scenario/AI execution unavailable. No synthetic assumptions/rates fill official gaps. Utilities/location/depth/coverage and excavation safety remain unknown. |
@@ -55,4 +55,4 @@ M7.1 backend ingestion/read API and explicit migration are implemented and teste
 
 There is no remaining M6 feature backlog required for the local judging workflow. Production readiness and any post-hackathon capabilities require separately scoped work. Do not infer a production release from completion of the hackathon acceptance checklist.
 
-M7.4 polish/verification is in progress; see [current QA evidence and open gates](M7_FINAL_QA.md). Completion is not claimed.
+M7 is complete locally; see [M7_FINAL_QA](M7_FINAL_QA.md) for final evidence and remaining limitations.

@@ -90,4 +90,4 @@ Implemented: App shell + routing, Icon, MapToolbar, MunicipalEvidence (RecordEvi
 
 See [M7.2 report](M7_2_IMPLEMENTATION.md) for actual test results, deviations, basemap policy and browser boundaries. The M7.3 report reconciles delivered navigation/filter/editor behavior with this design. Comprehensive 7.4 contrast, screen-reader, zoom and cross-browser gates remain targets, not certification.
 
-M7.4 polish/verification is in progress; see [current QA evidence and open gates](M7_FINAL_QA.md). Completion is not claimed.
+M7.4 polish, accessibility and integration verification are complete locally; see [M7 final QA evidence](M7_FINAL_QA.md). Remaining items are limitations and technical debt, not open milestone gates.
