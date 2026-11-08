@@ -52,7 +52,9 @@ def main():
     env.update(PYTHONPATH=str(ROOT/'apps/api'), CIVICPLAIN_DATABASE_PATH=str(folder/'demo.sqlite3'),
                CIVICPLAIN_ALLOWED_ORIGINS=f'http://127.0.0.1:{args.web_port}',
                CIVICPLAIN_AI_PROVIDER='deterministic', CIVICPLAIN_AI_MAX_CALLS_PER_HOUR='0',
-               VITE_API_BASE_URL=f'http://127.0.0.1:{args.api_port}/api/v1')
+               VITE_API_BASE_URL=f'http://127.0.0.1:{args.api_port}/api/v1',
+               VITE_MUNICIPAL_API_BASE_URL=f'http://127.0.0.1:{args.api_port}/api/v2',
+               VITE_BASEMAP='local', CIVICPLAIN_DATA_MODE='synthetic', CIVICPLAIN_OFFICIAL_SNAPSHOT_ID='')
     # Explicit override takes precedence over frontend env files; reject secret-shaped VITE variables.
     for config in (ROOT/'apps/web').glob('.env*'):
         if config.is_file() and any('VITE_' in line and any(word in line.upper() for word in ('KEY','SECRET','TOKEN','PASSWORD')) for line in config.read_text().splitlines() if not line.lstrip().startswith('#')):
@@ -81,7 +83,7 @@ def main():
                 time.sleep(.2)
         web = subprocess.Popen(['npm','run','preview' if args.production else 'dev','--prefix','apps/web','--','--port',str(args.web_port),'--strictPort'], cwd=ROOT, env=env, start_new_session=True)
         children.append(web)
-        print(f'\nSYNTHETIC isolated demo: http://127.0.0.1:{args.web_port}/\nDatabase retained: {folder.relative_to(ROOT)}/demo.sqlite3\nExplore Demo → inspect road → rework → scenarios → Explain tradeoffs.\nCtrl+C stops this demo. Rerun for a fresh environment; no existing records are reset.\n', flush=True)
+        print(f'\nSYNTHETIC isolated demo: http://127.0.0.1:{args.web_port}/\nDatabase retained: {folder.relative_to(ROOT)}/demo.sqlite3\nMap selects streets; Projects provides explicit screening; Scenarios preserves saved planning workflows.\nCtrl+C stops this demo. Rerun for a fresh environment; no existing records are reset.\n', flush=True)
         while all(child.poll() is None for child in children):
             time.sleep(.25)
         raise RuntimeError('A demo server stopped. Its database is retained; fix the error and rerun for a fresh isolated demo.')

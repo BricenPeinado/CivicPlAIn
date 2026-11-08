@@ -2,6 +2,16 @@
 
 Status: M2 implements local map/list selection, synthetic maintenance attributes and assessment history, three repair categories, deterministic cost/preliminary-duration estimates, immutable snapshots and comparison/breakdown panels. M3 additionally implements persisted fictional work projects, deterministic spatial/temporal conflict screening, source snapshots and map/review panels. M4 adds hypothetical scenario editing, immutable evaluation and budget/tradeoff comparison. M5 implements bounded evidence explanations, optional provider fact selection, offline fallback and human review-note submission. M6 verifies final local integration/demo readiness; see FINAL_QA_REPORT. No unrestricted generative factual prose or production authorization is offered.
 
+M7.1 now adds official NYC acquisition, immutable geographic/condition/administrative snapshots, safe explicit migration and read-only v2 inspection in the same backend. M7.2 now provides the map-first official/synthetic interface with four distinct views; 7.3–7.4 deepen workflows and verification. Initial official permits are bounded unverified street-name/date candidates and categories/road links remain unknown until supported. See [M7.1 implementation](M7_1_IMPLEMENTATION.md).
+
+## Implemented M7.2 interface boundary
+
+The initial screen is a full-height street map, narrow charcoal navigation and one evidence inspector; no dashboard card stack, expanded planning forms, guide or placeholder Settings item. Floating search/list, layer toggles, zoom and geographic focus expose map actions. Selection shows identifiers, latest accepted dated pavement evidence or an explicit unknown, physical/source attributes, accepted permit links, provenance and coverage. Raw inspection lines remain separate from accepted road condition; historical observations are not a current condition forecast. All initial permit locations remain unknown, so none are drawn.
+
+Map, Dashboard, Projects and Scenarios are separately addressable. Basic overview and permit browsing support relocation in this milestone, with richer navigation/filter work retained for 7.3. The official planning capability view cannot call v1 estimates/conflicts/scenarios/AI; explicit context switching reaches the original synthetic tools. Synthetic conflict analysis is an explicit action, never a navigation side effect. Existing saved results, deterministic engines and review/advisor tools remain unchanged. Unsaved scenario drafts remain mounted in their original synthetic context while hidden and across mode changes; the browser warns on dirty reload where supported. No automatic save/retry or persistent browser storage is introduced.
+
+Desktop uses a 100px rail and 344px inspector (310px at intermediate widths); mobile uses labeled bottom navigation and a bounded, scrollable inspector sheet. Local labels and shoreline keep data usable without external tiles. Search, record-list selection and geographic query refinement remain functional if WebGL fails; inspection/located-permit records can be browsed independently of visible overlays. See [M7.2 implementation](M7_2_IMPLEMENTATION.md) and [design system](M7_DESIGN_SYSTEM.md) for precise implemented behavior versus planned refinements.
+
 ## Users and problem
 
 The primary user is a municipal pavement planner preparing a small road-maintenance program. A utility coordinator checks schedule assumptions, and an engineering/budget reviewer evaluates alternatives. One solo developer must be able to build and demonstrate the complete vertical workflow.
@@ -10,7 +20,7 @@ The expensive mistake to prevent is paying for new pavement and then reopening t
 
 ## Study area and workflow
 
-Use the Lower Manhattan window and bounded segment selection defined in [DATA_SOURCES](DATA_SOURCES.md). Aim for 20–30 segments; accept fewer with an explicit coverage explanation. The demo uses frozen local fixtures rather than requiring live municipal services.
+M0–M6 use the 24 synthetic segments in lower-manhattan-window-v1. M7 uses the separately versioned Lower Manhattan pilot scope and complete bounded selection in [DATA_SOURCES](DATA_SOURCES.md); the old first-30 target applies only to the historical demonstrator. Both use frozen local snapshots, with distinct official and synthetic modes.
 
 1. Open the map and inspect source coverage, snapshot dates, and demo labels.
 2. Select a segment; inspect assets, latest usable condition assessment, and planned work. Unknown condition is visible.
@@ -30,7 +40,7 @@ Use the Lower Manhattan window and bounded segment selection defined in [DATA_SO
 | I need options within my budget | Scenario comparison showing central and upper-bound affordability, elapsed days, lane-closure-days proxy, and limitations |
 | I need to explain a recommendation to a reviewer | Evidence/explanation panel with claim references, review status, deterministic fallback, and no approval control |
 
-These may be panels on one page; separate routed pages are not required.
+M0–M6 implemented these as panels on one page. M7 supersedes that layout with the four distinct views below; the existing workflows and saved records remain available in synthetic mode.
 
 ## Functional requirements
 
@@ -54,6 +64,32 @@ These may be panels on one page; separate routed pages are not required.
 
 ## Exclusions and success
 
-No live utility clearance, excavation authorization, engineering certification, procurement, automatic approval, payments, traffic simulation, or citywide predictive claims. Prioritization and detours are stretch; forecasting, live integrations, other asset categories, and multi-tenancy are post-MVP.
+No live utility clearance, excavation authorization, engineering certification, procurement, automatic approval, payments, traffic simulation, or citywide predictive claims. Prioritization and detours are stretch; forecasting, continuous live synchronization, other asset categories, and multi-tenancy remain beyond M7. Manually reviewed official geographic snapshots are now M7 scope.
 
 MVP success means a reviewer can complete the workflow above on frozen fixtures, reproduce each total and conflict from cited inputs, distinguish synthetic examples from observations, see a budget tradeoff and a missing-utility warning, and recover to deterministic explanations when AI fails. M6 must demonstrate both a detected conflict and an indeterminate case. Demo savings are hypothetical and are not validated municipal savings.
+
+
+## M7 product requirements (planned; supersedes historical layout only)
+
+The primary entry is Map. A municipal planner should recognize real Lower Manhattan streets, locate a record, inspect its evidence and understand unavailable information without traversing unrelated panels. The redesign does not imply municipal endorsement, survey accuracy or production readiness.
+
+| View | Main question / content | Excluded from initial view |
+| --- | --- | --- |
+| Map | Where is the record? Full-height geographic canvas, compact search/layers, selected road or permit inspector, source/coverage status; equivalent paged list | Dashboard KPI grid, expanded repair cards, full scenario editor, always-open advisor |
+| Dashboard | What is loaded and missing? Snapshot-specific counts, dated condition coverage, permit linkage completeness, source retrieval/observation ages and links to filtered records | Large interactive map, invented savings, risk rankings, model forecasts or synthetic values in official totals |
+| Projects | What administrative work records require review? Searchable permit/project list, raw status/window, matched roads, unknown locations, sources and limitations; synthetic conflicts in synthetic mode | Treating permit issuance as actual construction, inferred excavation/closures, automatic analysis on page load |
+| Scenarios | What saved hypothetical plans exist? Existing synthetic draft/edit/evaluate/history/comparison workflow, one editor or comparison at a time, links to related map records | Silent conversion of plans to official roads, demo prices on real roads, implied real-data execution |
+
+M7-F1: Persist mode (`official` or `synthetic`) and snapshot in navigation. Official mode defaults only when an approved geographic snapshot exists; otherwise show official-data unavailable with an explicit switch to synthetic. Never silently fall back to fixtures. Every record, map legend, summary and evidence disclosure carries applicable classifications. Field-level provenance distinguishes mixed records.
+
+M7-F2: Official roads depict published centerlines; condition uses the actual DOT scale/category/date and documented matching. Unsupported or missing values stay unknown. Centerline length is not repair scope; administrative widths are not surveyed dimensions. All six classifications in DATA_MODEL must render consistently.
+
+M7-F3: Official permits remain administrative records with source windows/statuses and match limitations. Unlocated and ambiguous records are reviewable in Projects and included in coverage denominators. No permit-based utility-location, schedule commitment or financial inference is allowed.
+
+M7-F4: Source/coverage details disclose retrieval time, source release/date when known, study rule, count exclusions, matching method and update limitations. The initial M7 real-data feature is inspection, not real-road costing/screening/scenario execution. Explain unavailable capabilities and missing prerequisites; keep existing synthetic planning available through explicit navigation. Enabling real planning requires a separately approved, versioned contract, not relaxed synthetic flags.
+
+M7-F5: Preserve all old saved records, IDs, calculation/replay versions, optimistic draft edits and explicit review notes. No migration maps a synthetic road to a similarly named official street. M7.2 removes the old guide/chrome; historical guide documents remain. Do not add or expand guide/tour/presentation features.
+
+M7-F6: Navigation loads one primary workflow. View/mode/snapshot/road are shareable via URLs in 7.2; search/viewport/additional filter links remain 7.3 work. Filters are scoped visibly. Pending writes and dirty scenario edits survive ordinary route changes; mode changes retain mounted synthetic drafts and pending-write reconciliation in their original context, without copying or discarding them. No navigation/GET creates estimates, analyses, evaluations or AI audits.
+
+M7 nonfunctional acceptance is defined by test IDs in M7_IMPLEMENTATION_PLAN: explicit snapshot isolation; reproducible local ingestion; atomic publication; bounded paginated reads; accessible fallback; verified source attribution; local/no-key operation after import; preservation of immutable history. Performance numbers are targets to measure on stated hardware, not verified claims. New architecture does not remove the unauthenticated local-only release boundary.

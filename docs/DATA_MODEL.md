@@ -1,6 +1,60 @@
-# Preliminary data model
+# Data model and versioned contracts
 
 Status: M2 implements synthetic RoadSegment maintenance attributes, related asset records, normalized ConditionAssessment history, a synthetic RepairOption catalog and immutable CostEstimate snapshots. M3 adds implemented WorkProject, ConflictFinding and immutable ConflictAnalysis records below. M4 implements the versioned scenario/action contracts below, editable revisions and immutable evaluations. Generic infrastructure assets remain unimplemented; M5 implements the bounded AI interaction and human-review audit records below. The concrete M2 shapes below supersede their former planning drafts. Existing M1 JSON remains unchanged in storage; enriched reads preserve its API shape.
+
+
+## M7 official-data inspection contract (implemented in 7.1)
+
+M0–M6 models below remain unchanged. Official facts use separate immutable sidecar tables and `municipal-record-v2`; no synthetic-only validator was relaxed. [M7_1_IMPLEMENTATION](M7_1_IMPLEMENTATION.md) records verified source mappings, commands and evidence. This concrete contract supersedes the M7.0 proposed DTOs.
+
+| Classification | Meaning |
+| --- | --- |
+| `official_observation` | Published geographic feature or agency observation, with its original source/date; no independent survey-accuracy claim |
+| `imported_administrative_record` | Permit status/effectiveness/expiration and other administrative facts; no actual-work assertion |
+| `derived_calculation` | Explicit deterministic transformation/count/candidate computation retaining source inputs and method |
+| `planning_assumption` | Explicit human hypothetical input, never silently inferred from source data; no new official calculation execution in 7.1 |
+| `synthetic_fixture` | Authored test/example data; isolated automated fixtures and existing v1 records only |
+| `unknown` | Null value with a reason; never a guessed coordinate, zero budget or retrieval-date inspection |
+
+### MunicipalRecord
+
+Pydantic `schemas/municipal.py` validates the common persisted shape: `contract_version`, namespaced `id`, `kind` (`road`, `condition`, `permit`, `context`), `source_revision_id`, string `source_record_key`, record `classification`, nullable GeoJSON `geometry`, nullable `[west,south,east,north]` bbox, `raw_identifiers`, `values`, `field_classifications`, `field_provenance`, `unknown_reasons`, `lineage`, `limitations`, `contains_synthetic`, `contains_assumptions`. Every `values` key has a classification and provenance entry; nulls require unknown reasons. Provenance retains source revision/record/field/original value/unit; geometry provenance distinguishes the derived LION coordinate transformation. Raw source geometry/allowlisted material fields remain in lineage. A record's origin does not override individual unknown fields.
+
+Records are stored under a composite snapshot/kind/ID key; snapshot context is in the REST envelope rather than duplicated in every immutable payload. Raw field lineage plus `field_provenance` replaces the earlier proposed more deeply nested generic lineage DTO. Text/numbers retain source strings; decimal ratings are not float-rounded. Original inspection/permit floating datetimes are retained without inventing a timezone or converting to analytical half-open dates. V1 calendar semantics are unaffected.
+
+| Kind | Current exact semantics |
+| --- | --- |
+| `road` | Manhattan LION regular street (`FeatureTyp='0'`, LBoro or RBoro=1), full MultiLineString transformed EPSG:2263 → 4326; regular nonzero valid line parts required. SegmentID **repeats** in the live service: source key is `SegmentID:OBJECTID`; preserve both and StreetCode as strings. OID is an export row identity, not durable segment identity across republishes. Width/area/cost/utility depth/schedule remain unknown. |
+| `condition` | DOT `systemrating` decimal string, `inspection` floating timestamp, OFT, direction/type/non-rating reason. Source row ID (`:id AS source_row_id`) is the row key; content hash fallback for source-shaped adapter tests/exports without a row ID. Same OFT can have several observations/passes; never select a segment by OFT alone. No official category inferred: current dictionary has decimal-range gaps and a local-street exception with no usable local-street field. |
+| `permit` | PermitNumber is documented primary key; OFT is an 18-digit location code if supplied. Issue/status/type/validity and modified timestamp are administrative fields. WKT and LocationGeometry retained raw; CRS is unspecified, so `geometry` and bbox stay null. No snapped coordinate, footprint, started-work status or confirmed dates created. |
+| `context` | OTI shoreline lines, WGS84 GeoJSON; display context only. No closed shoreline polygons or inferred land/water fill. |
+
+Read DTOs additionally expose `match`, `location_basis` (`source_geometry`, `matched_road_reference`, `unknown`), `scope_membership` (`confirmed_geometry`, `accepted_road_link`, `unverified_candidate`) and `same_oft_records`. Same-OFT relationships identify the documented DOT on/from/to location, **not** a particular LION roadbed, direction, conflict or actual construction project. Road summaries remain category unknown. Accepted linked condition history is available independently; `/conditions` also exposes unaccepted/unmatched observations.
+
+### SourceRevision / DataSnapshot
+
+Each source revision stores `id`, source ID/catalog/endpoint, canonical raw-record-set SHA-256, physical page checksums, exact query, source update marker, serialized/native CRS statement, cadence, attribution, schema fingerprint, dictionary URL/hash, license identifier (nullable), terms URLs/review version, source disclaimer, adapter version/release note, and first acquisition UTC timestamp. Live feeds have no immutable release number: checksums plus source metadata provide the version. ArcGIS editingInfo is not asserted to be the separately advertised LION ZIP edition. Full metadata, dictionaries and terms evidence are retained in ignored acquisition bundles. Portal terms HTML is hashed; city/DOT terms reviewed through official browser-readable pages return 403 to the downloader, recorded honestly without invented page hashes. No standard CC/public-domain license is inferred from null licenseId.
+
+Source identity excludes retrieval timestamps and volatile portal-session HTML. It includes source rows/page checksums, query, update marker, reviewed schema/dictionary/terms profile, CRS and adapter. Snapshot identity hashes coverage, source revision IDs, counts, normalized record/match content, decision hash and PROJ/GEOS/pyproj/Shapely versions. It excludes publication/attempt/retrieval clocks. IDs use `nyc-` plus the first 32 hex characters of the full manifest SHA-256; the full unique hash is stored. Exact repeats reuse a snapshot; changed content/rules/reviews create another. Source retrieval time is retained from first publication; later successful new snapshots have import-run evidence. No automatically activated current snapshot exists.
+
+The manifest includes coverage (pilot/context bbox, source readiness, exact bounded permit query/completeness limitations), capabilities, counts, source revision IDs, method/runtime versions, OFT groups and warnings. Original full geometry is retained; selection intersects rather than clips. All four layers must have valid records for this pilot release; failure/zero-row acquisition is not optional-layer success. Unknown utility coverage is independent of available permits.
+
+### SQLite schema 7
+
+Explicit migration marker: **7 / m7-official-snapshots-v1**, after existing 2–5; no fictitious schema 6. Existing 20 tables/JSON/saved calculations are untouched.
+
+| Table | Concrete layout |
+| --- | --- |
+| `source_revisions` | id PK, source_id, raw_sha256, payload |
+| `import_runs` | id PK, checked status (validated/rejected/published/failed), report_json; current CLI writes published audits only, including acquisition hash, rejects and refresh diff; dry-run/failure reports stay on disk |
+| `data_snapshots` | id PK, study_area_id, full manifest_hash UNIQUE, manifest_json, published_at |
+| `snapshot_sources` | snapshot_id/source_revision_id composite PK and FKs |
+| `import_records` | snapshot_id/kind/id composite PK; source revision/key unique per snapshot/kind; west/south/east/north nullable; payload; composite FK to membership; snapshot/kind/bbox index |
+| `geographic_matches` | snapshot_id/id PK, source kind/record and target kind/road composite FKs within same snapshot; target kind fixed road; status matched/ambiguous/unmatched; payload with candidates, metric CRS, tolerance, review evidence |
+
+Source revisions, snapshots, membership, records and matches reject UPDATE/DELETE through triggers. Publication uses one transaction. Match candidates use UTM18N minimum separation ≤5 m for available geometry, or documented OFT's first 6-digit StreetCode as **candidate** street membership when unlocated; no nearest/unique candidate auto-acceptance. Explicit review binds the complete normalized record hash, reviewer, rationale and eligible road. Initial live import has no reviewed links. A reviewed street reference is not a permit footprint. See ARCHITECTURE for backup/recovery and API_SPEC for read semantics.
+
+No official costing, conflict, scenario or AI execution is enabled; v1 replay/calculators stay synthetic. Derived presentation projections never reserialize saved v1 payloads.
 
 ## Shared conventions
 

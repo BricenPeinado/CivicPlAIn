@@ -46,6 +46,12 @@ export function ScenarioPlanner({ roads, selectedRoad, projects }: { roads: Road
     }).catch(e=>{ if(!ac.signal.aborted)setError(e.message); }).finally(()=>{ if(!ac.signal.aborted)setLoading(false); });
     return ()=>{ ac.abort(); controller.current?.abort(); sequence.current++; };
   },[retry]);
+  useEffect(() => {
+    const dirty = !!draft && (!saved || JSON.stringify(draft) !== JSON.stringify(asDraft(saved)) || note !== (saved.assumptions.find(a => a.id === 'editor')?.note || saved.assumptions.map(a => a.note).join('\n')));
+    const guard = (event: BeforeUnloadEvent) => { if (dirty || busy) { event.preventDefault(); event.returnValue = ''; } };
+    window.addEventListener('beforeunload', guard);
+    return () => window.removeEventListener('beforeunload', guard);
+  }, [draft, saved, note, busy]);
   function change(d: ScenarioDraft) { setDraft(d); setComparison(null); }
   function edit(s: Scenario) { setSaved(s); setDraft(asDraft(s)); setNote(s.assumptions.find(a=>a.id==='editor')?.note || s.assumptions.map(a=>a.note).join('\n')); setEvaluation(histories[s.id]?.[0] || null); setError(''); }
   async function persist(shouldEvaluate: boolean) {

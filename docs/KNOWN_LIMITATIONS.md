@@ -2,6 +2,32 @@
 
 Reviewed for M6 on 2026-11-07. No critical or high-severity application crash was found in the tested local workflow. This assessment covers the bounded synthetic demonstrator on the verified host, not production safety, penetration testing or cross-browser certification.
 
+## M7.1 official-data integration limits
+
+M7.1 backend ingestion/read API and explicit migration are implemented and tested; M7.2 now implements the map shell and official inspection; 7.3–7.4 retain richer navigation and broader verification. See [M7.1 sources, tests and evidence](M7_1_IMPLEMENTATION.md). Historical M6 limitations below apply to the retained synthetic workspace.
+
+| Boundary | Current limitation |
+| --- | --- |
+| Permit coverage/location | Only MANHATTAN permit issue dates ≥2026-10-01 and on-street names present in selected LION roads were fetched for the initial pilot. Long streets can include out-of-pilot records; aliases/missing names and older still-valid permits may be omitted. This is not complete geographic coverage or confirmed future work. All initial permits are unlocated/unmatched; source WKT CRS is unspecified. |
+| Geographic links | Initial live import has no accepted road links. Pavement geometries have unreviewed spatial candidates; shared DOT OFT links identify a location, not a unique LION roadbed/direction. Same SegmentID can occur repeatedly in the service. No nearest/name-only match is auto-accepted; manual reviews require a record hash and rationale. |
+| Rating categories | Decimal ratings and official inspection datetimes are present, but current dictionary category ranges leave decimal gaps and a local-street exception unsupported by available class fields. Categories remain unknown; zero classified poor/good/fair roads does not mean zero poor/good/fair streets. |
+| Source/version freshness | LION ArcGIS edit marker is not asserted equal to ZIP catalog release 26c. Mutable APIs lack transactional export guarantees; count/update checks detect observed changes, not all possible concurrent changes. Archived checksums freeze this import; no automatic/live refresh or accuracy guarantee. |
+| Terms and distribution | Catalog licenseId is null; no CC/public-domain inference. Portal terms/dictionaries are hashed, city/DOT pages were browser-reviewed but automated download returned 403. M7.2 displays the mandatory NYC DOT application disclaimer in Sources & terms and links source-specific terms in provenance. Extracts remain ignored/local; no blanket redistribution/deployment clearance. |
+| Interface | M7.2 reads pinned v2 official snapshots, with independent overlays, source labels, inspector and keyboard fallback. The initial snapshot has no accepted condition/permit road links; overlays never invent them. Basic four-view relocation is implemented; complete 7.3 navigation/filter acceptance and 7.4 accessibility/cross-browser certification remain open. |
+| Scope/performance | 10,000-road/20,000-permit pilot limits; 2,000-feature viewport cap, explicit refinement error. Full pilot may exceed viewport cap. Some bounded read filters/summaries materialize records in Python; this is not a citywide/tile/query platform. No citywide benchmark. |
+| Storage/recovery | Explicit schema-7 migration preserves rows and verifies a private SQLite backup including committed WAL. Writers must be quiesced. Busy/injected failure/backup comparisons are tested; real disk exhaustion/power interruption and production disaster recovery are unrun. Local files/hashes are not tamper-proof or encrypted. Current import_runs stores successful publication audits; failed/acquired reports remain local disk evidence. |
+| Engineering/AI | Real costing, actual schedules, traffic/budget, conflict/scenario/AI execution unavailable. No synthetic assumptions/rates fill official gaps. Utilities/location/depth/coverage and excavation safety remain unknown. |
+
+## M7.2 interface limits
+
+- Basemap tiles are optional OSM standard interactive tiles, best-effort/no SLA. Browser cache and visible attribution are retained; no bulk/prefetch/offline tile download. Automated browser checks used `VITE_BASEMAP=local`; actual hosted-tile availability was not certified. Local API geometry/source-name labels/shoreline remain available. This is not an offline tile package.
+- The 2,000-record viewport guard applies to each layer. Full pilot or historical inspection views can exceed it; zoom/refine rather than silently truncating. The client currently paginates full record payloads; large views can require many local API reads. No citywide latency guarantee or spatial-server rewrite.
+- All imported inspection dates are overlaid together. Overlapping lines do not show a time trend, a current rating or an accepted road link. Initial permits are unlocated and therefore have no map markers. An accepted road reference is not a work footprint.
+- Only view, mode, snapshot and road selection are URL state in 7.2. Camera/search/layer filters and selected permit/scenario/evaluation links remain 7.3 work. Official Map remounts when leaving it; the selected road restores focus on return. Native beforeunload warnings depend on browser support/user interaction; drafts are in-memory, not recovery storage.
+- Browser checks cover the host's Chromium/WebGL at 320/390/768/1280 widths, source/inspection selection and navigation. Unit tests simulate source/tile/WebGL failure. Full cross-browser/screen-reader/contrast/200% zoom and sustained-performance certification remain 7.4. Large MapLibre bundle advisory remains; no new dependency was added.
+
+## Implemented M6 limitations
+
 | Priority / scope | Limitation and practical effect |
 | --- | --- |
 | Release blocker for municipal/production use | Data is entirely authored and synthetic. The 24 schematic segments do not depict actual NYC streets; dimensions, conditions, project footprints, organizations, prices and dates are not municipal observations. No city adoption or accuracy validation is claimed. |
