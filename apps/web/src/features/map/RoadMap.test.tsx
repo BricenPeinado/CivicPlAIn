@@ -10,6 +10,8 @@ vi.mock('maplibre-gl', () => ({
     handlers = new Map<string, (...args: any[]) => void>();
     canvas = document.createElement('canvas');
     source = { setData: vi.fn() };
+    queryRenderedFeatures = vi.fn(() => []); setLayoutProperty = vi.fn(); getLayer = vi.fn(() => true);
+    getBounds() { return { getWest: () => -74.01, getSouth: () => 40.71, getEast: () => -74.0, getNorth: () => 40.72 }; }
     setFilter = vi.fn(); addControl = vi.fn(); addSource = vi.fn(); addLayer = vi.fn();
     fitBounds = vi.fn(); resize = vi.fn(); remove = vi.fn();
     constructor() { state.maps.push(this); }
@@ -42,10 +44,10 @@ it('shows hover feedback and preserves the list fallback on map errors', () => {
   const map = state.maps[0];
   act(() => map.handlers.get('load')());
   act(() => map.handlers.get('mousemove:road-hit')({features:[{properties:{road_id:'demo-r-001',name:'Demo segment R-001'}}]}));
-  expect(screen.getByText('Demo segment R-001 · Demo data')).toBeInTheDocument();
+  expect(screen.getByText('Demo segment R-001 · Synthetic fixture')).toBeInTheDocument();
   act(() => map.handlers.get('error')());
-  expect(screen.getByRole('alert')).toHaveTextContent('Use the road list below');
-  expect(screen.getByRole('button', {name:/Study area/})).toBeDisabled();
+  expect(screen.getByRole('alert')).toHaveTextContent('Search and the street list');
+  expect(screen.getByRole('button', {name:/Return to study focus/})).toBeDisabled();
 });
 it('handles WebGL context loss and cleans up the instance', () => {
   const rendered = render(<RoadMap roads={roads} selectedId={null} onSelect={vi.fn()}/>);
@@ -63,7 +65,7 @@ it('ignores late errors from the disposed StrictMode instance', () => {
   act(() => state.maps[0].handlers.get('error')());
   act(() => state.maps[1].handlers.get('load')());
   expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-  expect(screen.getByRole('button', {name:/Study area/})).toBeEnabled();
+  expect(screen.getByRole('button', {name:/Return to study focus/})).toBeEnabled();
 });
 
 it('renders project geometry, toggles the work-zone source and highlights all finding assets', async () => {
@@ -85,4 +87,20 @@ it('renders project geometry, toggles the work-zone source and highlights all fi
   expect(map.source.setData.mock.calls.at(-1)[0].features).toEqual([]);
   view.rerender(<RoadMap {...props} visibleCategories={['water']}/>);
   expect(map.source.setData.mock.calls.at(-1)[0].features.every((f: any) => f.properties.category === 'water')).toBe(true);
+});
+
+it('isolates tile failure while keeping official layers interactive and independently visible', () => {
+  const layers = { streets: true, conditions: false, permits: false, shoreline: true, basemap: true };
+  const onSelect = vi.fn(), onViewport = vi.fn();
+  const view = render(<RoadMap official selectedId={null} onSelect={onSelect} layers={layers} onViewport={onViewport}/>);
+  const map = state.maps[0]; act(() => map.handlers.get('load')());
+  act(() => map.handlers.get('error')({ sourceId: 'basemap' }));
+  expect(screen.getByRole('status')).toHaveTextContent('Official layers remain available'); expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  act(() => map.handlers.get('click:road-hit')({ features: [{ properties: { road_id: 'road-real' } }] })); expect(onSelect).toHaveBeenCalledWith('road-real');
+  view.rerender(<RoadMap official selectedId={null} onSelect={onSelect} layers={{ ...layers, conditions: true, streets: false }} onViewport={onViewport}/>);
+  expect(map.setLayoutProperty).toHaveBeenCalledWith('observations', 'visibility', 'visible'); expect(map.setLayoutProperty).toHaveBeenCalledWith('road-hit', 'visibility', 'none'); expect(map.setLayoutProperty).toHaveBeenLastCalledWith('basemap', 'visibility', 'none');
+  act(() => map.handlers.get('moveend')()); expect(onViewport).toHaveBeenCalledWith([-74.01,40.71,-74.0,40.72]);
+});
+it('preserves records while exposing an official source-rendering failure', () => {
+  render(<RoadMap official selectedId={null} onSelect={vi.fn()}/>); const map = state.maps[0]; act(() => map.handlers.get('load')()); act(() => map.handlers.get('error')({ sourceId: 'roads' })); expect(screen.getByRole('status')).toHaveTextContent('A map layer could not render'); expect(screen.getByRole('button', { name: 'Return to study focus' })).toBeEnabled();
 });

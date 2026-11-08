@@ -1,32 +1,27 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { analyzeConflicts, getProjects } from '../../services/api';
 import type { ConflictAnalysis, RoadsCollection, WorkProject } from '../../types/api';
 
+/** Reading/navigating never creates an analysis. Screening is an explicit user action. */
 export function useConflicts(roads: RoadsCollection | null) {
-  const [projects, setProjects] = useState<WorkProject[]>([]);
-  const [analysis, setAnalysis] = useState<ConflictAnalysis | null>(null);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [retry, setRetry] = useState(0);
+  const [projects, setProjects] = useState<WorkProject[]>([]), [analysis, setAnalysis] = useState<ConflictAnalysis | null>(null);
+  const [error, setError] = useState(''), [loading, setLoading] = useState(false), [retry, setRetry] = useState(0);
+  const pending = useRef<AbortController | null>(null);
   useEffect(() => {
-    const controller = new AbortController();
-    setProjects([]); setAnalysis(null); setError(''); setLoading(false);
-    if (!roads?.features.length || !roads.meta.dataset_snapshot_id) return;
+    const ac = new AbortController(); setProjects([]); setAnalysis(null); setError(''); setLoading(false);
+    if (!roads?.features.length) return () => ac.abort();
     setLoading(true);
-    const load = async () => {
-      const response = await getProjects(controller.signal);
-      if (response.meta.dataset_snapshot_id !== roads.meta.dataset_snapshot_id) throw new Error('Project snapshot differs from roads. Reload the workspace.');
-      let result: ConflictAnalysis | null = null;
-      if (response.data.length) {
-        const checked = await analyzeConflicts(roads.meta.dataset_snapshot_id!, response.data.map(p => p.id), controller.signal);
-        if (checked.data.dataset_snapshot_id !== roads.meta.dataset_snapshot_id || checked.meta.dataset_snapshot_id !== roads.meta.dataset_snapshot_id) throw new Error('Analysis snapshot changed. Reload the workspace.');
-        result = checked.data;
-      }
-      if (!controller.signal.aborted) { setProjects(response.data); setAnalysis(result); }
-    };
-    load().catch(e => { if (!controller.signal.aborted) setError(e instanceof Error ? e.message : 'Conflict data unavailable.'); })
-      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
-    return () => controller.abort();
+    getProjects(ac.signal).then(r => { if (r.meta.dataset_snapshot_id !== roads.meta.dataset_snapshot_id) throw new Error('Project snapshot differs from roads. Reload the workspace.'); if (!ac.signal.aborted) setProjects(r.data); })
+      .catch(e => { if (!ac.signal.aborted) setError(e.message); }).finally(() => { if (!ac.signal.aborted) setLoading(false); });
+    return () => { ac.abort(); pending.current?.abort(); };
   }, [roads, retry]);
-  return { projects, analysis, error, loading, reload: () => setRetry(v => v + 1) };
+  async function analyze() {
+    if (!roads?.meta.dataset_snapshot_id || !projects.length || loading) return;
+    const ac = new AbortController(); pending.current = ac; setLoading(true); setError('');
+    try { const r = await analyzeConflicts(roads.meta.dataset_snapshot_id, projects.map(p => p.id), ac.signal);
+      if (r.data.dataset_snapshot_id !== roads.meta.dataset_snapshot_id || r.meta.dataset_snapshot_id !== roads.meta.dataset_snapshot_id) throw new Error('Analysis snapshot changed. Reload the workspace.');
+      if (!ac.signal.aborted) setAnalysis(r.data);
+    } catch (e) { if (!ac.signal.aborted) setError((e as Error).message); } finally { if (!ac.signal.aborted) setLoading(false); }
+  }
+  return { projects, analysis, error, loading, reload: () => setRetry(v => v + 1), analyze };
 }

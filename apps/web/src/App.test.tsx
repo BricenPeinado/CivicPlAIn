@@ -2,160 +2,87 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
-import { getEvidence, getRoad, getRoads, getProjects } from './services/api';
+import { getEvidence, getRoad, getRoads, getProjects, analyzeConflicts } from './services/api';
+import { getWorkspace, getSnapshots, getSnapshot } from './services/municipal';
 import type { RoadsCollection } from './types/api';
-// Reuse the reviewed API fixture in tests only; production has no bundled road data.
 import { readFileSync } from 'node:fs';
 const fixture = readFileSync('../../data/demo/roads.geojson', 'utf8');
 const manifest = JSON.parse(readFileSync('../../data/demo/manifest.json', 'utf8'));
-vi.mock('./services/api');
-vi.mock('./features/map/RoadMap', () => ({
-  colors: { good: '#277953', fair: '#bd831f', poor: '#c45e4d', unknown: '#859198' },
-  RoadMap: ({ onSelect }: { onSelect: (id: string) => void }) => <button onClick={() => onSelect('demo-r-001')}>Select map segment</button>,
-}));
-const collection: RoadsCollection = { ...JSON.parse(fixture), meta: {
-  request_id: 'test', dataset_snapshot_id: 'demo-m1-v1', warnings: ['DEMO DATA'], next_cursor: null,
-} };
+vi.mock('./services/api'); vi.mock('./services/municipal');
+vi.mock('./features/map/RoadMap', () => ({ RoadMap: ({ onSelect }: { onSelect: (id: string) => void }) => <button onClick={() => onSelect('demo-r-001')}>Select map segment</button> }));
+const collection: RoadsCollection = { ...JSON.parse(fixture), meta: { request_id: 'test', dataset_snapshot_id: 'demo-m1-v1', warnings: ['DEMO DATA'], next_cursor: null } };
 beforeEach(() => {
-  vi.mocked(getRoads).mockResolvedValue(collection);
-  vi.mocked(getProjects).mockResolvedValue({ data: [], meta: collection.meta });
-  vi.mocked(getRoad).mockImplementation(async id => {
-    const feature = collection.features.find(f => f.id === id)!;
-    return { data: { ...feature.properties, geometry: feature.geometry }, meta: collection.meta };
-  });
+  window.history.replaceState(null, '', '/');
+  vi.mocked(getWorkspace).mockResolvedValue({ mode: 'synthetic', snapshot_id: 'demo-m1-v1' }); vi.mocked(getSnapshots).mockResolvedValue([]);
+  vi.mocked(getRoads).mockResolvedValue(collection); vi.mocked(getProjects).mockResolvedValue({ data: [], meta: collection.meta });
+  vi.mocked(getRoad).mockImplementation(async id => { const f = collection.features.find(f => f.id === id)!; return { data: { ...f.properties, geometry: f.geometry }, meta: collection.meta }; });
   vi.mocked(getEvidence).mockResolvedValue({ data: manifest.evidence_source as never, meta: collection.meta });
 });
-describe('workspace', () => {
-  it('renders loading state, real dataset metrics and demo disclosure', async () => {
-    render(<App/>);
-    expect(screen.getByRole('heading', { name: 'Loading the study area' })).toBeInTheDocument();
-    await screen.findByRole('region', { name: 'Keyboard accessible road list' });
-    const summary = screen.getByRole('region', { name: 'Loaded dataset summary' });
-    expect(within(summary).getByText('24')).toBeInTheDocument();
-    expect(within(summary).getAllByText('6')).toHaveLength(4);
-    expect(screen.getByText('DEMO DATA')).toBeInTheDocument();
-    expect(screen.getByText('All road geometries and conditions are synthetic. No NYC municipal observations are displayed.', { exact: false })).toBeInTheDocument();
+async function openList(user: ReturnType<typeof userEvent.setup>) { await user.click(await screen.findByRole('button', { name: 'Open street list' })); return screen.getByRole('region', { name: 'Keyboard accessible road list' }); }
+async function nav(user: ReturnType<typeof userEvent.setup>, name: string) { await user.click(screen.getByRole('link', { name })); }
+describe('map-first workspace', () => {
+  it('opens on the map with concise synthetic disclosure and focused navigation', async () => {
+    render(<App/>); await screen.findByRole('button', { name: 'Select map segment' });
+    expect(screen.getByRole('combobox', { name: 'Dataset mode' })).toHaveValue('synthetic');
+    expect(screen.getByText(/All geometry, conditions and costs/)).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Loaded dataset summary', hidden: true })).not.toBeVisible();
+    expect(screen.queryByText('Explore Demo')).not.toBeInTheDocument(); expect(analyzeConflicts).not.toHaveBeenCalled();
+    expect(screen.getAllByRole('link').filter(l => l.getAttribute('aria-current') === 'page')).toHaveLength(1);
   });
-  it('selects from the list and loads correct details and provenance', async () => {
-    const user = userEvent.setup(); render(<App/>);
-    const list = await screen.findByRole('region', { name: 'Keyboard accessible road list' });
-    await user.click(within(list).getByRole('button', { name: /Demo segment R-001/ }));
+  it('selects with the keyboard and preserves source evidence and unknowns', async () => {
+    const user = userEvent.setup(); render(<App/>); const list = await openList(user);
+    const first = within(list).getByRole('button', { name: /Demo segment R-001/ }); first.focus(); await user.keyboard('{Enter}');
     const detail = screen.getByRole('complementary', { name: 'Road details' });
-    expect(await within(detail).findByRole('heading', { name: 'Demo segment R-001' })).toBeInTheDocument();
-    expect(within(detail).getByText('3 / 10 (demo)')).toBeInTheDocument();
-    expect(await within(detail).findByText(manifest.evidence_source.title)).toBeInTheDocument();
-    expect(within(list).getByRole('button', { name: /Demo segment R-001/ })).toHaveAttribute('aria-pressed', 'true');
-    await user.click(within(list).getByRole('button', { name: /Demo segment R-004/ }));
-    await within(detail).findByRole('heading', { name: 'Demo segment R-004' });
-    expect(within(detail).queryByText('3 / 10 (demo)')).not.toBeInTheDocument();
-    expect(within(detail).getAllByText('Unknown').length).toBeGreaterThan(1);
+    await within(detail).findByRole('heading', { name: 'Demo segment R-001' }); expect(within(detail).getByText('3 / 10 (demo)')).toBeInTheDocument();
+    await user.click(within(detail).getByText('Attributes and provenance')); expect(await within(detail).findByText(manifest.evidence_source.title)).toBeInTheDocument();
+    expect(first).toHaveAttribute('aria-pressed', 'true');
+    await user.click(within(list).getByRole('button', { name: /Demo segment R-004/ })); await within(detail).findByRole('heading', { name: 'Demo segment R-004' });
+    expect(within(detail).queryByText('3 / 10 (demo)')).not.toBeInTheDocument(); expect(within(detail).getAllByText('Unknown').length).toBeGreaterThan(1);
   });
-  it('keeps map selection in React state and filters list without changing dataset counts', async () => {
-    const user = userEvent.setup(); render(<App/>);
-    await user.click(await screen.findByRole('button', { name: 'Select map segment' }));
-    expect(await screen.findByRole('heading', { name: 'Demo segment R-001' })).toBeInTheDocument();
-    await user.type(screen.getByRole('textbox', { name: 'Find road segments' }), 'absent');
-    expect(screen.getByText('No segments match this search.')).toBeInTheDocument();
-    expect(within(screen.getByRole('region', { name: 'Loaded dataset summary' })).getByText('24')).toBeInTheDocument();
+  it('keeps map selection while filtering streets; dashboard counts stay snapshot-wide', async () => {
+    const user = userEvent.setup(); render(<App/>); await user.click(await screen.findByRole('button', { name: 'Select map segment' })); await screen.findByRole('heading', { name: 'Demo segment R-001' });
+    await user.type(screen.getByRole('textbox', { name: 'Find road segments' }), 'absent'); expect(screen.getByText('No segments match this search.')).toBeInTheDocument();
+    await nav(user, 'Dashboard'); const summary = screen.getByRole('region', { name: 'Loaded dataset summary' }); expect(within(summary).getByText('24')).toBeInTheDocument(); expect(within(summary).getAllByText('6')).toHaveLength(4);
+    expect(screen.queryByRole('button', { name: 'Select map segment', hidden: true })).not.toBeVisible();
   });
-  it('supports keyboard road selection', async () => {
-    const user = userEvent.setup(); render(<App/>);
-    const list = await screen.findByRole('region', { name: 'Keyboard accessible road list' });
-    const road = within(list).getByRole('button', { name: /Demo segment R-002/ });
-    road.focus(); await user.keyboard('{Enter}');
-    expect(await screen.findByRole('heading', { name: 'Demo segment R-002' })).toBeInTheDocument();
+  it('handles API failures and retry without substitute roads', async () => {
+    vi.mocked(getRoads).mockRejectedValueOnce(new Error('API unavailable')); const user = userEvent.setup(); render(<App/>);
+    expect(await screen.findByRole('alert')).toHaveTextContent('Unable to load road data'); await user.click(screen.getByRole('button', { name: 'Retry connection' })); await openList(user); expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
-  it('handles API failure and retry', async () => {
-    vi.mocked(getRoads).mockRejectedValueOnce(new Error('API unavailable'));
-    const user = userEvent.setup(); render(<App/>);
-    expect(await screen.findByRole('alert')).toHaveTextContent('Unable to load road data');
-    await user.click(screen.getByRole('button', { name: 'Retry connection' }));
-    await screen.findByRole('region', { name: 'Keyboard accessible road list' });
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  it('shows an empty inventory without invented records', async () => {
+    vi.mocked(getRoads).mockResolvedValue({ ...collection, features: [] }); const user = userEvent.setup(); render(<App/>); const list = await openList(user); expect(list).toHaveTextContent('No segments match'); await nav(user, 'Dashboard'); expect(within(screen.getByRole('region', { name: 'Loaded dataset summary' })).getAllByText('0')).toHaveLength(5);
   });
-  it('handles empty records without fabricated metrics', async () => {
-    vi.mocked(getRoads).mockResolvedValue({ ...collection, features: [] });
-    render(<App/>);
-    await screen.findByRole('heading', { name: 'No road segments loaded' });
-    expect(within(screen.getByRole('region', { name: 'Loaded dataset summary' })).getAllByText('0')).toHaveLength(5);
+  it('retains map and street list after a detail failure', async () => {
+    vi.mocked(getRoad).mockRejectedValue(new Error('Road not available')); const user = userEvent.setup(); render(<App/>); await openList(user); await user.click(screen.getByRole('button', { name: 'Select map segment' })); expect(await screen.findByRole('alert')).toHaveTextContent('Road not available'); expect(screen.getByRole('region', { name: 'Keyboard accessible road list' })).toBeVisible();
   });
-  it('handles detail failures while retaining list and map', async () => {
-    vi.mocked(getRoad).mockRejectedValue(new Error('Road not available'));
-    const user = userEvent.setup(); render(<App/>);
-    await user.click(await screen.findByRole('button', { name: 'Select map segment' }));
-    expect(await screen.findByRole('alert')).toHaveTextContent('Road not available');
-    expect(screen.getByRole('region', { name: 'Keyboard accessible road list' })).toBeInTheDocument();
-    await waitFor(() => expect(getRoad).toHaveBeenCalled());
+  it('runs screening only on explicit action and retains finding selection', async () => {
+    const { projects, analysis } = await import('./features/conflicts/testData'); vi.mocked(getProjects).mockResolvedValue({ data: projects, meta: collection.meta }); vi.mocked(analyzeConflicts).mockResolvedValue({ data: analysis, meta: collection.meta });
+    const user = userEvent.setup(); render(<App/>); await screen.findByRole('button', { name: 'Select map segment' }); await nav(user, 'Projects'); const review = screen.getByRole('region', { name: 'Project coordination and conflict review' });
+    expect(review).toHaveTextContent('Screening has not been run'); expect(analyzeConflicts).not.toHaveBeenCalled(); await user.click(screen.getByRole('button', { name: 'Run conflict screening' }));
+    await user.click(await within(review).findByRole('button', { name: /Potential pavement rework/ })); expect(await within(review).findByRole('article', { name: 'Selected conflict evidence' })).toHaveTextContent('Sequential gap: 2');
+    await user.click(within(review).getByRole('button', { name: /Fictional distant telecom inspection/ })); expect(review).toHaveTextContent('No conflicts detected in the checked records'); await user.click(within(review).getByRole('button', { name: 'Show all conflicts' })); expect(within(review).getByRole('button', { name: /Potential pavement rework/ })).toBeInTheDocument();
+    expect(analyzeConflicts).toHaveBeenCalledOnce();
+  });
+  it('isolates project failures from the map and retries independently', async () => {
+    vi.mocked(getProjects).mockRejectedValueOnce(new Error('Project storage unavailable')); const user = userEvent.setup(); render(<App/>); await openList(user); expect(screen.getByRole('region', { name: 'Keyboard accessible road list' })).toBeVisible(); await nav(user, 'Projects'); expect(await screen.findByRole('alert')).toHaveTextContent('Project storage unavailable'); await user.click(screen.getByRole('button', { name: 'Retry project analysis' })); await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument()); expect(screen.getByText('No project records loaded. Utility coverage remains unknown.')).toBeVisible();
+  });
+  it('rejects mismatched project snapshots before screening', async () => {
+    vi.mocked(getProjects).mockResolvedValue({ data: [], meta: { ...collection.meta, dataset_snapshot_id: 'other' } }); const user = userEvent.setup(); render(<App/>); await screen.findByRole('button', { name: 'Select map segment' }); await nav(user, 'Projects'); expect(await screen.findByRole('alert')).toHaveTextContent('Project snapshot differs from roads'); expect(analyzeConflicts).not.toHaveBeenCalled();
+  });
+  it('preserves scenario drafts across views and explicit dataset switches', async () => {
+    const { getScenarios, getRepairCatalog } = await import('./services/api'); vi.mocked(getScenarios).mockResolvedValue({ data: [], meta: collection.meta }); vi.mocked(getRepairCatalog).mockResolvedValue({ data: [], meta: collection.meta });
+    const user = userEvent.setup(); render(<App/>); await screen.findByRole('button', { name: 'Select map segment' }); await nav(user, 'Scenarios'); await user.click(await screen.findByRole('button', { name: 'Create scenario' })); await user.type(screen.getByRole('textbox', { name: 'Name' }), 'Unfinished review plan'); const unload = new Event('beforeunload', { cancelable: true }); window.dispatchEvent(unload); expect(unload.defaultPrevented).toBe(true);
+    await nav(user, 'Map'); await nav(user, 'Scenarios'); expect(screen.getByRole('textbox', { name: 'Name' })).toHaveValue('Unfinished review plan');
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Dataset mode' }), 'official'); expect(await screen.findByRole('heading', { name: 'Official data unavailable' })).toBeInTheDocument(); await user.selectOptions(screen.getByRole('combobox', { name: 'Dataset mode' }), 'synthetic'); expect(screen.getByRole('textbox', { name: 'Name' })).toHaveValue('Unfinished review plan');
+  });
+  it('fails closed for unavailable official snapshot without loading synthetic records', async () => {
+    window.history.replaceState(null, '', '/#/map?mode=official&snapshot=nyc-11111111111111111111111111111111'); vi.mocked(getSnapshot).mockRejectedValue(new Error('Published snapshot not found')); render(<App/>); expect(await screen.findByRole('heading', { name: 'Official data unavailable' })).toBeVisible(); expect(getRoads).not.toHaveBeenCalled(); expect(screen.queryByText('Synthetic geometry')).not.toBeInTheDocument();
+  });
+  it('offers a named invalid-link state without data mutations', async () => {
+    window.history.replaceState(null, '', '/#/no-such-page'); const user = userEvent.setup(); render(<App/>); expect(screen.getByRole('alert')).toHaveTextContent('Page not found'); await user.click(screen.getByRole('button', { name: 'Return to map' })); await screen.findByRole('button', { name: 'Select map segment' }); expect(analyzeConflicts).not.toHaveBeenCalled();
   });
 });
 
-it('loads the M3 analysis and filters findings using project selection', async () => {
-  const { projects, analysis } = await import('./features/conflicts/testData');
-  const { analyzeConflicts } = await import('./services/api');
-  vi.mocked(getProjects).mockResolvedValue({ data: projects, meta: collection.meta });
-  vi.mocked(analyzeConflicts).mockResolvedValue({ data: analysis, meta: collection.meta });
-  const user = userEvent.setup(); render(<App/>);
-  const review = await screen.findByRole('region', { name: 'Project coordination and conflict review' });
-  const finding = await within(review).findByRole('button', { name: /Potential pavement rework/ });
-  await user.click(finding);
-  expect(await within(review).findByRole('article', { name: 'Selected conflict evidence' })).toHaveTextContent('Sequential gap: 2');
-  await user.click(within(review).getByRole('button', { name: /Fictional distant telecom inspection/ }));
-  expect(within(review).getByText(/No conflicts detected in the checked records/)).toBeInTheDocument();
-  await user.click(within(review).getByRole('button', { name: 'Show all conflicts' }));
-  expect(within(review).getByRole('button', { name: /Potential pavement rework/ })).toBeInTheDocument();
-  expect(analyzeConflicts).toHaveBeenCalledWith('demo-m1-v1', projects.map(p => p.id), expect.any(AbortSignal));
-});
-
-it('keeps roads usable when project data fail and retries M3 independently', async () => {
-  vi.mocked(getProjects).mockRejectedValueOnce(new Error('Project storage unavailable'));
-  const user = userEvent.setup(); render(<App/>);
-  expect(await screen.findByRole('alert')).toHaveTextContent('Project storage unavailable');
-  expect(screen.getByRole('region', { name: 'Keyboard accessible road list' })).toBeInTheDocument();
-  await user.click(screen.getByRole('button', { name: 'Retry project analysis' }));
-  await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument());
-  expect(screen.getByText('No project records loaded. Utility coverage remains unknown.')).toBeInTheDocument();
-});
-it('rejects mismatched project snapshots before analysis', async () => {
-  vi.mocked(getProjects).mockResolvedValue({ data: [], meta: { ...collection.meta, dataset_snapshot_id: 'different' } });
-  render(<App/>);
-  expect(await screen.findByRole('alert')).toHaveTextContent('Project snapshot differs from roads');
-});
-
-it('guides the loaded demo records without creating substitute data', async () => {
-  const { projects, analysis } = await import('./features/conflicts/testData');
-  const { analyzeConflicts } = await import('./services/api');
-  vi.mocked(getProjects).mockResolvedValue({ data: projects, meta: collection.meta });
-  vi.mocked(analyzeConflicts).mockResolvedValue({ data: analysis, meta: collection.meta });
-  const user = userEvent.setup(); render(<App/>);
-  await user.click(screen.getByRole('button', { name: 'Explore Demo' }));
-  const guide = await screen.findByRole('region', { name: 'Synthetic demo guide' });
-  await user.click(within(guide).getByRole('button', { name: /Inspect demo road/ }));
-  expect(await screen.findByRole('heading', { name: 'Demo segment R-001' })).toBeInTheDocument();
-  await waitFor(() => expect(within(guide).getByRole('button', { name: /Review potential/ })).toBeEnabled());
-  await user.click(within(guide).getByRole('button', { name: /Review potential/ }));
-  expect(await screen.findByRole('article', { name: 'Selected conflict evidence' })).toHaveTextContent('Sequential gap: 2');
-});
-it('keeps unavailable demo data explicit and compact navigation named', async () => {
-  vi.mocked(getRoads).mockResolvedValue({ ...collection, features: collection.features.slice(1) });
-  const user = userEvent.setup(); render(<App/>);
-  await user.click(screen.getByRole('button', { name: 'Explore Demo' }));
-  const guide = await screen.findByRole('region', { name: 'Synthetic demo guide' });
-  expect(within(guide).getByRole('button', { name: /Inspect demo road/ })).toBeDisabled();
-  expect(guide).toHaveTextContent('Primary demo road is absent');
-  expect(screen.getByRole('button', { name: 'Infrastructure map' })).toHaveAttribute('title');
-  expect(screen.getByRole('button', { name: 'Scenario planner' })).toHaveAttribute('aria-expanded', 'false');
-});
-it('reopening scenario navigation preserves the unsaved editor', async () => {
-  const { getScenarios, getRepairCatalog } = await import('./services/api');
-  vi.mocked(getScenarios).mockResolvedValue({data:[],meta:collection.meta});
-  vi.mocked(getRepairCatalog).mockResolvedValue({data:[],meta:collection.meta});
-  const user=userEvent.setup(); render(<App/>);
-  await screen.findByRole('region',{name:'Keyboard accessible road list'});
-  const navigation=screen.getByRole('button',{name:'Scenario planner'});
-  await user.click(navigation);
-  await waitFor(()=>expect(screen.getByRole('button',{name:'Create scenario'})).toBeEnabled());
-  await user.click(screen.getByRole('button',{name:'Create scenario'}));
-  await user.type(screen.getByRole('textbox',{name:'Name'}),'Unfinished review plan');
-  await user.click(navigation);
-  expect(screen.getByRole('textbox',{name:'Name'})).toHaveValue('Unfinished review plan');
+it('a direct dashboard link does not instantiate a map', async () => {
+  window.history.replaceState(null, '', '/#/dashboard?mode=synthetic'); render(<App/>); await screen.findByRole('region', { name: 'Loaded dataset summary' }); expect(screen.queryByText('Select map segment')).not.toBeInTheDocument(); expect(analyzeConflicts).not.toHaveBeenCalled();
 });

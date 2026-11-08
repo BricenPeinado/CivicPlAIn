@@ -26,9 +26,9 @@ export function ConflictReview(props: Props) {
   const selected = findings.find(f => f.id === selectedFinding);
   const name = (id: string) => projects.find(p => p.id === id)?.title || id;
   return <section className="coordination-card" aria-label="Project coordination and conflict review">
-    <div className="list-heading"><div><p className="eyebrow">M3 · DETERMINISTIC SCREENING</p><h2>Project coordination</h2></div><span className="demo-badge">FICTIONAL DEMO PROJECTS</span></div>
+    <div className="list-heading"><div><h2>Project coordination</h2></div><span className="demo-badge">FICTIONAL DEMO PROJECTS</span></div>
     <p className="coverage-note"><strong>Human coordination review required.</strong> Findings are screening signals, not final engineering determinations. Utility coverage is unknown; an empty result never establishes excavation safety.</p>
-    {props.loading ? <p role="status">Loading projects and analyzing supplied evidence…</p> : props.error ? <div role="alert"><p>Project analysis unavailable. {props.error}</p><button onClick={props.reload}>Retry project analysis</button></div> : <>
+    {props.loading ? <p role="status">Loading project evidence…</p> : props.error ? <div role="alert"><p>Project analysis unavailable. {props.error}</p><button onClick={props.reload}>Retry project analysis</button></div> : <>
       <fieldset className="project-layers"><legend>Work-zone map layers</legend>
         <label><input type="checkbox" checked={props.showProjects} onChange={e => props.setShowProjects(e.target.checked)}/>Show project work zones</label>
         {infrastructureCategories.filter(c => projects.some(p => p.infrastructure_category === c)).map(c => <label key={c}><input type="checkbox" checked={props.visibleCategories.includes(c)} onChange={e => props.setVisibleCategories(e.target.checked ? [...props.visibleCategories, c] : props.visibleCategories.filter(v => v !== c))}/><i style={{ background: categoryColors[c] }}/>{label(c)}</label>)}
@@ -56,7 +56,8 @@ export function ConflictReview(props: Props) {
         <div className="finding-list">{findings.map(f => <button key={f.id} aria-pressed={f.id === selectedFinding} className={f.id === selectedFinding ? 'finding-row selected' : 'finding-row'} onClick={() => props.onFinding(f.id)}>
           <strong>⚑ {findingLabels[f.finding_type]}</strong><span>Coordination review · {f.synthetic_input ? 'Synthetic inputs' : 'Source inputs'}</span><span>{f.project_ids.map(name).join(' + ')}</span>
         </button>)}</div>
-        {!findings.length && <p>No conflicts detected in the checked records for this selection; utility coverage may be incomplete.</p>}
+        {!analysis && <p>Screening has not been run. Run screening to evaluate the supplied project evidence.</p>}
+        {analysis && !findings.length && <p>No conflicts detected in the checked records for this selection; utility coverage may be incomplete.</p>}
         {selected && <article className="finding-detail" aria-label="Selected conflict evidence"><h3>{findingLabels[selected.finding_type]}</h3><AIAdvisor context={{ type: 'conflict', record_ids: [selected.id] }} label="Explain this conflict"/><p>{selected.explanation}</p>
           <p><strong>Priority:</strong> Coordination review; no validated safety assessment.</p><p><strong>Affected roads:</strong> {selected.affected_road_ids.join(', ') || 'Unresolved'}</p>
           <h4>Computed spatial evidence</h4><p>{selected.spatial_evidence.classifications.map(label).join(' · ')}</p><p>Footprint distance: {selected.spatial_evidence.distance_m === null ? 'Unknown' : `${selected.spatial_evidence.distance_m.toFixed(2)} m (computed; accuracy unverified)`}. Polygon area overlap: {selected.spatial_evidence.polygon_overlap ? 'Yes, in supplied geometry' : 'No'}.</p>

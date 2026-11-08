@@ -1,10 +1,16 @@
 # CivicPlAIn
 
-BUHACKS 2026 — local municipal infrastructure decision-support prototype.
+Municipal infrastructure planning application — local React/FastAPI/SQLite modular monolith.
 
-Milestones **0–6 are complete locally** for the bounded hackathon demonstrator. One React/TypeScript/Vite client calls one FastAPI modular monolith with SQLite. Select a road on the local MapLibre schematic, inspect synthetic condition/provenance, compare deterministic repair estimates, review spatial/date conflicts, compare saved hypothetical scenarios and inspect evidence-grounded explanations with useful offline fallback. M6 adds an API-backed **Explore Demo** guide, focused accessibility/readability fixes, lazy map/scenario loading, local request safeguards and an isolated startup helper. See [final QA and the 24-item acceptance checklist](docs/FINAL_QA_REPORT.md), [demo script](docs/HACKATHON_DEMO.md), [limitations](docs/KNOWN_LIMITATIONS.md) and [presentation outline](docs/PRESENTATION_OUTLINE.md).
+**M0–M6, M7.1 official-data integration and M7.2 map-first interface are implemented locally.** M7.3 deeper dashboard/navigation workflows and M7.4 broader polish/accessibility remain planned. M7.1 adds explicit official NYC acquisition, validated immutable snapshots, additive SQLite migration and read-only `/api/v2` in the same application. See [M7.1 exact sources, commands and verification](docs/M7_1_IMPLEMENTATION.md), [roadmap](docs/MVP_ROADMAP.md), [architecture audit/plan](docs/M7_IMPLEMENTATION_PLAN.md) and [design system](docs/M7_DESIGN_SYSTEM.md) and [M7.2 implementation and verification](docs/M7_2_IMPLEMENTATION.md). The map reads pinned official snapshots without converting official records into synthetic planning inputs.
 
-No production municipal use, verified cost savings, excavation clearance, automatic approval, live data ingestion or forecasting is claimed. Historical milestone reports record their original scope; the M6 report and current shared contracts describe this release.
+M7 retains the existing local application and every saved estimate, conflict analysis, scenario evaluation and review note. Official geometry, condition observations and administrative permits have field-level classifications and provenance; a permit is not a verified construction schedule or buried utility. Existing synthetic rates will not price official roads. Real-data costing/scenario execution needs a later source-neutral calculation contract and reviewed inputs; M7 initially exposes that capability as unavailable with reasons. Existing M1–M6 calculations remain available in the explicitly synthetic workspace. See the [scope decision and source gates](docs/M7_IMPLEMENTATION_PLAN.md#scope-and-release-gates).
+
+The ordinary startup defaults to **Synthetic fixtures**. The official startup below uses the same application with a published snapshot. The dataset control explicitly switches contexts; source errors never silently substitute fixtures. Historical demo/presentation documents are retained as evidence; M7 adds no tours, presentation scripts or judge-specific UI. No production readiness, municipal adoption or engineering authorization is implied by the redesign.
+
+Milestones **0–6 are complete locally** for the bounded hackathon demonstrator. One React/TypeScript/Vite client calls one FastAPI modular monolith with SQLite. Select a road on the local MapLibre schematic, inspect synthetic condition/provenance, compare deterministic repair estimates, review spatial/date conflicts, compare saved hypothetical scenarios and inspect evidence-grounded explanations with useful offline fallback. M6 historically added an API-backed guide, accessibility/readability fixes, lazy map/scenario loading, local request safeguards and an isolated startup helper. M7.2 removes the guide and milestone/placeholder chrome from the product while preserving all planning, scenario, conflict and advisor tools. See [final QA and the 24-item acceptance checklist](docs/FINAL_QA_REPORT.md), [demo script](docs/HACKATHON_DEMO.md), [limitations](docs/KNOWN_LIMITATIONS.md) and [presentation outline](docs/PRESENTATION_OUTLINE.md).
+
+No production municipal use, verified cost savings, excavation clearance, automatic approval, automatic/live refresh or forecasting is claimed. Historical milestone reports record their original scope; the M6 report and current shared contracts describe this release.
 
 **DEMO DATA:** the 24 road segments are an authored schematic inside the chosen Lower Manhattan study window, not actual streets or municipal condition observations. There are six good, six fair, six poor, and six unknown demo conditions. M2 explicitly adds synthetic planning dimensions and dated synthetic assessments to four roads, plus an incomplete fifth asset. These dimensions are authored rectangular scopes, not measurements from geometry. Other dimensions, lane counts and utility information remain unknown. This application cannot establish excavation safety or authorize work.
 
@@ -23,7 +29,7 @@ PYTHONPATH=apps/api .venv/bin/python -m app.seed
 
 Python's complete resolved dependency set is pinned in `apps/api/requirements.txt`; direct dependency ranges are recorded in `requirements.in`. JavaScript dependencies use exact versions and `package-lock.json`, including project-local `@types/node` 22.20.5 with explicit Node typing for the test/configuration imports. No parent-directory type installation is required. No global installs, external database, map-provider key, or OpenAI key are required.
 
-## Quick isolated demo
+## Isolated synthetic workspace
 
 After installing dependencies above, run:
 
@@ -31,7 +37,7 @@ After installing dependencies above, run:
 .venv/bin/python scripts/demo.py
 ```
 
-Open **http://127.0.0.1:5173/** → **Explore Demo**. Every run creates a fresh ignored `data/tmp/m6-demo-*/demo.sqlite3`, seeds deterministically and forces no-key deterministic AI. The ordinary database and every earlier demo remain intact. Ctrl+C stops only the helper's child servers; files are retained. This is the safe reset procedure: initialize a new isolated environment, with no deletion/reset of existing records.
+Open **http://127.0.0.1:5173/**. Use **Map** to search/select a fixture street, **Projects** → **Run conflict screening** for deliberate screening, or **Scenarios** for saved plans. Repair comparisons and explanations open from the selected street inspector. Every run creates a fresh ignored `data/tmp/m6-demo-*/demo.sqlite3`, seeds deterministically and forces no-key deterministic AI. The ordinary database and every earlier demo remain intact. Ctrl+C stops only the helper's child servers; files are retained. This is the safe reset procedure: initialize a new isolated environment, with no deletion/reset of existing records.
 
 Occupied ports: `.venv/bin/python scripts/demo.py --api-port 8016 --web-port 5186`. Production assets: add `--production` (builds first). The helper waits for API health, refuses occupied ports, and never installs dependencies. It supports the verified POSIX/macOS environment. See [exact demo interactions and recovery](docs/HACKATHON_DEMO.md).
 
@@ -53,6 +59,39 @@ Open **http://127.0.0.1:5173/**. API health is **http://127.0.0.1:8000/api/v1/he
 
 The database defaults to ignored `data/tmp/civicplain.sqlite3` and survives restarts. Startup initializes tables but does not seed implicitly. Repeat the seed command safely: stable IDs, checksum checks, a transaction, and immutable manifest metadata prevent duplicate imports. To demonstrate a genuinely empty dataset, start the API with a new local database path and do not seed it.
 
+## Official NYC inspection data (M7.1 backend)
+
+The default backend configuration remains synthetic. Official import is explicit and never runs at startup. Use an isolated ignored database (or a verified backup/copy with writers stopped). M7.2 reads v2 through its dedicated client while preserving v1 for synthetic tools; configure their base URLs independently.
+
+```sh
+PYTHONPATH=apps/api .venv/bin/python -m app.migrate --database data/tmp/official.sqlite3 --backup data/tmp/official-before-v7.sqlite3
+PYTHONPATH=apps/api .venv/bin/python -m app.ingest acquire --output data/raw/nyc-new-run --permit-since 2026-10-01
+PYTHONPATH=apps/api .venv/bin/python -m app.ingest dry-run --acquisition data/raw/nyc-new-run/acquisition.json --report data/processed/nyc-new-review.json
+# Review the report, counts, provenance, coverage and quarantine before using its report_hash:
+PYTHONPATH=apps/api .venv/bin/python -m app.ingest publish --acquisition data/raw/nyc-new-run/acquisition.json --database data/tmp/official.sqlite3 --approve-report <reviewed-report-hash>
+```
+
+Each output directory/report/backup must be new. Downloads need verified HTTPS, the system `/usr/bin/curl`, and official-service availability; subsequent reads/dry-runs use local evidence. Fixed sources only; no user URL fetcher. Invalid records are quarantined; nonzero rejects also require explicit `--allow-rejects` after review. Refresh into a new acquisition directory, review and publish again; old snapshots remain available and exact repeats are no-ops. Approval hashes confirm reviewed content, not municipal authorization.
+
+A genuine four-layer pilot is retained locally in ignored `data/tmp/m7-official-pilot.sqlite3`. For this checkout's pinned snapshot/start command, source hashes and limitations see [M7.1 implementation evidence](docs/M7_1_IMPLEMENTATION.md). Query `/api/v2/data-snapshots` to discover available IDs; every official data request requires snapshot_id. `/api/v2/workspace` reports the explicit configured mode/pin. Missing official snapshots never fall back to fixtures.
+
+Permits are administrative records and initially all are unlocated street-name candidates; permit dates do not confirm construction. Decimal ratings/inspection dates remain visible without invented categories or automatic road assignment. Utility depth/location, costs, traffic and actual work schedules remain unknown. No official record enters existing synthetic estimates/conflicts/scenarios/AI.
+
+## Map-first official workspace
+
+Start the API against the already imported local pilot (or substitute your reviewed published database/pin):
+
+```sh
+CIVICPLAIN_DATABASE_PATH="$PWD/data/tmp/m7-official-pilot.sqlite3" CIVICPLAIN_DATA_MODE=official CIVICPLAIN_OFFICIAL_SNAPSHOT_ID=nyc-3947b35876a619b31067db96b1409ad8 PYTHONPATH=apps/api .venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+npm run dev --prefix apps/web
+```
+
+The default Map view has a narrow navigation rail, floating street search/list and Layers, and one contextual inspector. Official streets retain actual coordinates; pavement overlays show original inspection geometries across all imported dates, not a current road-condition classification. No permit markers appear for the initial unlocated permit set. Projects retains those records. Dashboard shows snapshot-wide counts without loading WebGL. Scenarios explains unavailable official planning inputs and links explicitly to the preserved synthetic workflow. Existing synthetic drafts stay in memory across navigation/mode changes; dirty scenario reloads request the browser's native warning.
+
+Use `#/map?mode=official&snapshot=<published-id>&road=<road-id>` to retain a selected street. Only mode/snapshot/road are accepted query parameters in 7.2; search/layer/camera persistence and richer filters are 7.3 follow-up. Browser Back/Forward restores valid view/context/road; selecting a road restores its geographic focus. No navigation or map movement runs a calculation. Conflict screening now requires **Run conflict screening** in synthetic Projects.
+
+Basemap attribution remains on the map; **Sources & terms** includes the required NYC DOT disclaimer. The optional [OSM service](https://operations.osmfoundation.org/policies/tiles/) is best-effort, with no SLA: normal browser cache/Referer, no prefetch/proxy/offline tile download. Tile failure leaves official lines/labels usable. Set `VITE_BASEMAP=local` for offline/automated tests. API and WebGL errors retain search/list access and retries. See [M7.2 report](docs/M7_2_IMPLEMENTATION.md) for the tested layouts and remaining limits.
+
 ## Configuration
 
 No environment file is required. `.env.example` documents supported variable names without credentials. Backend variables must be exported in the launching shell; the backend does not load `.env` automatically.
@@ -60,6 +99,10 @@ No environment file is required. `.env.example` documents supported variable nam
 | Variable | Default / purpose |
 | --- | --- |
 | `CIVICPLAIN_DATABASE_PATH` | Absolute repository `data/tmp/civicplain.sqlite3`; override with another local SQLite file path |
+| `CIVICPLAIN_DATA_MODE` | `synthetic` default; `official` requires explicit published snapshot pin; affects v2 workspace discovery, never v1 routing |
+| `CIVICPLAIN_OFFICIAL_SNAPSHOT_ID` | Required `nyc-<32 hex>` pin in official mode; no automatic newest-snapshot activation |
+| `VITE_MUNICIPAL_API_BASE_URL` | `http://127.0.0.1:8000/api/v2`; read-only official/workspace API, configured independently of v1 |
+| `VITE_BASEMAP` | Default `osm`: normal interactive OSM standard raster tiles; `local` disables external tiles and keeps official lines/labels/shoreline. No external font requests. |
 | `CIVICPLAIN_ALLOWED_ORIGINS` | Comma-separated `http://127.0.0.1:5173,http://localhost:5173`; explicit local HTTP origins with ports only |
 | `VITE_API_BASE_URL` | `http://127.0.0.1:8000/api/v1`; frontend public configuration, never a secret |
 
@@ -82,7 +125,7 @@ The documented `/api/v1` boundary is preserved; `/api/roads` and root `/health` 
 | POST `/api/v1/estimates` | 201 immutable estimate; explicit planning dimensions optional |
 | GET `/api/v1/estimates/{id}` | Saved output and complete reproducible input/source snapshot |
 
-See [API contract](docs/API_SPEC.md). Roads support `limit=1..100` (default 30), `bbox=west,south,east,north`, and opaque `cursor`. The web client enforces the study's hard cap of 30 records. A valid no-match filter returns an empty collection. Invalid inputs return a sanitized 422 error; unavailable storage returns 503.
+See [API contract](docs/API_SPEC.md). Roads support `limit=1..100` (default 30), `bbox=west,south,east,north`, and opaque `cursor`. The synthetic v1 client retains the historical hard cap of 30 roads; the official v2 viewport client has its separate 2,000-record refinement guard. A valid no-match filter returns an empty collection. Invalid inputs return a sanitized 422 error; unavailable storage returns 503.
 
 ## Checks
 
@@ -96,15 +139,17 @@ npm run build --prefix apps/web
 git diff --check
 ```
 
-No lint command is configured. M6 verification: **212 backend / 57 frontend tests pass**, typecheck and production build pass, including clean dependency installations. MapLibre is lazy-loaded separately from the ~273 kB application shell; its ~1,069 kB module and ~519 kB local worker retain Vite's large-chunk advisory. Starlette's httpx test-client deprecation remains nonblocking. Browser dev/production checks and scoped npm audit results are recorded in FINAL_QA_REPORT; no lint command is configured.
+Current M7.2 verification: **265 backend / 80 frontend tests pass**, typecheck and production build pass. See [the implementation report](docs/M7_2_IMPLEMENTATION.md) for scope and browser evidence.
+
+Historical M6 verification: **212 backend / 57 frontend tests pass**, typecheck and production build pass, including clean dependency installations. MapLibre is lazy-loaded separately from the ~273 kB application shell; its ~1,069 kB module and ~519 kB local worker retain Vite's large-chunk advisory. Starlette's httpx test-client deprecation remains nonblocking. Browser dev/production checks and scoped npm audit results are recorded in FINAL_QA_REPORT; no lint command is configured.
 
 To preview the production build, allow `http://127.0.0.1:4173` in the API's local origins, restart the API, then run `npm run preview --prefix apps/web`. The ordinary dev commands use port 5173.
 
 ## Map and fixture strategy
 
-The default MapLibre style is an authored, local background plus API GeoJSON. It has **no remote tiles, fonts, sprites, or hosted GIS dependencies**. The MapLibre ESM worker is emitted as a local Vite asset using `setWorkerUrl`; see the [official v6 migration guide](https://maplibre.org/maplibre-gl-js/docs/guides/v5-to-v6-migration-guide/). Attribution identifies CivicPlAIn synthetic geometry and the absence of municipal observations. MapLibre's BSD license notice is preserved by the build. No third-party geographic dataset is redistributed.
+Synthetic mode uses a local background with explicitly authored fixture geometry and condition categories. Official mode uses actual imported NYC streets/shoreline and source-name labels, with optional attributed OSM standard raster context. `VITE_BASEMAP=local` disables external tiles; unrecognized basemap values fail closed to local mode. No external fonts/sprites are used. The local MapLibre ESM worker and BSD notices remain bundled.
 
-Pan, zoom, hover, selection highlights, study-area reset, and resize are supported. An equivalent searchable keyboard list supports selection when WebGL or map resources fail. The frontend shows loading, empty, timeout, API failure/retry, and detail failure states. Green/good, amber/fair, red/poor, gray/unknown have corresponding text labels.
+Pan, zoom, hover, selection highlights, study-focus reset and resize are supported. An equivalent searchable keyboard list supports street/inspection/located-permit selection and geographic refinement when WebGL or map resources fail. Synthetic categories retain text labels; poor is amber, unknown is gray. The official inspection layer preserves decimal source ratings on a continuous blue scale across all imported dates, without invented category normalization or accepted road associations. Source/tile failures have distinct retry/fallback states. See [M7.2](docs/M7_2_IMPLEMENTATION.md) for attribution/policy and limits.
 
 Reviewed fixtures live in `data/demo/roads.geojson` and `manifest.json`. Reproduce them with `python3 scripts/create_demo_fixture.py`; this writes the same bytes and checksum, not newly sampled observations. The manifest records IDs, exact bounds, synthetic category rules, per-field assumptions, expected counts, and provenance. Generated databases, downloads, node modules, and build outputs remain ignored.
 
@@ -205,7 +250,7 @@ DATA_MODEL now defines proposed `scenario-action-v1` scope/quantity/provenance, 
 
 ## M4 scenario workflow
 
-Rerun `PYTHONPATH=apps/api .venv/bin/python -m app.seed` to add three **synthetic hypothetical** scenarios and immutable initial evaluations without overwriting existing drafts, projects, estimates or conflict analyses. Restart the API after updating source. Open **Scenario planner** in the existing sidebar. The map and keyboard road list remain the selection surface; select a road, then use **Add selected map road** in a new plan.
+Rerun `PYTHONPATH=apps/api .venv/bin/python -m app.seed` to add three **synthetic hypothetical** scenarios and immutable initial evaluations without overwriting existing drafts, projects, estimates or conflict analyses. Restart the API after updating source. Open **Scenarios** in the sidebar. The map and keyboard road list remain the selection surface; select a road, then use **Add selected map road** in a new plan.
 
 Create or edit name, description, objective, nonnegative USD budget, common planning horizon, repair methods, whole-segment/explicit partial scope, authored assumptions, optional dates and closure declarations. Select external projects explicitly; optionally exclude or replace a snapshot with a reason. Related-project links alone never replace a project. Save a draft or save and evaluate; inspect older frozen evaluation history. Compare two or three saved evaluations from the scenario list. Unsaved form changes never alter an old evaluation.
 

@@ -2,6 +2,16 @@
 
 Status: requirements apply to all milestones. M6 local test evidence is recorded in [FINAL_QA_REPORT](FINAL_QA_REPORT.md); completion is not validated engineering safety.
 
+
+## M7 data safeguards (7.1 backend implemented; interface planned)
+
+M7 real-data inspection does not certify source truth, current conditions or engineering feasibility. Apply DATA_MODEL's six field-level classifications; an official publisher can supply administrative records, assumptions or outdated observations. Retain original values, observation/retrieval/release dates, transformations and reviewed match evidence. Synthetic fixtures must never fill gaps in an official snapshot, aggregate, work record or estimate.
+
+Permit location/window/status is administrative evidence, not a buried-utility footprint, actual construction commitment or completed-work observation. Unknown or unmatched records remain visible; no finding/search result or blank map establishes safety. Derived centerline length and converted administrative width do not establish repair scope. Proposed dates, quantities or budgets stay assumptions even when authored against real roads. Costs, schedules, model predictions and savings are not invented to make a screen look complete.
+
+The M7 official read interface exposes unavailable costing/conflict/scenario/AI capabilities honestly pending separate versioned source-neutral contracts and reviewed inputs. Existing synthetic calculation/advisor/review functionality remains available only with explicit context and labels. Redesign must preserve unknown-utility warnings, accessible alternatives, source disclosure and accountable human review. No new tours/judge flows or visual polish may imply city endorsement, safe deferral, spending authority or production authorization.
+
+
 ## Human accountability
 
 CivicPlAIn is decision-support software because it presents alternatives and evidence for human interpretation. It has no authority, tools, or API endpoints to approve construction or spending. A planner, utility coordinator, and qualified engineering/budget reviewers must validate schedules, quantities, site conditions, and permissible actions using their established procedures. A local review note is not a signed municipal approval or verified identity.

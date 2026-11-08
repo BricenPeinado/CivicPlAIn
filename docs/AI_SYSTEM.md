@@ -2,6 +2,14 @@
 
 Status: M5 implemented; M6 integration and responsible-AI regression verified locally. This is a bounded evidence advisor, not an engineering decision system. See [M5 implementation and verification](M5_IMPLEMENTATION.md). M1–M4 calculations, snapshots and fixture prices are unchanged. Useful deterministic explanations require neither a key nor network access.
 
+
+## M7 official-data boundary (7.1 inspection implemented)
+
+M7.1 ingestion does not alter this implemented provider/evidence contract. M7 official records use the separate six-classification municipal read contract in DATA_MODEL, not synthetic-only Road/Evidence inputs. No v2 AI endpoint is included: official map/project views display deterministic source values, lineage and missingness directly. Existing synthetic explanations/reviews remain available in their own context. Never change an official record's classification to call v1 AI, copy permit narrative/contacts/geometry into provider context, or treat a published administrative record as an observation.
+
+A future real-data advisor requires a versioned evidence projection/classification/citation and review contract with source-revision hashes, field lineage, unknown/assumption propagation and replay validation. Preserve fact-reference-only selection, deterministic server rendering, no-key fallback, source-failure closed behavior and no mutation tools. It must not fabricate prices, schedules, utility locations or predictions. That extension is outside M7's official inspection scope and cannot be enabled by a frontend label change. See [M7 plan](M7_IMPLEMENTATION_PLAN.md).
+
+
 ## Architecture and allowed tasks
 
 The existing FastAPI monolith owns: reference validation → EvidenceBuilder → context integrity validation → optional LLMProvider → structured selection/citation validation → deterministic rendering or fallback → append-only audit. The React advisor receives only the public REST response. No model gets SQL, Python, mutation tools, web research, arbitrary files, raw utility geometry or database access.

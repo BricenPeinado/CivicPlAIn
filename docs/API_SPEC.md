@@ -2,6 +2,39 @@
 
 **Implemented through M5; integrated/verified in M6:** the five M1 GET paths plus GET `/api/v1/road-segments/{id}/conditions`, GET `/api/v1/repair-options`, GET `/api/v1/road-segments/{id}/repair-options`, POST `/api/v1/estimates`, GET `/api/v1/estimates/{id}`. M3 additionally implements project list/detail, conflict analysis/list/detail and saved analysis retrieval below. M3.5 provided the scenario contracts; M4 implements scenario CRUD, immutable evaluation and comparison below. M5 explanation and human-review routes are implemented in the M5 section below. Base `/api/v1`, local server `http://127.0.0.1:8000`; no `/api/roads` or root `/health` aliases.
 
+
+## M7 official-data read API (implemented in 7.1)
+
+One FastAPI process serves read-only `/api/v2` alongside unchanged synthetic `/api/v1`. Contract `municipal-record-v2` is defined in DATA_MODEL. No official IDs resolve through v1 or enter v1 calculations. M7.2 uses a separate read-only v2 client for official inspection and unchanged v1 transport for the explicit synthetic planning workspace.
+
+| Method/path under `/api/v2` | Query | Result |
+| --- | --- | --- |
+| GET `/workspace` | none | Configured synthetic context or explicitly pinned published official snapshot; missing official snapshot is 404, never synthetic fallback |
+| GET `/data-snapshots` | limit/cursor | Published snapshots, newest publication then ID; discovery meta snapshot_id null |
+| GET `/data-snapshots/{snapshot_id}` | none | Full frozen manifest and publication timestamp |
+| GET `/road-segments` | snapshot_id required; bbox, q, condition, limit/cursor | Full municipal road records, unknown normalized category and provenance |
+| GET `/road-segments/geojson` | same, bbox required | GeoJSON features with compact values/classifications/source identity; no raw geometry lineage/narrative in properties |
+| GET `/road-segments/{id}` | snapshot_id required | Record, condition summary, lineage and unknowns |
+| GET `/road-segments/{id}/conditions` | snapshot_id required; limit/cursor | Only reviewed matched condition history, source date descending then ID; latest_usable_id nullable, original decimal ratings |
+| GET `/conditions` | snapshot_id required; bbox, limit/cursor | All imported observations, including unmatched/ambiguous records; added so unaccepted readings remain inspectable |
+| GET `/permits` | snapshot_id required; road_id, q, status, location, bbox, limit/cursor | Administrative permit records; location all/matched/ambiguous/unmatched/unlocated; road_id selects accepted links only |
+| GET `/permits/{id}` | snapshot_id required | Unlocated records remain valid detail records with raw WKT and reason, candidates and same-OFT references |
+| GET `/context/geojson` | snapshot_id and bbox required; layer=shoreline, limit/cursor | Real local shoreline lines; bbox must be within approved context extent |
+| GET `/source-revisions/{id}` | snapshot_id required | Source provenance only if a member of that snapshot |
+| GET `/dashboard` | snapshot_id required | Whole-snapshot counts/coverage/date range/capabilities; independent of map pan and page size |
+
+Responses use `{data,meta}`; GeoJSON uses `{type,features,meta}` and `application/geo+json`. Meta includes request_id, contract_version, snapshot_id, mode official, coverage, capabilities, warnings, returned_count, total_matching and next_cursor. Workspace has the smaller `{data:{mode,snapshot_id,...},meta:{request_id}}` selection response. No global mutation endpoint exists. Snapshot ID remains mandatory on data reads even when workspace is configured official; this prevents tab/context leakage.
+
+Lists default to 100, limit 1–100. Opaque base64 cursors bind endpoint, contract, snapshot, exact supplied filters (excluding page size) and last record ID. Immutable records make continuation stable; changing bbox/search/status/snapshot invalidates a cursor. Clients restart pagination when filter text changes, including equivalent alternate bbox formatting. Discovery ordering uses publication/ID; condition history ordering uses date/ID. Repeating the same valid cursor repeats its page; there is no stateful consumed-token store. Unknown/repeated parameters, malformed cursor, invalid enum, q/status outside 1–100 characters, invalid bbox and missing required fields return 422. Search is literal case-insensitive substring of name/on-street/source key, not SQL LIKE syntax.
+
+Bbox is finite ordered EPSG:4326 west,south,east,north, no antimeridian. Indexed envelopes prefilter; Shapely exact full-geometry intersection includes boundary. No geometry is clipped. GeoJSON viewports exceeding 2,000 matching features return 422 `VIEWPORT_TOO_BROAD`, never truncation; paged record lists are separately available. A broad entire-pilot viewport can require refinement. Permit bbox uses source geometry or explicitly accepted road reference; unlocated records are excluded with unlocated_excluded_count. Unknown permit geometry never gets a synthetic point.
+
+Dashboard concrete shape: snapshot_id, coverage, source_status, counts, capabilities, observation_date_range, latest_retrieved_at, method_version, classification derived_calculation, source_revision_ids, dated_road_coverage and limitations. `counts.roads` is an integer; condition good/fair/poor/unknown counts sum to roads (currently all unknown because no supported category mapping). Assessments contain total/dated/undated/accepted/ambiguous/unmatched; permits contain total/confirmed_in_scope/scope_candidates/matched/ambiguous/unmatched/unlocated. Match buckets sum to total. Unlocated overlaps ambiguous/unmatched; never add it to total. Confirmed_in_scope + scope_candidates = total. Counts have a common derivation/provenance envelope; dated_road_coverage has explicit value/denominator. This compact shared-provenance shape replaces M7.0's proposed individual metric wrappers. All required layers must pass publication, so missing-layer null aggregates are deferred until an actual optional-layer contract exists. No cost/savings/active-construction/safety prediction metric is inferred.
+
+Errors retain the existing sanitized envelope/X-Request-ID. Unknown snapshot/member/record/reference →404; unsupported official mutations on read resources →405; invalid query →422; missing explicit schema-7 migration →503 `MIGRATION_REQUIRED`; other storage failures →503 `STORAGE_UNAVAILABLE`. Source-layer-unavailable/409 is reserved, not an implemented partial-layer response. Official calculation endpoints do not exist. V1 routes and saved replay are unchanged. No route downloads data or starts an import.
+
+Backend configuration: CIVICPLAIN_DATA_MODE defaults synthetic; official requires CIVICPLAIN_OFFICIAL_SNAPSHOT_ID with valid nyc-hex format and a published snapshot at read time. It selects `/workspace`, never reroutes v1. M7.2 reads public VITE_MUNICIPAL_API_BASE_URL (default http://127.0.0.1:8000/api/v2) independently of VITE_API_BASE_URL. The client reads /workspace for initial mode/pin unless a validated URL explicitly selects context. No UI selection changes server configuration, ingestion or stored snapshots.
+
 ## Transport conventions
 
 JSON except road feature collection responses, which use `application/geo+json`. Required request fields are listed with `!`; other fields are optional. IDs reference the same snapshot. Unknown fields are rejected in mutation/calculation inputs. Money is a two-decimal USD string; dates and geometry follow DATA_MODEL. Lists use `limit` 1–100 (default 30), opaque `cursor`, and stable ID ordering. M1 cursors encode the last ID, snapshot and bbox and reject mismatched filters/snapshots; clients must treat them as opaque. Bbox is an exact geometry intersection filter, including boundary contact. Deterministic domain routes never invoke an LLM. Only explicit AI-mode requests to /ai/* may attempt a configured provider.
@@ -53,7 +86,7 @@ The previous proposed `/conflicts/check` and ConflictCheckResult draft are super
 
 Project/conflict lists use the existing limit 1–100/default 30, stable-ID order and opaque cursors. M3 cursors bind to snapshot plus endpoint filters and reject reuse with different filters. Findings across all saved analyses are returned by default; use analysis_id for one version. Different input snapshots can intentionally retain findings for the same pair, with distinct analysis IDs. Valid no-match filters return empty arrays; incomplete coverage warning remains in metadata. Empty unseeded databases return empty lists. Unknown filter references return 404. GET never triggers analysis.
 
-POST persists immutable analyses/findings transactionally. Identical inputs return the existing record/time; no duplicate findings are added. Changed inputs/parameters yield a new analysis. GET returns saved output without recomputation. The web client checks all loaded projects automatically after loading them (≤50); its layer controls only affect presentation. Project editing/creation is a fixture adapter responsibility, without an open mutation endpoint.
+POST persists immutable analyses/findings transactionally. Identical inputs return the existing record/time; no duplicate findings are added. Changed inputs/parameters yield a new analysis. GET returns saved output without recomputation. M7.2 loads projects without creating analyses. The user explicitly invokes Run conflict screening in synthetic Projects (≤50); its layer controls only affect presentation. Failed reads may be retried; analyses/calculation writes are never retried automatically. Project editing/creation is a fixture adapter responsibility, without an open mutation endpoint.
 
 Implemented request:
 

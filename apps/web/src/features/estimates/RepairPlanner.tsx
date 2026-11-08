@@ -59,7 +59,7 @@ export function RepairPlanner({ road }: { road: Road }) {
           <label>Planning width (m)<input type="number" min="0.001" max="100" step="any" value={width} onChange={e => setWidth(e.target.value)}/></label>
           <label>Planning assumption note<input maxLength={1000} value={note} onChange={e => setNote(e.target.value)}/></label>
         </fieldset>
-        {options.length === 0 && <p>No repair catalog loaded. Seed the reviewed M2 demo fixtures.</p>}
+        {options.length === 0 && <p>The synthetic repair catalog is unavailable in this workspace.</p>}
         <div className="repair-grid">{options.map(({ option, suitability, preview, unavailable_reason }) => <article className="repair-option" key={option.id}>
           <span className="demo-badge">SYNTHETIC COSTS</span><h3>{option.label}</h3><p>{option.description}</p><p className="suitability">⚠ {statusLabel[suitability.status]}</p><p>{suitability.rationale}</p>
           {preview ? <><strong className="repair-total">{usd(preview.scenarios.base.total_usd)}</strong><p>Low–high: {usd(preview.scenarios.low.total_usd)} – {usd(preview.scenarios.high.total_usd)}</p><p>{preview.duration.total_preliminary_days} preliminary days · {preview.duration.active_workdays} active workdays</p><p>{quantity(preview.quantity)} m² · {usd(option.unit_rates_usd.base)}/m² bundled base rate</p></> : <p className="unavailable-estimate">Estimate unavailable: {unavailable_reason}</p>}

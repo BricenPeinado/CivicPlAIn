@@ -25,6 +25,8 @@ from app.routes.ai import router as ai_router, review_router
 from app.core.ai_repository import AIInteractionAuditRepository
 from app.services.ai.providers import AISettings, OpenAIProvider
 from app.services.ai.explanations import AIExplanationService
+from app.core.municipal_repository import MunicipalRepository
+from app.routes.municipal import router as municipal_router
 
 
 def error(request, status, code, message, fields=None):
@@ -47,6 +49,8 @@ def create_app(settings: Settings | None = None, ai_settings=None, ai_provider=N
 
     app = FastAPI(title="CivicPlAIn local API", version="0.1.0", lifespan=lifespan)
     app.state.repository = RoadRepository(settings.database_path)
+    app.state.settings = settings
+    app.state.municipal = MunicipalRepository(settings.database_path)
     app.state.planning = PlanningRepository(settings.database_path)
     app.state.conflicts = ConflictRepository(settings.database_path)
     app.state.scenarios = ScenarioRepository(settings.database_path)
@@ -81,6 +85,9 @@ def create_app(settings: Settings | None = None, ai_settings=None, ai_provider=N
     @app.exception_handler(HTTPException)
     async def http_error(request, exc):
         codes = {404: "NOT_FOUND", 405: "METHOD_NOT_ALLOWED"}
+        for code in ['MIGRATION_REQUIRED','VIEWPORT_TOO_BROAD','SOURCE_LAYER_UNAVAILABLE']:
+            if str(exc.detail).startswith(code+':'):
+                codes[exc.status_code]=code
         return error(request, exc.status_code, codes.get(exc.status_code, "HTTP_ERROR"), str(exc.detail))
 
     @app.exception_handler(sqlite3.Error)
@@ -97,6 +104,7 @@ def create_app(settings: Settings | None = None, ai_settings=None, ai_provider=N
     app.include_router(scenarios_router)
     app.include_router(ai_router)
     app.include_router(review_router)
+    app.include_router(municipal_router)
     return app
 
 
